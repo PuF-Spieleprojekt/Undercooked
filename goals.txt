@@ -1,0 +1,18 @@
+goals: 
+
+UML some more
+design doc
+work through libgdx tutorial
+
+
+
+h - ice cold. cooldown. vent.
+3 - climb the mountain
+v - calm
+H - heal
+G - survive
+E - leverage
+
+
+
+
