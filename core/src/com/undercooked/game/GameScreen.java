@@ -26,7 +26,8 @@ public class GameScreen implements Screen {
     Texture dropImage;
     Texture bucketImage;
     Texture counterImage;
-    Rectangle counterBounds = new Rectangle(0,0,103,236);
+    Texture mapImage;
+    Rectangle counterBounds = new Rectangle(430,164,90,200);
 
     Sound dropSound;
     Music rainMusic;
@@ -48,6 +49,9 @@ public class GameScreen implements Screen {
     Vector2 desired_velocity = new Vector2(0.0f,0.0f);
     double transition_speed = 16;
 
+    // with certain actions, we only want to execute when the button is let go again, like when picking up and dropping of
+
+
     public GameScreen(final Undercooked gam) {
         this.game = gam;
 
@@ -55,6 +59,7 @@ public class GameScreen implements Screen {
         dropImage = new Texture(Gdx.files.internal("droplet.png"));
         bucketImage = new Texture(Gdx.files.internal("bucket.png"));
         counterImage = new Texture(Gdx.files.internal("counter.jpeg"));
+        mapImage = new Texture(Gdx.files.internal("map.jpeg"));
 
         // load the drop sound effect and the rain background "music"
         dropSound = Gdx.audio.newSound(Gdx.files.internal("drop.mp3"));
@@ -107,19 +112,23 @@ public class GameScreen implements Screen {
         // begin a new batch and draw the bucket and
         // all drops
         game.batch.begin();
-        game.batch.draw(counterImage, 0, 0);
+        game.batch.draw(mapImage, 0, 0);
         game.font.draw(game.batch, "Drops Collected: " + dropsGathered, 0, 480);
         game.font.draw(game.batch, "progress: " + progress, 0, 465);
         game.font.draw(game.batch, "Dishes served: " + dishesServed, 0, 450);
         game.font.draw(game.batch, "picked up ingredient: " + pickedUp, 0, 435);
         game.font.draw(game.batch, "put down ingredient / ready to process: " + putDown, 0, 420);
-        game.batch.draw(bucketImage, bucket.x, bucket.y);
         for (Rectangle raindrop : raindrops) {
             game.batch.draw(dropImage, raindrop.x, raindrop.y);
         }
+        game.batch.draw(bucketImage, bucket.x, bucket.y);
+        // while carrying, draw the ingredient over the player
+        if (pickedUp) {
+            game.batch.draw(dropImage, bucket.x, bucket.y);
+        }
         // if ingredient is put down, draw it there
         if (putDown) {
-            game.batch.draw(dropImage, 10, 30);
+            game.batch.draw(dropImage, counterBounds.x + 12, counterBounds.y + 100);
         }
 
         game.batch.end();
@@ -173,22 +182,16 @@ public class GameScreen implements Screen {
         if (bucket.y > 480 - 64)
             bucket.y = 480 - 64;
 
-        // pick up food
-        if (Gdx.input.isKeyPressed(Keys.Q) && !pickedUp)
-            pickedUp = true;
+
         // put down food in order to process it
-        if (Gdx.input.isKeyPressed(Keys.W) && pickedUp) {
-            pickedUp = false;
-            putDown = true;
-        }
         if (counterBounds.overlaps(bucket)) {
-            if (pickedUp) {
+            if (pickedUp && Gdx.input.isKeyJustPressed(Keys.A)) {
                 pickedUp = false;
                 putDown = true;
             }
 
             // process the food that is put down
-            if (Gdx.input.isKeyPressed(Keys.A) && putDown)
+            if (Gdx.input.isKeyPressed(Keys.Q) && putDown)
                 progress += 35 * Gdx.graphics.getDeltaTime();
         }
 
@@ -215,10 +218,13 @@ public class GameScreen implements Screen {
         while (iter.hasNext()) {
             Rectangle raindrop = iter.next();
             if (raindrop.overlaps(bucket)) {
-                dropsGathered++;
-                dropSound.play();
-                iter.remove();
-                pickedUp = true;
+                // pick up food
+                if (Gdx.input.isKeyJustPressed(Keys.A) && !pickedUp) {
+                    dropsGathered++;
+                    dropSound.play();
+                    iter.remove();
+                    pickedUp = true;
+                }
             }
         }
     }
