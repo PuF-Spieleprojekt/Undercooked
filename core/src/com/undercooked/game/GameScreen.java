@@ -171,6 +171,10 @@ public class GameScreen implements Screen {
         }
 
         // serve it and then the food isn't there anymore
+        // TODO @Elena insert the image of the "serving area" from Jan's graphic at the right end
+        //              of the screen and add variables so that the bucket has to walk over
+        //              to the serving area and when it overlaps, only then the dish is served
+        //              and the counter goes up
         if (progress > 100) {
             progress = 0;
             putDown = false;
