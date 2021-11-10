@@ -7,8 +7,10 @@ import com.badlogic.gdx.Input.Keys;
 import com.badlogic.gdx.Screen;
 import com.badlogic.gdx.audio.Music;
 import com.badlogic.gdx.audio.Sound;
+import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.OrthographicCamera;
 import com.badlogic.gdx.graphics.Texture;
+import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
 import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.math.Rectangle;
 import com.badlogic.gdx.math.Vector3;
@@ -22,6 +24,9 @@ public class GameScreen implements Screen {
 
     Texture dropImage;
     Texture bucketImage;
+    Texture counterImage;
+    Rectangle counterBounds = new Rectangle(0,0,103,236);
+
     Sound dropSound;
     Music rainMusic;
     OrthographicCamera camera;
@@ -30,12 +35,18 @@ public class GameScreen implements Screen {
     long lastDropTime;
     int dropsGathered;
 
+    double progress = 0;
+    int dishesServed = 0;
+    boolean pickedUp = false;
+    boolean putDown = false;
+
     public GameScreen(final Undercooked gam) {
         this.game = gam;
 
         // load the images for the droplet and the bucket, 64x64 pixels each
         dropImage = new Texture(Gdx.files.internal("droplet.png"));
         bucketImage = new Texture(Gdx.files.internal("bucket.png"));
+        counterImage = new Texture(Gdx.files.internal("counter.jpeg"));
 
         // load the drop sound effect and the rain background "music"
         dropSound = Gdx.audio.newSound(Gdx.files.internal("drop.mp3"));
@@ -62,8 +73,8 @@ public class GameScreen implements Screen {
 
     private void spawnRaindrop() {
         Rectangle raindrop = new Rectangle();
-        raindrop.x = MathUtils.random(0, 800 - 64);
-        raindrop.y = 480;
+        raindrop.x = MathUtils.random(120, 800 - 64);
+        raindrop.y = MathUtils.random(0, 480 - 64);
         raindrop.width = 64;
         raindrop.height = 64;
         raindrops.add(raindrop);
@@ -88,12 +99,30 @@ public class GameScreen implements Screen {
         // begin a new batch and draw the bucket and
         // all drops
         game.batch.begin();
+        game.batch.draw(counterImage, 0, 0);
         game.font.draw(game.batch, "Drops Collected: " + dropsGathered, 0, 480);
+        game.font.draw(game.batch, "progress: " + progress, 0, 465);
+        game.font.draw(game.batch, "Dishes served: " + dishesServed, 0, 450);
+        game.font.draw(game.batch, "picked up ingredient: " + pickedUp, 0, 435);
+        game.font.draw(game.batch, "put down ingredient / ready to process: " + putDown, 0, 420);
         game.batch.draw(bucketImage, bucket.x, bucket.y);
         for (Rectangle raindrop : raindrops) {
             game.batch.draw(dropImage, raindrop.x, raindrop.y);
         }
+        // if ingredient is put down, draw it there
+        if (putDown) {
+            game.batch.draw(dropImage, 10, 30);
+        }
+
         game.batch.end();
+
+        // draw progressbar
+        game.shape.setProjectionMatrix(camera.combined);
+        game.shape.begin(ShapeRenderer.ShapeType.Filled);
+        game.shape.setColor(Color.BLUE);
+        game.shape.rect(10,10, (float) (2 * progress),20);
+        game.shape.end();
+
 
         // process user input
         if (Gdx.input.isTouched()) {
@@ -101,20 +130,56 @@ public class GameScreen implements Screen {
             touchPos.set(Gdx.input.getX(), Gdx.input.getY(), 0);
             camera.unproject(touchPos);
             bucket.x = touchPos.x - 64 / 2;
+            bucket.y = touchPos.y - 64 / 2;
         }
         if (Gdx.input.isKeyPressed(Keys.LEFT))
             bucket.x -= 200 * Gdx.graphics.getDeltaTime();
         if (Gdx.input.isKeyPressed(Keys.RIGHT))
             bucket.x += 200 * Gdx.graphics.getDeltaTime();
+        if (Gdx.input.isKeyPressed(Keys.DOWN))
+            bucket.y -= 200 * Gdx.graphics.getDeltaTime();
+        if (Gdx.input.isKeyPressed(Keys.UP))
+            bucket.y += 200 * Gdx.graphics.getDeltaTime();
 
         // make sure the bucket stays within the screen bounds
         if (bucket.x < 0)
             bucket.x = 0;
         if (bucket.x > 800 - 64)
             bucket.x = 800 - 64;
+        if (bucket.y < 0)
+            bucket.y = 0;
+        if (bucket.y > 480 - 64)
+            bucket.y = 480 - 64;
+
+        // pick up food
+        if (Gdx.input.isKeyPressed(Keys.Q) && !pickedUp)
+            pickedUp = true;
+        // put down food in order to process it
+        if (Gdx.input.isKeyPressed(Keys.W) && pickedUp) {
+            pickedUp = false;
+            putDown = true;
+        }
+        if (counterBounds.overlaps(bucket)) {
+            if (pickedUp) {
+                pickedUp = false;
+                putDown = true;
+            }
+
+            // process the food that is put down
+            if (Gdx.input.isKeyPressed(Keys.A) && putDown)
+                progress += 35 * Gdx.graphics.getDeltaTime();
+        }
+
+        // serve it and then the food isn't there anymore
+        if (progress > 100) {
+            progress = 0;
+            putDown = false;
+            dishesServed += 1;
+        }
+
 
         // check if we need to create a new raindrop
-        if (TimeUtils.nanoTime() - lastDropTime > 1000000000)
+        if (TimeUtils.nanoTime() - lastDropTime > 4000000000L)
             spawnRaindrop();
 
         // move the raindrops, remove any that are beneath the bottom edge of
@@ -123,13 +188,11 @@ public class GameScreen implements Screen {
         Iterator<Rectangle> iter = raindrops.iterator();
         while (iter.hasNext()) {
             Rectangle raindrop = iter.next();
-            raindrop.y -= 200 * Gdx.graphics.getDeltaTime();
-            if (raindrop.y + 64 < 0)
-                iter.remove();
             if (raindrop.overlaps(bucket)) {
                 dropsGathered++;
                 dropSound.play();
                 iter.remove();
+                pickedUp = true;
             }
         }
     }
