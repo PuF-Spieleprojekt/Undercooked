@@ -13,6 +13,7 @@ import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
 import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.math.Rectangle;
+import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.math.Vector3;
 import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.ScreenUtils;
@@ -39,6 +40,13 @@ public class GameScreen implements Screen {
     int dishesServed = 0;
     boolean pickedUp = false;
     boolean putDown = false;
+
+    Vector2 playerMovementVector = new Vector2(0.0f, 0.0f);
+    float speed = 0;
+    double direction = 0;
+    float dt;
+    Vector2 desired_velocity = new Vector2(0.0f,0.0f);
+    double transition_speed = 16;
 
     public GameScreen(final Undercooked gam) {
         this.game = gam;
@@ -132,14 +140,28 @@ public class GameScreen implements Screen {
             bucket.x = touchPos.x - 64 / 2;
             bucket.y = touchPos.y - 64 / 2;
         }
+
+        desired_velocity. x = desired_velocity.y = 0.0f;
         if (Gdx.input.isKeyPressed(Keys.LEFT))
-            bucket.x -= 200 * Gdx.graphics.getDeltaTime();
+            desired_velocity.x = -300 * Gdx.graphics.getDeltaTime();
         if (Gdx.input.isKeyPressed(Keys.RIGHT))
-            bucket.x += 200 * Gdx.graphics.getDeltaTime();
+            desired_velocity.x = 300 * Gdx.graphics.getDeltaTime();
         if (Gdx.input.isKeyPressed(Keys.DOWN))
-            bucket.y -= 200 * Gdx.graphics.getDeltaTime();
+            desired_velocity.y = -300 * Gdx.graphics.getDeltaTime();
         if (Gdx.input.isKeyPressed(Keys.UP))
-            bucket.y += 200 * Gdx.graphics.getDeltaTime();
+            desired_velocity.y = 300 * Gdx.graphics.getDeltaTime();
+
+        // a little mainstream formula from video game development. source: https://www.reddit.com/r/gamedev/comments/1eg21z/how_do_you_implement_acceleration/
+        // New Velocity = old_velocity * (1 - delta_time * transition_speed) + desired_velocity * (delta_time * transition_speed)
+        playerMovementVector.x = (float) (playerMovementVector.x * (1 - Gdx.graphics.getDeltaTime() * transition_speed) + desired_velocity.x * (Gdx.graphics.getDeltaTime() * transition_speed));
+        playerMovementVector.y = (float) (playerMovementVector.y * (1 - Gdx.graphics.getDeltaTime() * transition_speed) + desired_velocity.y * (Gdx.graphics.getDeltaTime() * transition_speed));
+        speed = playerMovementVector.len2();
+        if (speed >= 300) {
+            playerMovementVector.scl(100 / speed);
+        }
+
+        bucket.x += playerMovementVector.x;
+        bucket.y += playerMovementVector.y;
 
         // make sure the bucket stays within the screen bounds
         if (bucket.x < 0)
