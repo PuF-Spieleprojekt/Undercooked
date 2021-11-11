@@ -3,6 +3,7 @@ package com.undercooked.game;
 import java.util.Iterator;
 
 import com.badlogic.gdx.Gdx;
+import com.badlogic.gdx.Input;
 import com.badlogic.gdx.Input.Keys;
 import com.badlogic.gdx.Screen;
 import com.badlogic.gdx.audio.Music;
@@ -28,6 +29,7 @@ public class GameScreen implements Screen {
     Texture counterImage;
     Texture mapImage;
     Rectangle counterBounds = new Rectangle(430,164,90,200);
+    Rectangle servingArea = new Rectangle(700, 170, 50, 130);
 
     Sound dropSound;
     Music rainMusic;
@@ -200,10 +202,18 @@ public class GameScreen implements Screen {
         //              of the screen and add variables so that the bucket has to walk over
         //              to the serving area and when it overlaps, only then the dish is served
         //              and the counter goes up
+        // No image used for serving area, just a rectangle
+        if (servingArea.overlaps(bucket)){
+            if (pickedUp && Gdx.input.isKeyJustPressed(Keys.A)) {
+                pickedUp = false;
+                putDown = true;
+                dishesServed ++;
+            }
+        }
         if (progress > 100) {
             progress = 0;
             putDown = false;
-            dishesServed += 1;
+//            dishesServed += 1;
         }
 
 
@@ -227,6 +237,11 @@ public class GameScreen implements Screen {
                 }
             }
         }
+        // Closes the window using ecs button.
+        if (Gdx.input.isKeyPressed(Input.Keys.ESCAPE)){
+            Gdx.app.exit();
+        }
+
     }
 
     @Override
