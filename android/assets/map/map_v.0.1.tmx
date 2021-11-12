@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<map version="1.5" tiledversion="1.7.2" orientation="orthogonal" renderorder="right-down" width="25" height="15" tilewidth="32" tileheight="32" infinite="0" nextlayerid="4" nextobjectid="1">
+<map version="1.5" tiledversion="1.7.2" orientation="orthogonal" renderorder="right-down" width="25" height="15" tilewidth="32" tileheight="32" infinite="0" nextlayerid="5" nextobjectid="5">
  <tileset firstgid="1" source="Preview.tsx"/>
  <tileset firstgid="487" source="Inside_A2.tsx"/>
  <tileset firstgid="679" source="Inside_B.tsx"/>
@@ -61,4 +61,26 @@
 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0
 </data>
  </layer>
+ <objectgroup id="4" name="Object Layer 1">
+  <object id="1" x="465.558" y="165.307" width="33.0614" height="178.127">
+   <properties>
+    <property name="blocked" value=""/>
+   </properties>
+  </object>
+  <object id="2" x="201.067" y="334.662" width="240.201" height="10.1208">
+   <properties>
+    <property name="blocked" value=""/>
+   </properties>
+  </object>
+  <object id="3" x="196.344" y="140.342" width="244.249" height="14.8439">
+   <properties>
+    <property name="blocked" value=""/>
+   </properties>
+  </object>
+  <object id="4" x="707.784" y="205.116" width="26.9889" height="68.8217">
+   <properties>
+    <property name="blocked" value=""/>
+   </properties>
+  </object>
+ </objectgroup>
 </map>
