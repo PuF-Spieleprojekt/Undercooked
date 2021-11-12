@@ -13,6 +13,9 @@ import com.badlogic.gdx.graphics.OrthographicCamera;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
 import com.badlogic.gdx.maps.MapLayers;
+import com.badlogic.gdx.maps.MapObject;
+import com.badlogic.gdx.maps.MapObjects;
+import com.badlogic.gdx.maps.objects.RectangleMapObject;
 import com.badlogic.gdx.maps.tiled.TiledMap;
 import com.badlogic.gdx.maps.tiled.TiledMapRenderer;
 import com.badlogic.gdx.maps.tiled.TiledMapTileLayer;
@@ -24,6 +27,7 @@ import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.math.Rectangle;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.math.Vector3;
+import com.badlogic.gdx.physics.box2d.Shape;
 import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.ScreenUtils;
 import com.badlogic.gdx.utils.TimeUtils;
@@ -42,7 +46,7 @@ public class GameScreen implements Screen {
     //Map properties
     TiledMap map;
     TiledMapRenderer tiledmaprenderer;
-    TiledMapTileLayer objectLayer;
+    MapObjects objects;
     int[] mapLayerIndices;
 
     Sound dropSound;
@@ -80,12 +84,13 @@ public class GameScreen implements Screen {
         map = new TmxMapLoader().load("map/map_v.0.1.tmx");
         tiledmaprenderer = new OrthogonalTiledMapRenderer(map);
         MapLayers mapLayers = map.getLayers();
-        // objectLayer = (TiledMapTileMapObject) mapLayers.get("Object Layer 1");
+        objects = mapLayers.get("Object Layer 1").getObjects();
         mapLayerIndices = new int[]{
                 mapLayers.getIndex("Tile Layer 1"),
                 mapLayers.getIndex("Tile Layer 2"),
                 mapLayers.getIndex("Tile Layer 3")
         };
+
 
         // load the drop sound effect and the rain background "music"
         dropSound = Gdx.audio.newSound(Gdx.files.internal("drop.mp3"));
@@ -132,7 +137,7 @@ public class GameScreen implements Screen {
         // render map
         tiledmaprenderer.setView(camera);
         tiledmaprenderer.render(mapLayerIndices);
-        //tiledmaprenderer.renderTileLayer(objectLayer);
+
 
         game.font.draw(game.batch, "Drops Collected: " + dropsGathered, 0, 480);
         game.font.draw(game.batch, "progress: " + progress, 0, 465);
@@ -201,6 +206,11 @@ public class GameScreen implements Screen {
         if (bucket.y > 480 - 64)
             bucket.y = 480 - 64;
 
+        // collision detection
+        for (MapObject object : objects){
+            collisionDetection((RectangleMapObject) object, bucket);
+        }
+
 
         // put down food in order to process it
         if (counterBounds.overlaps(bucket)) {
@@ -259,6 +269,27 @@ public class GameScreen implements Screen {
             Gdx.app.exit();
         }
 
+    }
+
+    static void collisionDetection(RectangleMapObject blockingObject, Rectangle bucket){
+        // bucket can't cross objects with propertie "blocked
+        if (blockingObject.getRectangle().overlaps(bucket)) {
+            /*System.out.print("Obere Kante : " +blockingObject.getRectangle().y + blockingObject.getRectangle().height + "\n Untere Kante: "
+            +blockingObject.getRectangle().y+ "\n Eimer: " +bucket.y);*/
+            if (blockingObject.getRectangle().x > bucket.x) {
+               // System.out.print("right");
+                bucket.x = bucket.x - 10;
+            } else if (blockingObject.getRectangle().x + blockingObject.getRectangle().width - 5 < bucket.x) {
+               // System.out.print("left");
+                bucket.x = bucket.x + 10;
+            } else if (blockingObject.getRectangle().y > bucket.y) {
+               // System.out.print("down");
+                bucket.y = bucket.y - 10;
+            } else if (blockingObject.getRectangle().y + blockingObject.getRectangle().height - 5 < bucket.y) {
+               // System.out.print("up");
+                bucket.y = bucket.y + 10;
+            }
+        }
     }
 
     @Override
