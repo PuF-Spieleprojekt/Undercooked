@@ -12,6 +12,12 @@ import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.OrthographicCamera;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
+import com.badlogic.gdx.maps.MapLayers;
+import com.badlogic.gdx.maps.tiled.TiledMap;
+import com.badlogic.gdx.maps.tiled.TiledMapRenderer;
+import com.badlogic.gdx.maps.tiled.TiledMapTileLayer;
+import com.badlogic.gdx.maps.tiled.TmxMapLoader;
+import com.badlogic.gdx.maps.tiled.renderers.OrthoCachedTiledMapRenderer;
 import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.math.Rectangle;
 import com.badlogic.gdx.math.Vector2;
@@ -30,6 +36,12 @@ public class GameScreen implements Screen {
     Texture mapImage;
     Rectangle counterBounds = new Rectangle(430,164,90,200);
     Rectangle servingArea = new Rectangle(700, 170, 50, 130);
+
+    //Map properties
+    TiledMap map;
+    TiledMapRenderer tiledmaprenderer;
+    TiledMapTileLayer mapLayers;
+    int[] mapLayerIndices;
 
     Sound dropSound;
     Music rainMusic;
@@ -61,7 +73,17 @@ public class GameScreen implements Screen {
         dropImage = new Texture(Gdx.files.internal("droplet.png"));
         bucketImage = new Texture(Gdx.files.internal("bucket.png"));
         counterImage = new Texture(Gdx.files.internal("counter.jpeg"));
-        mapImage = new Texture(Gdx.files.internal("map.jpeg"));
+        // mapImage = new Texture(Gdx.files.internal("map.jpeg"));
+
+        // load Tiled Map and generate Layerindex;
+        map = new TmxMapLoader().load("map/map_v.0.1.tmx");
+        tiledmaprenderer = new OrthoCachedTiledMapRenderer(map);
+        MapLayers mapLayers = map.getLayers();
+        mapLayerIndices = new int[]{
+                mapLayers.getIndex("Tile Layer 1"),
+                mapLayers.getIndex("Tile Layer 2"),
+                mapLayers.getIndex("Tile Layer 3")
+        };
 
         // load the drop sound effect and the rain background "music"
         dropSound = Gdx.audio.newSound(Gdx.files.internal("drop.mp3"));
@@ -114,7 +136,11 @@ public class GameScreen implements Screen {
         // begin a new batch and draw the bucket and
         // all drops
         game.batch.begin();
-        game.batch.draw(mapImage, 0, 0);
+        // game.batch.draw(mapImage, 0, 0);
+        // render map
+        tiledmaprenderer.setView(camera);
+        tiledmaprenderer.render(mapLayerIndices);
+
         game.font.draw(game.batch, "Drops Collected: " + dropsGathered, 0, 480);
         game.font.draw(game.batch, "progress: " + progress, 0, 465);
         game.font.draw(game.batch, "Dishes served: " + dishesServed, 0, 450);
