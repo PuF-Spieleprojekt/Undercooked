@@ -49,7 +49,7 @@ public class GameScreen implements Screen {
     Music rainMusic;
     OrthographicCamera camera;
     Rectangle bucket;
-    Array<Rectangle> raindrops;
+    Rectangle raindrops;
     long lastDropTime;
     int dropsGathered;
 
@@ -65,8 +65,7 @@ public class GameScreen implements Screen {
     Vector2 desired_velocity = new Vector2(0.0f,0.0f);
     double transition_speed = 16;
 
-    // with certain actions, we only want to execute when the button is let go again, like when picking up and dropping of
-
+    boolean soundLooping = false;
 
     public GameScreen(final Undercooked gam) {
         this.game = gam;
@@ -106,20 +105,10 @@ public class GameScreen implements Screen {
         bucket.height = 64;
 
         // create the raindrops array and spawn the first raindrop
-        raindrops = new Array<Rectangle>();
-        spawnRaindrop();
+        raindrops = new Rectangle(46,96,64,64);;
 
     }
 
-    private void spawnRaindrop() {
-        Rectangle raindrop = new Rectangle();
-        raindrop.x = MathUtils.random(120, 800 - 64);
-        raindrop.y = MathUtils.random(0, 480 - 64);
-        raindrop.width = 64;
-        raindrop.height = 64;
-        raindrops.add(raindrop);
-        lastDropTime = TimeUtils.nanoTime();
-    }
 
     @Override
     public void render(float delta) {
@@ -150,9 +139,7 @@ public class GameScreen implements Screen {
         game.font.draw(game.batch, "Dishes served: " + dishesServed, 0, 450);
         game.font.draw(game.batch, "picked up ingredient: " + pickedUp, 0, 435);
         game.font.draw(game.batch, "put down ingredient / ready to process: " + putDown, 0, 420);
-        for (Rectangle raindrop : raindrops) {
-            game.batch.draw(dropImage, raindrop.x, raindrop.y);
-        }
+        game.batch.draw(dropImage, raindrops.x, raindrops.y);
         game.batch.draw(bucketImage, bucket.x, bucket.y);
         // while carrying, draw the ingredient over the player
         if (pickedUp) {
@@ -169,7 +156,7 @@ public class GameScreen implements Screen {
         game.shape.setProjectionMatrix(camera.combined);
         game.shape.begin(ShapeRenderer.ShapeType.Filled);
         game.shape.setColor(Color.BLUE);
-        game.shape.rect(10,10, (float) (2 * progress),20);
+        game.shape.rect(counterBounds.x + 12, counterBounds.y + 70, (float) (0.7 * progress), 20);
         game.shape.end();
 
 
@@ -182,7 +169,7 @@ public class GameScreen implements Screen {
             bucket.y = touchPos.y - 64 / 2;
         }
 
-        desired_velocity. x = desired_velocity.y = 0.0f;
+        desired_velocity.x = desired_velocity.y = 0.0f;
         if (Gdx.input.isKeyPressed(Keys.LEFT))
             desired_velocity.x = -300 * Gdx.graphics.getDeltaTime();
         if (Gdx.input.isKeyPressed(Keys.RIGHT))
@@ -220,11 +207,18 @@ public class GameScreen implements Screen {
             if (pickedUp && Gdx.input.isKeyJustPressed(Keys.A)) {
                 pickedUp = false;
                 putDown = true;
+                dropSound.play();
             }
 
             // process the food that is put down
-            if (Gdx.input.isKeyPressed(Keys.Q) && putDown)
-                progress += 35 * Gdx.graphics.getDeltaTime();
+            if (Gdx.input.isKeyPressed(Keys.Q) && putDown) {
+                if(!soundLooping) {
+                    dropSound.loop();
+                    soundLooping = true;
+                }
+                progress += 40 * Gdx.graphics.getDeltaTime();
+            }
+
         }
 
         // serve it and then the food isn't there anymore
@@ -243,28 +237,21 @@ public class GameScreen implements Screen {
         if (progress > 100) {
             progress = 0;
             putDown = false;
-//            dishesServed += 1;
+            dishesServed += 1;
+            dropSound.stop();
+            soundLooping = false;
         }
 
-
-        // check if we need to create a new raindrop
-        if (TimeUtils.nanoTime() - lastDropTime > 4000000000L)
-            spawnRaindrop();
 
         // move the raindrops, remove any that are beneath the bottom edge of
         // the screen or that hit the bucket. In the later case we play back
         // a sound effect as well.
-        Iterator<Rectangle> iter = raindrops.iterator();
-        while (iter.hasNext()) {
-            Rectangle raindrop = iter.next();
-            if (raindrop.overlaps(bucket)) {
-                // pick up food
-                if (Gdx.input.isKeyJustPressed(Keys.A) && !pickedUp) {
-                    dropsGathered++;
-                    dropSound.play();
-                    iter.remove();
-                    pickedUp = true;
-                }
+        if (raindrops.overlaps(bucket)) {
+            // pick up food
+            if (Gdx.input.isKeyJustPressed(Keys.A) && !pickedUp) {
+                dropsGathered++;
+                dropSound.play();
+                pickedUp = true;
             }
         }
         // Closes the window using ecs button.
