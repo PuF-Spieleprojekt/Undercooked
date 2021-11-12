@@ -132,7 +132,7 @@ public class GameScreen implements Screen {
         // render map
         tiledmaprenderer.setView(camera);
         tiledmaprenderer.render(mapLayerIndices);
-        tiledmaprenderer.renderTileLayer(objectLayer);
+        //tiledmaprenderer.renderTileLayer(objectLayer);
 
         game.font.draw(game.batch, "Drops Collected: " + dropsGathered, 0, 480);
         game.font.draw(game.batch, "progress: " + progress, 0, 465);
