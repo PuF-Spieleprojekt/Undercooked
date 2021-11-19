@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<map version="1.5" tiledversion="1.7.2" orientation="orthogonal" renderorder="right-down" width="25" height="15" tilewidth="32" tileheight="32" infinite="0" nextlayerid="5" nextobjectid="9">
+<map version="1.5" tiledversion="1.7.2" orientation="orthogonal" renderorder="right-down" width="25" height="15" tilewidth="32" tileheight="32" infinite="0" nextlayerid="5" nextobjectid="11">
  <tileset firstgid="1" source="Preview.tsx"/>
  <tileset firstgid="487" source="Inside_A2.tsx"/>
  <tileset firstgid="679" source="Inside_B.tsx"/>
@@ -84,9 +84,14 @@
   </object>
   <object id="8" x="692.667" y="191.333" width="51.3333" height="89.3333">
    <properties>
-    <property name="Serving area" value=""/>
     <property name="blocked" value=""/>
    </properties>
   </object>
+  <object id="9" x="662.667" y="194" width="54.6667" height="85.3333">
+   <properties>
+    <property name="Serving Area" value=""/>
+   </properties>
+  </object>
+  <object id="10" x="548" y="271.333"/>
  </objectgroup>
 </map>
