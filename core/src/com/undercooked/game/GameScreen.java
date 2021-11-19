@@ -39,9 +39,9 @@ public class GameScreen implements Screen {
     Texture dropImage;
     Texture bucketImage;
     Texture counterImage;
-    Texture mapImage;
-    Rectangle counterBounds = new Rectangle(430,164,90,200);
-    Rectangle servingArea = new Rectangle(700, 170, 50, 130);
+
+    //Rectangle counterBounds = new Rectangle(430,164,90,200);
+    //Rectangle servingArea = new Rectangle(700, 170, 50, 130);
 
     //Map properties
     TiledMap map;
@@ -54,6 +54,7 @@ public class GameScreen implements Screen {
     OrthographicCamera camera;
     Rectangle bucket;
     Rectangle raindrops;
+    RectangleMapObject servingArea;
     long lastDropTime;
     int dropsGathered;
 
@@ -71,8 +72,8 @@ public class GameScreen implements Screen {
 
     boolean soundLooping = false;
 
-    public GameScreen(final Undercooked gam) {
-        this.game = gam;
+    public GameScreen(final Undercooked game) {
+        this.game = game;
 
         // load the images for the droplet and the bucket, 64x64 pixels each
         dropImage = new Texture(Gdx.files.internal("droplet.png"));
@@ -133,7 +134,6 @@ public class GameScreen implements Screen {
         // begin a new batch and draw the bucket and
         // all drops
         game.batch.begin();
-        // game.batch.draw(mapImage, 0, 0);
         // render map
         tiledmaprenderer.setView(camera);
         tiledmaprenderer.render(mapLayerIndices);
@@ -151,17 +151,14 @@ public class GameScreen implements Screen {
             game.batch.draw(dropImage, bucket.x, bucket.y);
         }
         // if ingredient is put down, draw it there
-        if (putDown) {
-            game.batch.draw(dropImage, counterBounds.x + 12, counterBounds.y + 100);
-        }
-
+        drawInServingArea((RectangleMapObject) servingArea, dropImage);
         game.batch.end();
 
         // draw progressbar
         game.shape.setProjectionMatrix(camera.combined);
         game.shape.begin(ShapeRenderer.ShapeType.Filled);
         game.shape.setColor(Color.BLUE);
-        game.shape.rect(counterBounds.x + 12, counterBounds.y + 70, (float) (0.7 * progress), 20);
+        //game.shape.rect(counterBounds.x + 12, counterBounds.y + 70, (float) (0.7 * progress), 20);
         game.shape.end();
 
 
@@ -208,42 +205,20 @@ public class GameScreen implements Screen {
 
         // collision detection
         for (MapObject object : objects){
-            collisionDetection((RectangleMapObject) object, bucket);
-        }
+
+            if(object.getProperties().containsKey("blocked")) {
+                collisionDetection((RectangleMapObject) object, bucket);
+
+            } else if(object.getProperties().containsKey("Preparing Area")){
+                servingArea =(RectangleMapObject) object;
+                preparingAreaAction(servingArea, bucket);
 
 
-        // put down food in order to process it
-        if (counterBounds.overlaps(bucket)) {
-            if (pickedUp && Gdx.input.isKeyJustPressed(Keys.A)) {
-                pickedUp = false;
-                putDown = true;
-                dropSound.play();
-            }
-
-            // process the food that is put down
-            if (Gdx.input.isKeyPressed(Keys.Q) && putDown) {
-                if(!soundLooping) {
-                    dropSound.loop();
-                    soundLooping = true;
-                }
-                progress += 40 * Gdx.graphics.getDeltaTime();
-            }
-
-        }
-
-        // serve it and then the food isn't there anymore
-        // TODO @Elena insert the image of the "serving area" from Jan's graphic at the right end
-        //              of the screen and add variables so that the bucket has to walk over
-        //              to the serving area and when it overlaps, only then the dish is served
-        //              and the counter goes up
-        // No image used for serving area, just a rectangle
-        if (servingArea.overlaps(bucket)){
-            if (pickedUp && Gdx.input.isKeyJustPressed(Keys.A)) {
-                pickedUp = false;
-                putDown = true;
-                dishesServed ++;
+            } else if (object.getProperties().containsKey("Serving Area")){
+                servingAreaAction((RectangleMapObject) object, bucket);
             }
         }
+
         if (progress > 100) {
             progress = 0;
             putDown = false;
@@ -271,23 +246,57 @@ public class GameScreen implements Screen {
 
     }
 
-    static void collisionDetection(RectangleMapObject blockingObject, Rectangle bucket){
+    public void servingAreaAction(RectangleMapObject areaObject, Rectangle playerObject){
+        if (areaObject.getRectangle().overlaps(playerObject)){
+            if (pickedUp && Gdx.input.isKeyJustPressed(Keys.A)) {
+                pickedUp = false;
+                putDown = true;
+                dishesServed ++;
+            }
+        }
+    }
+
+    public void drawInServingArea(RectangleMapObject areaObject, Texture objectImage){
+        if (putDown) {
+            game.batch.draw(objectImage, areaObject.getRectangle().x + 12, areaObject.getRectangle().y + 100);
+        }
+    }
+    public void preparingAreaAction(RectangleMapObject areaObject, Rectangle playerObject ){
+        if (((RectangleMapObject) areaObject).getRectangle().overlaps(playerObject)){
+            // put down food in order to process it
+            if (pickedUp && Gdx.input.isKeyJustPressed(Keys.A)) {
+                pickedUp = false;
+                putDown = true;
+                dropSound.play();
+            }
+
+            // process the food that is put down
+            if (Gdx.input.isKeyPressed(Keys.Q) && putDown) {
+                if(!soundLooping) {
+                    dropSound.loop();
+                    soundLooping = true;
+                }
+                progress += 40 * Gdx.graphics.getDeltaTime();
+            }
+        }
+    }
+    public void collisionDetection(RectangleMapObject blockingObject, Rectangle playerObject){
         // bucket can't cross objects with propertie "blocked
-        if (blockingObject.getRectangle().overlaps(bucket)) {
+        if (blockingObject.getRectangle().overlaps(playerObject)) {
             /*System.out.print("Obere Kante : " +blockingObject.getRectangle().y + blockingObject.getRectangle().height + "\n Untere Kante: "
             +blockingObject.getRectangle().y+ "\n Eimer: " +bucket.y);*/
-            if (blockingObject.getRectangle().x > bucket.x) {
+            if (blockingObject.getRectangle().x > playerObject.x) {
                // System.out.print("right");
-                bucket.x = bucket.x - 10;
-            } else if (blockingObject.getRectangle().x + blockingObject.getRectangle().width - 5 < bucket.x) {
+                playerObject.x = playerObject.x - 10;
+            } else if (blockingObject.getRectangle().x + blockingObject.getRectangle().width - 5 < playerObject.x) {
                // System.out.print("left");
-                bucket.x = bucket.x + 10;
-            } else if (blockingObject.getRectangle().y > bucket.y) {
+                playerObject.x = playerObject.x + 10;
+            } else if (blockingObject.getRectangle().y > playerObject.y) {
                // System.out.print("down");
-                bucket.y = bucket.y - 10;
-            } else if (blockingObject.getRectangle().y + blockingObject.getRectangle().height - 5 < bucket.y) {
+                playerObject.y = playerObject.y - 10;
+            } else if (blockingObject.getRectangle().y + blockingObject.getRectangle().height - 5 < playerObject.y) {
                // System.out.print("up");
-                bucket.y = bucket.y + 10;
+                playerObject.y = playerObject.y + 10;
             }
         }
     }
@@ -300,7 +309,7 @@ public class GameScreen implements Screen {
     public void show() {
         // start the playback of the background music
         // when the screen is shown
-        rainMusic.play();
+       // rainMusic.play();
     }
 
     @Override
