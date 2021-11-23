@@ -1,7 +1,5 @@
 package com.undercooked.game;
 
-import java.util.Iterator;
-
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Input;
 import com.badlogic.gdx.Input.Keys;
@@ -18,25 +16,20 @@ import com.badlogic.gdx.maps.MapObjects;
 import com.badlogic.gdx.maps.objects.RectangleMapObject;
 import com.badlogic.gdx.maps.tiled.TiledMap;
 import com.badlogic.gdx.maps.tiled.TiledMapRenderer;
-import com.badlogic.gdx.maps.tiled.TiledMapTileLayer;
 import com.badlogic.gdx.maps.tiled.TmxMapLoader;
-import com.badlogic.gdx.maps.tiled.objects.TiledMapTileMapObject;
-import com.badlogic.gdx.maps.tiled.renderers.OrthoCachedTiledMapRenderer;
 import com.badlogic.gdx.maps.tiled.renderers.OrthogonalTiledMapRenderer;
-import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.math.Rectangle;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.math.Vector3;
-import com.badlogic.gdx.physics.box2d.Shape;
-import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.ScreenUtils;
-import com.badlogic.gdx.utils.TimeUtils;
+import com.undercooked.game.entities.Ingridient;
 
 public class GameScreen implements Screen {
 
     final Undercooked game;
 
-    Texture dropImage;
+   // Texture dropImage;
+    Texture broccoliImage;
     Texture bucketImage;
     Texture counterImage;
 
@@ -53,10 +46,11 @@ public class GameScreen implements Screen {
     Music rainMusic;
     OrthographicCamera camera;
     Rectangle bucket;
-    Rectangle raindrops;
+    //Rectangle raindrops;
     RectangleMapObject servingArea;
     long lastDropTime;
     int dropsGathered;
+    Ingridient broc;
 
     double progress = 0;
     int dishesServed = 0;
@@ -76,7 +70,8 @@ public class GameScreen implements Screen {
         this.game = game;
 
         // load the images for the droplet and the bucket, 64x64 pixels each
-        dropImage = new Texture(Gdx.files.internal("droplet.png"));
+       // dropImage = new Texture(Gdx.files.internal("droplet.png"));
+        broccoliImage = new Texture(Gdx.files.internal("textures/Broccoli.png"));
         bucketImage = new Texture(Gdx.files.internal("bucket.png"));
         counterImage = new Texture(Gdx.files.internal("counter.jpeg"));
         // mapImage = new Texture(Gdx.files.internal("map.jpeg"));
@@ -111,7 +106,8 @@ public class GameScreen implements Screen {
         bucket.height = 64;
 
         // create the raindrops array and spawn the first raindrop
-        raindrops = new Rectangle(46,96,64,64);;
+       // raindrops = new Rectangle(46,96,64,64);
+        broc = new Ingridient("Broccoli", broccoliImage, new Rectangle(46,46,64,64));
 
     }
 
@@ -144,14 +140,16 @@ public class GameScreen implements Screen {
         game.font.draw(game.batch, "Dishes served: " + dishesServed, 0, 450);
         game.font.draw(game.batch, "picked up ingredient: " + pickedUp, 0, 435);
         game.font.draw(game.batch, "put down ingredient / ready to process: " + putDown, 0, 420);
-        game.batch.draw(dropImage, raindrops.x, raindrops.y);
+        //game.batch.draw(dropImage, raindrops.x, raindrops.y);
+        game.batch.draw(broc.texture, broc.hitbox.x, broc.hitbox.y);
         game.batch.draw(bucketImage, bucket.x, bucket.y);
+
         // while carrying, draw the ingredient over the player
         if (pickedUp) {
-            game.batch.draw(dropImage, bucket.x, bucket.y);
+            game.batch.draw(broc.texture, bucket.x, bucket.y);
         }
         // if ingredient is put down, draw it there
-        drawInServingArea((RectangleMapObject) servingArea, dropImage);
+        drawInServingArea((RectangleMapObject) servingArea, broccoliImage);
         game.batch.end();
 
         // draw progressbar
@@ -231,7 +229,7 @@ public class GameScreen implements Screen {
         // move the raindrops, remove any that are beneath the bottom edge of
         // the screen or that hit the bucket. In the later case we play back
         // a sound effect as well.
-        if (raindrops.overlaps(bucket)) {
+        if (broc.hitbox.overlaps(bucket)) {
             // pick up food
             if (Gdx.input.isKeyJustPressed(Keys.A) && !pickedUp) {
                 dropsGathered++;
@@ -326,7 +324,7 @@ public class GameScreen implements Screen {
 
     @Override
     public void dispose() {
-        dropImage.dispose();
+        broccoliImage.dispose();
         bucketImage.dispose();
         dropSound.dispose();
         rainMusic.dispose();
