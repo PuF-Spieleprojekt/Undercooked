@@ -23,15 +23,19 @@ import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.math.Vector3;
 import com.badlogic.gdx.utils.ScreenUtils;
 import com.undercooked.game.entities.Ingridient;
+import com.undercooked.game.entities.Player;
 
 public class GameScreen implements Screen {
 
     final Undercooked game;
 
-   // Texture dropImage;
+   // Textures;
     Texture broccoliImage;
     Texture bucketImage;
     Texture counterImage;
+
+
+
 
     //Rectangle counterBounds = new Rectangle(430,164,90,200);
     //Rectangle servingArea = new Rectangle(700, 170, 50, 130);
@@ -45,12 +49,13 @@ public class GameScreen implements Screen {
     Sound dropSound;
     Music rainMusic;
     OrthographicCamera camera;
-    Rectangle bucket;
+    //Rectangle bucket;
     //Rectangle raindrops;
     RectangleMapObject servingArea;
     long lastDropTime;
     int dropsGathered;
     Ingridient broc;
+    Player player1;
 
     double progress = 0;
     int dishesServed = 0;
@@ -74,6 +79,8 @@ public class GameScreen implements Screen {
         broccoliImage = new Texture(Gdx.files.internal("textures/Broccoli.png"));
         bucketImage = new Texture(Gdx.files.internal("bucket.png"));
         counterImage = new Texture(Gdx.files.internal("counter.jpeg"));
+        //player textures TODO: create own file for that
+
         // mapImage = new Texture(Gdx.files.internal("map.jpeg"));
 
         // load Tiled Map and generate Layerindex;
@@ -98,12 +105,13 @@ public class GameScreen implements Screen {
         camera.setToOrtho(false, 800, 480);
 
         // create a Rectangle to logically represent the bucket
-        bucket = new Rectangle();
+        player1 = new Player("Player1",new Rectangle(368, 40, 64, 64));
+       /* bucket = new Rectangle();
         bucket.x = 800 / 2 - 64 / 2; // center the bucket horizontally
         bucket.y = 20; // bottom left corner of the bucket is 20 pixels above
         // the bottom screen edge
         bucket.width = 64;
-        bucket.height = 64;
+        bucket.height = 64;*/
 
         // create the raindrops array and spawn the first raindrop
        // raindrops = new Rectangle(46,96,64,64);
@@ -142,11 +150,11 @@ public class GameScreen implements Screen {
         game.font.draw(game.batch, "put down ingredient / ready to process: " + putDown, 0, 420);
         //game.batch.draw(dropImage, raindrops.x, raindrops.y);
         game.batch.draw(broc.texture, broc.hitbox.x, broc.hitbox.y);
-        game.batch.draw(bucketImage, bucket.x, bucket.y);
+        game.batch.draw(player1.getTexture(), player1.hitbox.x, player1.hitbox.y);
 
         // while carrying, draw the ingredient over the player
         if (pickedUp) {
-            game.batch.draw(broc.texture, bucket.x, bucket.y);
+            game.batch.draw(broc.texture, player1.hitbox.x, player1.hitbox.y);
         }
         // if ingredient is put down, draw it there
         drawInServingArea((RectangleMapObject) servingArea, broccoliImage);
@@ -165,19 +173,28 @@ public class GameScreen implements Screen {
             Vector3 touchPos = new Vector3();
             touchPos.set(Gdx.input.getX(), Gdx.input.getY(), 0);
             camera.unproject(touchPos);
-            bucket.x = touchPos.x - 64 / 2;
-            bucket.y = touchPos.y - 64 / 2;
+            //bucket.x = touchPos.x - 64 / 2;
+            //bucket.y = touchPos.y - 64 / 2;
         }
 
         desired_velocity.x = desired_velocity.y = 0.0f;
-        if (Gdx.input.isKeyPressed(Keys.LEFT))
+        if (Gdx.input.isKeyPressed(Keys.LEFT)){
             desired_velocity.x = -300 * Gdx.graphics.getDeltaTime();
-        if (Gdx.input.isKeyPressed(Keys.RIGHT))
+            player1.changeTexture("left");
+        }
+        if (Gdx.input.isKeyPressed(Keys.RIGHT)) {
             desired_velocity.x = 300 * Gdx.graphics.getDeltaTime();
-        if (Gdx.input.isKeyPressed(Keys.DOWN))
+            player1.changeTexture("right");
+        }
+        if (Gdx.input.isKeyPressed(Keys.DOWN)){
             desired_velocity.y = -300 * Gdx.graphics.getDeltaTime();
-        if (Gdx.input.isKeyPressed(Keys.UP))
+            player1.changeTexture("down");
+        }
+        if (Gdx.input.isKeyPressed(Keys.UP)){
             desired_velocity.y = 300 * Gdx.graphics.getDeltaTime();
+            player1.changeTexture("up");
+        }
+
 
         // a little mainstream formula from video game development. source: https://www.reddit.com/r/gamedev/comments/1eg21z/how_do_you_implement_acceleration/
         // New Velocity = old_velocity * (1 - delta_time * transition_speed) + desired_velocity * (delta_time * transition_speed)
@@ -188,32 +205,34 @@ public class GameScreen implements Screen {
             playerMovementVector.scl(100 / speed);
         }
 
-        bucket.x += playerMovementVector.x;
-        bucket.y += playerMovementVector.y;
+        player1.hitbox.x += playerMovementVector.x;
+        player1.hitbox.y += playerMovementVector.y;
+
+
 
         // make sure the bucket stays within the screen bounds
-        if (bucket.x < 0)
-            bucket.x = 0;
-        if (bucket.x > 800 - 64)
-            bucket.x = 800 - 64;
-        if (bucket.y < 0)
-            bucket.y = 0;
-        if (bucket.y > 480 - 64)
-            bucket.y = 480 - 64;
+        if (player1.hitbox.x < 0)
+            player1.hitbox.x = 0;
+        if (player1.hitbox.x > 800 - 64)
+            player1.hitbox.x = 800 - 64;
+        if (player1.hitbox.y < 0)
+            player1.hitbox.y = 0;
+        if (player1.hitbox.y > 480 - 64)
+            player1.hitbox.y = 480 - 64;
 
         // collision detection
         for (MapObject object : objects){
 
             if(object.getProperties().containsKey("blocked")) {
-                collisionDetection((RectangleMapObject) object, bucket);
+                collisionDetection((RectangleMapObject) object, player1.hitbox);
 
             } else if(object.getProperties().containsKey("Preparing Area")){
                 servingArea =(RectangleMapObject) object;
-                preparingAreaAction(servingArea, bucket);
+                preparingAreaAction(servingArea, player1.hitbox);
 
 
             } else if (object.getProperties().containsKey("Serving Area")){
-                servingAreaAction((RectangleMapObject) object, bucket);
+                servingAreaAction((RectangleMapObject) object, player1.hitbox);
             }
         }
 
@@ -229,7 +248,7 @@ public class GameScreen implements Screen {
         // move the raindrops, remove any that are beneath the bottom edge of
         // the screen or that hit the bucket. In the later case we play back
         // a sound effect as well.
-        if (broc.hitbox.overlaps(bucket)) {
+        if (broc.hitbox.overlaps(player1.hitbox)) {
             // pick up food
             if (Gdx.input.isKeyJustPressed(Keys.A) && !pickedUp) {
                 dropsGathered++;
