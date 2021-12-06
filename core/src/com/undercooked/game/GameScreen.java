@@ -34,12 +34,6 @@ public class GameScreen implements Screen {
     Texture bucketImage;
     Texture counterImage;
 
-
-
-
-    //Rectangle counterBounds = new Rectangle(430,164,90,200);
-    //Rectangle servingArea = new Rectangle(700, 170, 50, 130);
-
     //Map properties
     TiledMap map;
     TiledMapRenderer tiledmaprenderer;
@@ -49,10 +43,7 @@ public class GameScreen implements Screen {
     Sound dropSound;
     Music rainMusic;
     OrthographicCamera camera;
-    //Rectangle bucket;
-    //Rectangle raindrops;
     RectangleMapObject servingArea;
-    long lastDropTime;
     int dropsGathered;
     Ingridient broc;
     Player player1;
@@ -75,13 +66,9 @@ public class GameScreen implements Screen {
         this.game = game;
 
         // load the images for the droplet and the bucket, 64x64 pixels each
-       // dropImage = new Texture(Gdx.files.internal("droplet.png"));
         broccoliImage = new Texture(Gdx.files.internal("textures/Broccoli.png"));
         bucketImage = new Texture(Gdx.files.internal("bucket.png"));
         counterImage = new Texture(Gdx.files.internal("counter.jpeg"));
-        //player textures TODO: create own file for that
-
-        // mapImage = new Texture(Gdx.files.internal("map.jpeg"));
 
         // load Tiled Map and generate Layerindex;
         map = new TmxMapLoader().load("map/map_v.0.1.tmx");
@@ -106,15 +93,6 @@ public class GameScreen implements Screen {
 
         // create a Rectangle to logically represent the bucket
         player1 = new Player("Player1",new Rectangle(368, 40, 64, 64));
-       /* bucket = new Rectangle();
-        bucket.x = 800 / 2 - 64 / 2; // center the bucket horizontally
-        bucket.y = 20; // bottom left corner of the bucket is 20 pixels above
-        // the bottom screen edge
-        bucket.width = 64;
-        bucket.height = 64;*/
-
-        // create the raindrops array and spawn the first raindrop
-       // raindrops = new Rectangle(46,96,64,64);
         broc = new Ingridient("Broccoli", broccoliImage, new Rectangle(46,46,64,64));
 
     }
@@ -134,9 +112,6 @@ public class GameScreen implements Screen {
         // tell the SpriteBatch to render in the
         // coordinate system specified by the camera.
         game.batch.setProjectionMatrix(camera.combined);
-
-        // begin a new batch and draw the bucket and
-        // all drops
         game.batch.begin();
         // render map
         tiledmaprenderer.setView(camera);
@@ -173,8 +148,6 @@ public class GameScreen implements Screen {
             Vector3 touchPos = new Vector3();
             touchPos.set(Gdx.input.getX(), Gdx.input.getY(), 0);
             camera.unproject(touchPos);
-            //bucket.x = touchPos.x - 64 / 2;
-            //bucket.y = touchPos.y - 64 / 2;
         }
 
         desired_velocity.x = desired_velocity.y = 0.0f;
@@ -208,23 +181,15 @@ public class GameScreen implements Screen {
         player1.hitbox.x += playerMovementVector.x;
         player1.hitbox.y += playerMovementVector.y;
 
+        player1.checkBoundaries();
 
 
-        // make sure the bucket stays within the screen bounds
-        if (player1.hitbox.x < 0)
-            player1.hitbox.x = 0;
-        if (player1.hitbox.x > 800 - 64)
-            player1.hitbox.x = 800 - 64;
-        if (player1.hitbox.y < 0)
-            player1.hitbox.y = 0;
-        if (player1.hitbox.y > 480 - 64)
-            player1.hitbox.y = 480 - 64;
 
         // collision detection
         for (MapObject object : objects){
 
             if(object.getProperties().containsKey("blocked")) {
-                collisionDetection((RectangleMapObject) object, player1.hitbox);
+                player1.collisionDetection((RectangleMapObject) object);
 
             } else if(object.getProperties().containsKey("Preparing Area")){
                 servingArea =(RectangleMapObject) object;
@@ -297,26 +262,7 @@ public class GameScreen implements Screen {
             }
         }
     }
-    public void collisionDetection(RectangleMapObject blockingObject, Rectangle playerObject){
-        // bucket can't cross objects with propertie "blocked
-        if (blockingObject.getRectangle().overlaps(playerObject)) {
-            /*System.out.print("Obere Kante : " +blockingObject.getRectangle().y + blockingObject.getRectangle().height + "\n Untere Kante: "
-            +blockingObject.getRectangle().y+ "\n Eimer: " +bucket.y);*/
-            if (blockingObject.getRectangle().x > playerObject.x) {
-               // System.out.print("right");
-                playerObject.x = playerObject.x - 10;
-            } else if (blockingObject.getRectangle().x + blockingObject.getRectangle().width - 5 < playerObject.x) {
-               // System.out.print("left");
-                playerObject.x = playerObject.x + 10;
-            } else if (blockingObject.getRectangle().y > playerObject.y) {
-               // System.out.print("down");
-                playerObject.y = playerObject.y - 10;
-            } else if (blockingObject.getRectangle().y + blockingObject.getRectangle().height - 5 < playerObject.y) {
-               // System.out.print("up");
-                playerObject.y = playerObject.y + 10;
-            }
-        }
-    }
+
 
     @Override
     public void resize(int width, int height) {
