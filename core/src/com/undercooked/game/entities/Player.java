@@ -32,7 +32,6 @@ public class Player {
 
     public void changeTexture(String direction){
         if(step == 12){ step = 1;}
-        System.out.println(step);
         step+=1;
         switch (direction){
             case "up" :
@@ -111,6 +110,8 @@ public class Player {
             }
         }
     }
+
+
 
 
     public Texture getTexture(){

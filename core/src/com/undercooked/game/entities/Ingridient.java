@@ -10,11 +10,26 @@ public class Ingridient {
     String name;
    public Texture texture;
    public Rectangle hitbox;
+   private Boolean pickedUp = true;
 
 
     public Ingridient(String name, Texture texture, Rectangle hitbox){
         this.name = name;
         this.texture = texture;
         this.hitbox = hitbox;
+    }
+    public Texture getTexture(){
+        return this.texture;
+    }
+
+    public void pickUp(){
+        pickedUp = true;
+    }
+    public void letDown(){
+        pickedUp = false;
+    }
+
+    public Boolean getPickUp(){
+        return pickedUp;
     }
 }
