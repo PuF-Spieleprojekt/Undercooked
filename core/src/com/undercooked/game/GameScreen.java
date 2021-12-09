@@ -44,6 +44,7 @@ public class GameScreen implements Screen {
     int[] mapLayerIndices;
 
     RectangleMapObject servingArea;
+    RectangleMapObject preparingArea;
     RectangleMapObject blockingObject;
     RectangleMapObject currentLocation;
 
@@ -51,7 +52,6 @@ public class GameScreen implements Screen {
     Music rainMusic;
     OrthographicCamera camera;
     int dropsGathered;
-    Ingridient broc;
     Player player1;
     private ArrayList<Ingridient> ingridients = new ArrayList<Ingridient>();
 
@@ -139,7 +139,14 @@ public class GameScreen implements Screen {
                     game.batch.draw(ingridient.getTexture(), player1.hitbox.x, player1.hitbox.y);
                 } else{
                     // if ingredient is put down, draw it there
-                    drawInArea(servingArea, ingridient);
+                    System.out.println(ingridient.getIsPreparing());
+                    if(ingridient.getIsServed()){
+                        drawInArea(servingArea, ingridient);
+                    }else if (ingridient.getIsPreparing()){
+                        System.out.println("Im in");
+                        drawInArea(preparingArea, ingridient);
+                    }
+
                 }
             }
         }
@@ -156,30 +163,31 @@ public class GameScreen implements Screen {
         // Map Objects get initialized
         for (MapObject object : objects){
 
-            //TODO Create method that returns current location
-
-            currentLocation = (RectangleMapObject) object;
             if(object.getProperties().containsKey("blocked")) {
                 blockingObject = (RectangleMapObject) object;
                 player1.collisionDetection(blockingObject);
 
             } else if(object.getProperties().containsKey("Preparing Area")){
-                preparingAreaAction((RectangleMapObject) object, player1.hitbox);
+
+                preparingArea = (RectangleMapObject) object;
+                currentLocation = getLocation((RectangleMapObject) object, player1.hitbox);
 
             } else if (object.getProperties().containsKey("Serving Area")){
                 //Set servingArea to be able to acces it in batch.draw
                 servingArea =(RectangleMapObject) object;
+                currentLocation = getLocation((RectangleMapObject) object, player1.hitbox);
 
             } else if (object.getProperties().containsKey("ingridient")){
                 createIngridient((RectangleMapObject) object, player1.hitbox);
             }
         }
+            //System.out.println(currentLocation.getProperties().containsKey("Serving Area"));
 
-        getLocation(currentLocation, player1.hitbox);
         //Iterator for interaction with Ingridients
         for (Iterator<Ingridient> iter = ingridients.iterator(); iter.hasNext();){
             Ingridient ingridient = iter.next();
             servingAreaAction(servingArea, player1.hitbox, ingridient);
+            preparingAreaAction(preparingArea, player1.hitbox, ingridient);
         }
 
 
@@ -223,16 +231,6 @@ public class GameScreen implements Screen {
 
         player1.checkBoundaries();
 
-
-        if (progress > 100) {
-            progress = 0;
-            putDown = false;
-            dishesServed += 1;
-            dropSound.stop();
-            soundLooping = false;
-        }
-
-
         // move the raindrops, remove any that are beneath the bottom edge of
         // the screen or that hit the bucket. In the later case we play back
         // a sound effect as well.
@@ -251,24 +249,31 @@ public class GameScreen implements Screen {
 
     }
 
-    public void getLocation(RectangleMapObject object, Rectangle playerObject){
-        System.out.println(currentLocation.getProperties().containsKey("blocked") + "-----Outside");
+    public void drawInArea(RectangleMapObject areaObject, Ingridient ingridient){
+        game.batch.draw(ingridient.getTexture(), areaObject.getRectangle().x, areaObject.getRectangle().y);
+    }
+
+    public RectangleMapObject getLocation(RectangleMapObject object, Rectangle playerObject){
+        //System.out.println(currentLocation.getProperties().containsKey("blocked") + "-----Outside");
         if(object.getProperties().containsKey("blocked")){
             if (object.getRectangle().overlaps(playerObject)){
                 System.out.println("blocked");
+                return object;
             }
 
         }else if(object.getProperties().containsKey("Preparing Area")){
             if (object.getRectangle().overlaps(playerObject)){
                 System.out.println("preparing");
+                return object;
             }
 
         }else if(object.getProperties().containsKey("Serving Area")){
             if (object.getRectangle().overlaps(playerObject)){
                 System.out.println("serving");
+                return object;
             }
 
-        }
+        }return new RectangleMapObject();
     }
 
     //Create an ingridient according to the area the player is standing in
@@ -286,35 +291,38 @@ public class GameScreen implements Screen {
     public void servingAreaAction(RectangleMapObject areaObject, Rectangle playerObject, Ingridient ingridient){
             if (areaObject.getRectangle().overlaps(playerObject)){
                 if (ingridient.getPickUp() && Gdx.input.isKeyJustPressed(Keys.A)) {
-                    System.out.println("Should Drop");
-                    ingridient.letDown();
-
+                    ingridient.putDown(areaObject);
                     dishesServed ++;
                 }
-
         }
 
     }
 
-    public void drawInArea(RectangleMapObject areaObject, Ingridient ingridient){
-            game.batch.draw(ingridient.getTexture(), areaObject.getRectangle().x + 12, areaObject.getRectangle().y + 100);
-    }
-    public void preparingAreaAction(RectangleMapObject areaObject, Rectangle playerObject ){
+
+
+    public void preparingAreaAction(RectangleMapObject areaObject, Rectangle playerObject, Ingridient ingridient ){
         if (((RectangleMapObject) areaObject).getRectangle().overlaps(playerObject)){
             // put down food in order to process it
-            if (pickedUp && Gdx.input.isKeyJustPressed(Keys.A)) {
-                pickedUp = false;
-                putDown = true;
+            if (ingridient.getPickUp() && Gdx.input.isKeyJustPressed(Keys.A)) {
+                ingridient.putDown(areaObject);
                 dropSound.play();
             }
 
             // process the food that is put down
-            if (Gdx.input.isKeyPressed(Keys.Q) && putDown) {
+            if (Gdx.input.isKeyPressed(Keys.Q) && ingridient.getIsPreparing()) {
                 if(!soundLooping) {
                     dropSound.loop();
                     soundLooping = true;
                 }
                 progress += 40 * Gdx.graphics.getDeltaTime();
+
+                if (progress > 100) {
+                    progress = 0;
+                    ingridient.pickUp();
+                    dishesServed += 1;
+                    dropSound.stop();
+                    soundLooping = false;
+                }
             }
         }
     }

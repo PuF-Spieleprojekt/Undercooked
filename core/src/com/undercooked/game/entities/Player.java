@@ -10,6 +10,7 @@ public class Player {
     public Rectangle hitbox;
     private int step = 1;
     private Texture texture;
+    //TODO: Create TextureMap
     private final Texture lookup1 = new Texture(Gdx.files.internal("playermodel/PNG/Sequence/up1.png"));
     private final Texture lookup2 = new Texture(Gdx.files.internal("playermodel/PNG/Sequence/up2.png"));
     private final Texture lookup3 = new Texture(Gdx.files.internal("playermodel/PNG/Sequence/up3.png"));
