@@ -20,7 +20,7 @@ public class Undercooked extends Game {
 		// Use LibGDX's default Arial font.
 		font = new BitmapFont();
 		shape = new ShapeRenderer();
-		this.setScreen(new MainMenuScreen(this));
+		this.setScreen(new LogRegScreen(this));
 	}
 
 	public void render() {
