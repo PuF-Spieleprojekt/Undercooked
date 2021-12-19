@@ -33,9 +33,10 @@ public class MainMenuScreen extends ControlScreen implements Screen {
 //    private Label.LabelStyle labelStyle;
 
     public MainMenuScreen(final Undercooked gam) {
+
         super();
         game = gam;
-
+        Networking.createUserWithEmail("test@mail.com", "test");
 //        camera = new OrthographicCamera();
 //        camera.setToOrtho(false, 800, 480);
 //        FillViewport viewport = new FillViewport( 800, 480,camera);

@@ -13,7 +13,8 @@ buildscript {
         classpath 'org.gretty:gretty:3.0.2'
         classpath 'com.android.tools.build:gradle:3.5.4'
         classpath 'com.mobidevelop.robovm:robovm-gradle-plugin:2.3.12'
-        
+
+
 
     }
 }
@@ -30,15 +31,18 @@ allprojects {
         ashleyVersion = '1.7.3'
         aiVersion = '1.8.2'
         gdxControllersVersion = '2.1.0'
+        nakamaVersion='+'
     }
 
     repositories {
         mavenLocal()
+        maven { url 'https://jitpack.io' }
         mavenCentral()
         google()
         gradlePluginPortal()
         maven { url "https://oss.sonatype.org/content/repositories/snapshots/" }
         maven { url "https://oss.sonatype.org/content/repositories/releases/" }
+
     }
 }
 
@@ -127,7 +131,9 @@ project(":core") {
         api "com.badlogicgames.gdx:gdx:$gdxVersion"
         api "com.badlogicgames.gdx:gdx-box2d:$gdxVersion"
 
-
         implementation "com.badlogicgames.gdx:gdx-freetype:$gdxVersion"
+        implementation group: 'com.googlecode.json-simple', name: 'json-simple', version: '1.1.1'
+
+
     }
 }

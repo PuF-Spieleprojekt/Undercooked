@@ -2,33 +2,24 @@ package com.undercooked.game.entities;
 
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.Texture;
+import com.badlogic.gdx.graphics.g2d.Sprite;
+import com.badlogic.gdx.graphics.g2d.TextureAtlas;
 import com.badlogic.gdx.maps.objects.RectangleMapObject;
 import com.badlogic.gdx.math.Rectangle;
+import com.badlogic.gdx.utils.ObjectSet;
 
 public class Player {
     String name;
-    public Rectangle hitbox;
+    private Rectangle hitbox;
     private int step = 1;
-    private Texture texture;
-    //TODO: Create TextureMap
-    private final Texture lookup1 = new Texture(Gdx.files.internal("playermodel/PNG/Sequence/up1.png"));
-    private final Texture lookup2 = new Texture(Gdx.files.internal("playermodel/PNG/Sequence/up2.png"));
-    private final Texture lookup3 = new Texture(Gdx.files.internal("playermodel/PNG/Sequence/up3.png"));
-    private final Texture lookdown1 = new Texture(Gdx.files.internal("playermodel/PNG/Sequence/down1.png"));
-    private final Texture lookdown2 = new Texture(Gdx.files.internal("playermodel/PNG/Sequence/down2.png"));
-    private final Texture lookdown3 = new Texture(Gdx.files.internal("playermodel/PNG/Sequence/down3.png"));
-    private final Texture lookleft1 = new Texture(Gdx.files.internal("playermodel/PNG/Sequence/left1.png"));
-    private final Texture lookleft2 = new Texture(Gdx.files.internal("playermodel/PNG/Sequence/left2.png"));
-    private final Texture lookleft3 = new Texture(Gdx.files.internal("playermodel/PNG/Sequence/left3.png"));
-    private final Texture lookright1 = new Texture(Gdx.files.internal("playermodel/PNG/Sequence/right1.png"));
-    private final Texture lookright2 = new Texture(Gdx.files.internal("playermodel/PNG/Sequence/right2.png"));
-    private final Texture lookright3 = new Texture(Gdx.files.internal("playermodel/PNG/Sequence/right3.png"));
+    private Sprite sprite;
+    //TODO: Extend class from Sprite
+    TextureAtlas textureAtlas = new TextureAtlas(Gdx.files.internal("playermodel/player_naked_sprites.txt"));
 
-
-    public Player(String name, Rectangle hitbox){
+    public Player(String name){
         this.name = name;
-        this.hitbox = hitbox;
-        this.texture = lookdown1;
+        this.sprite = textureAtlas.createSprite("down1");
+        this.hitbox = sprite.getBoundingRectangle();
     }
 
     public void changeTexture(String direction){
@@ -37,49 +28,49 @@ public class Player {
         switch (direction){
             case "up" :
                 if (step>=5 &&step<=8){
-                    this.texture = lookup1;
+                   changeDirection("up1");
                     break;
                 } else if(step>=1 &&step<=4){
-                    this.texture = lookup2;
+                    changeDirection("up2");
                     break;
                 } else if (step>=9 &&step<=12){
-                    this.texture = lookup3;
+                    changeDirection("up3");
                     break;
             }
 
             case "down" :
                 if (step>=5 &&step<=8){
-                    this.texture = lookdown1;
+                    changeDirection("down1");;
                     break;
                 } else if(step>=1 &&step<=4){
-                    this.texture = lookdown2;
+                    changeDirection("down2");
                     break;
                 }else if(step>=9 &&step<=12){
-                    this.texture = lookdown3;
+                    changeDirection("down3");
                     break;
                 }
 
             case "left" :
                 if (step>=5 &&step<=8){
-                    this.texture = lookleft1;
+                    changeDirection("left1");
                     break;
                 } else if(step>=1 &&step<=4){
-                    this.texture = lookleft2;
+                    changeDirection("left2");
                     break;
                 }else if(step>=9 &&step<=12){
-                    this.texture = lookleft3;
+                    changeDirection("left3");
                     break;
                 }
 
             case "right" :
                 if (step>=5 &&step<=8){
-                    this.texture = lookright1;
+                    changeDirection("right1");
                     break;
                 } else if(step>=1 &&step<=4){
-                    this.texture = lookright2;
+                    changeDirection("right2");
                     break;
                 }else if(step>=9 &&step<=12){
-                    this.texture = lookright3;
+                    changeDirection("right3");
                     break;
                 }
         }
@@ -112,12 +103,18 @@ public class Player {
         }
     }
 
+    private void changeDirection(String name){
+        sprite.setRegion(textureAtlas.findRegion(name));
 
-
-
-    public Texture getTexture(){
-        return this.texture;
     }
+
+
+
+
+    public Sprite getTexture(){
+        return sprite;
+    }
+    public Rectangle getHitbox() { return this.hitbox; }
 }
 
 

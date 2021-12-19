@@ -99,7 +99,7 @@ public class GameScreen implements Screen {
         camera.setToOrtho(false, 800, 480);
 
         // create a Rectangle to logically represent the bucket
-        player1 = new Player("Player1",new Rectangle(368, 40, 64, 64));
+        player1 = new Player("Player1");
 
 
     }
@@ -136,21 +136,20 @@ public class GameScreen implements Screen {
             if(ingridient != null) {
                 //TODO make draw in Area responsive to current Position
                 if(ingridient.getPickUp()) {
-                    game.batch.draw(ingridient.getTexture(), player1.hitbox.x, player1.hitbox.y);
+                    game.batch.draw(ingridient.getTexture(), player1.getHitbox().x, player1.getHitbox().y);
                 } else{
                     // if ingredient is put down, draw it there
                     System.out.println(ingridient.getIsPreparing());
                     if(ingridient.getIsServed()){
                         drawInArea(servingArea, ingridient);
                     }else if (ingridient.getIsPreparing()){
-                        System.out.println("Im in");
                         drawInArea(preparingArea, ingridient);
                     }
 
                 }
             }
         }
-        game.batch.draw(player1.getTexture(), player1.hitbox.x, player1.hitbox.y);
+        game.batch.draw(player1.getTexture(), player1.getHitbox().x, player1.getHitbox().y);
         game.batch.end();
 
         // draw progressbar
@@ -170,15 +169,15 @@ public class GameScreen implements Screen {
             } else if(object.getProperties().containsKey("Preparing Area")){
 
                 preparingArea = (RectangleMapObject) object;
-                currentLocation = getLocation((RectangleMapObject) object, player1.hitbox);
+                currentLocation = getLocation((RectangleMapObject) object, player1.getHitbox());
 
             } else if (object.getProperties().containsKey("Serving Area")){
                 //Set servingArea to be able to acces it in batch.draw
                 servingArea =(RectangleMapObject) object;
-                currentLocation = getLocation((RectangleMapObject) object, player1.hitbox);
+                currentLocation = getLocation((RectangleMapObject) object, player1.getHitbox());
 
             } else if (object.getProperties().containsKey("ingridient")){
-                createIngridient((RectangleMapObject) object, player1.hitbox);
+                createIngridient((RectangleMapObject) object, player1.getHitbox());
             }
         }
             //System.out.println(currentLocation.getProperties().containsKey("Serving Area"));
@@ -186,8 +185,8 @@ public class GameScreen implements Screen {
         //Iterator for interaction with Ingridients
         for (Iterator<Ingridient> iter = ingridients.iterator(); iter.hasNext();){
             Ingridient ingridient = iter.next();
-            servingAreaAction(servingArea, player1.hitbox, ingridient);
-            preparingAreaAction(preparingArea, player1.hitbox, ingridient);
+            servingAreaAction(servingArea, player1.getHitbox(), ingridient);
+            preparingAreaAction(preparingArea, player1.getHitbox(), ingridient);
         }
 
 
@@ -226,8 +225,8 @@ public class GameScreen implements Screen {
             playerMovementVector.scl(100 / speed);
         }
 
-        player1.hitbox.x += playerMovementVector.x;
-        player1.hitbox.y += playerMovementVector.y;
+        player1.getHitbox().x += playerMovementVector.x;
+        player1.getHitbox().y += playerMovementVector.y;
 
         player1.checkBoundaries();
 
