@@ -1,16 +1,21 @@
 package com.undercooked.game;
 
 import com.badlogic.gdx.Gdx;
+import com.badlogic.gdx.Net;
 import com.badlogic.gdx.Screen;
 import com.badlogic.gdx.scenes.scene2d.Actor;
 import com.badlogic.gdx.scenes.scene2d.ui.*;
 import com.badlogic.gdx.scenes.scene2d.utils.ChangeListener;
 
+import java.awt.Color;
+import java.net.MalformedURLException;
+import java.util.concurrent.ExecutionException;
+
 public class LoginScreen extends ControlScreen implements Screen {
 
     final Undercooked game;
-
-    public LoginScreen(Undercooked game) {
+    public Networking net;
+    public LoginScreen(Undercooked game) throws InterruptedException, ExecutionException, MalformedURLException {
         super();
         this.game = game;
     }
@@ -20,7 +25,7 @@ public class LoginScreen extends ControlScreen implements Screen {
         Skin skin = new Skin(Gdx.files.internal("star-soldier-ui.json"));
 
 
-        Table table = new Table();
+        final Table table = new Table();
         table.setFillParent(true);
         table.setY(-80);
 
@@ -28,12 +33,12 @@ public class LoginScreen extends ControlScreen implements Screen {
         super.stage.addActor(table);
 
 
-        Label.LabelStyle ls = new Label.LabelStyle();
+        final Label.LabelStyle ls = new Label.LabelStyle();
         ls.font = game.font;
-        Label usernameLabel = new Label("Username", ls);
+        Label usernameLabel = new Label("E-Mail", ls);
         Label passwordLabel = new Label("Password", ls);
-        TextField usernameField = new TextField("", skin); // User Input
-        TextField passwordField = new TextField("", skin); // user Input
+        final TextField usernameField = new TextField("", skin); // User Input
+        final TextField passwordField = new TextField("", skin); // user Input
         TextButton submit = new TextButton("OK", skin);
 
         table.add(usernameLabel);
@@ -49,7 +54,22 @@ public class LoginScreen extends ControlScreen implements Screen {
         submit.addListener(new ChangeListener() {
             @Override
             public void changed(ChangeEvent event, Actor actor) {
-                game.setScreen(new MainMenuScreen(game));
+                try {
+                    net = new Networking(usernameField.getText(), passwordField.getText());
+                } catch (MalformedURLException e) {
+                    e.printStackTrace();
+                } catch (ExecutionException e) {
+                    e.printStackTrace();
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
+                if(Networking.authenticationSuccessful){
+                    game.setScreen(new MainMenuScreen(game, net));
+
+                }else{
+                    table.add(new Label(Networking.errorMessage, ls));
+                }
+
             }
         });
     }

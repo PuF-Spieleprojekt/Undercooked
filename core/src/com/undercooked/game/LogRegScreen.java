@@ -9,6 +9,9 @@ import com.badlogic.gdx.scenes.scene2d.ui.Table;
 import com.badlogic.gdx.scenes.scene2d.ui.TextButton;
 import com.badlogic.gdx.scenes.scene2d.utils.ClickListener;
 
+import java.net.MalformedURLException;
+import java.util.concurrent.ExecutionException;
+
 public class LogRegScreen extends ControlScreen implements Screen {
     final Undercooked game;
 //    OrthographicCamera camera;
@@ -70,7 +73,7 @@ public class LogRegScreen extends ControlScreen implements Screen {
         label.addListener(new ClickListener() {
             @Override
             public void clicked(InputEvent event, float x, float y) {
-                game.setScreen(new MainMenuScreen(game));
+                //game.setScreen(new MainMenuScreen(game));
             }
         });
 
@@ -97,7 +100,15 @@ public class LogRegScreen extends ControlScreen implements Screen {
         login.addListener(new ClickListener() {
             @Override
             public void clicked(InputEvent event, float x, float y) {
-                game.setScreen(new LoginScreen(game));
+                try {
+                    game.setScreen(new LoginScreen(game));
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                } catch (ExecutionException e) {
+                    e.printStackTrace();
+                } catch (MalformedURLException e) {
+                    e.printStackTrace();
+                }
             }
         });
     }

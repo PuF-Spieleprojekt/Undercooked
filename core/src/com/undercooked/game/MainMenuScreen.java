@@ -2,6 +2,7 @@ package com.undercooked.game;
 
 
 import com.badlogic.gdx.Gdx;
+import com.badlogic.gdx.Net;
 import com.badlogic.gdx.Screen;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.OrthographicCamera;
@@ -21,9 +22,12 @@ import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.utils.viewport.FillViewport;
 import com.badlogic.gdx.utils.viewport.ScreenViewport;
 
+import java.util.concurrent.ExecutionException;
+
 public class MainMenuScreen extends ControlScreen implements Screen {
 
     final Undercooked game;
+    final Networking net;
     OrthographicCamera camera;
 //    private FreeTypeFontGenerator fontGenerator;
 //    private FreeTypeFontGenerator.FreeTypeFontParameter fontParameter;
@@ -32,11 +36,12 @@ public class MainMenuScreen extends ControlScreen implements Screen {
 //    private Label label;
 //    private Label.LabelStyle labelStyle;
 
-    public MainMenuScreen(final Undercooked gam) {
+    public MainMenuScreen(final Undercooked gam, final Networking net) {
 
         super();
         game = gam;
-        Networking.createUserWithEmail("test@mail.com", "test");
+        this.net = net;
+
 //        camera = new OrthographicCamera();
 //        camera.setToOrtho(false, 800, 480);
 //        FillViewport viewport = new FillViewport( 800, 480,camera);
@@ -111,6 +116,19 @@ public class MainMenuScreen extends ControlScreen implements Screen {
         label.setPosition(200, 300);        // hardcoded position
         super.stage.addActor(label);
         super.stage.addActor(play);
+        //TODO: Just for testing!!!!! Change Gamecreation again! 
+        profile.addListener(new ChangeListener() {
+            @Override
+            public void changed(ChangeEvent event, Actor actor) {
+                try {
+                    net.createMatch();
+                } catch (ExecutionException e) {
+                    e.printStackTrace();
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
+            }
+        });
 
 
         play.addListener(new ChangeListener() {
