@@ -95,12 +95,12 @@
   <object id="11" x="30.3105" y="392.719" width="69.1871" height="52.7139">
    <properties>
     <property name="broccoli" value=""/>
-    <property name="ingridient" value=""/>
+    <property name="ingredient" value=""/>
    </properties>
   </object>
   <object id="12" x="30.9694" y="72.4817" width="70.5049" height="50.7372">
    <properties>
-    <property name="ingridient" value=""/>
+    <property name="ingredient" value=""/>
     <property name="potatoes" value=""/>
    </properties>
   </object>

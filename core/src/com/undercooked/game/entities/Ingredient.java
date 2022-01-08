@@ -8,7 +8,7 @@ import com.sun.org.apache.xpath.internal.operations.Bool;
 import org.w3c.dom.Text;
 
 
-public class Ingridient {
+public class Ingredient {
     String name;
    public Texture texture;
    public Rectangle hitbox;
@@ -17,7 +17,7 @@ public class Ingridient {
    private Boolean isPreparing = false;
    //TODO: Create Method for is preaderd additional Textures
 
-    public Ingridient(String name, Texture texture, Rectangle hitbox){
+    public Ingredient(String name, Texture texture, Rectangle hitbox){
         this.name = name;
         this.texture = texture;
         this.hitbox = hitbox;
