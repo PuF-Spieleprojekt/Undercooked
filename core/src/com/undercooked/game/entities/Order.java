@@ -9,7 +9,7 @@ public class Order {
     private int secondsUntilCanceled;
     private double tip;
 
-    public Order(Timer timer, Set<Ingridient> ingridients, double tip){
+    public Order(Timer timer, Set<Ingredient> ingredients, double tip){
         this.timer = timer;
         this.secondsUntilCanceled = secondsUntilCanceled;
         this.tip = tip;

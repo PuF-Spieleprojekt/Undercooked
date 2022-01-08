@@ -22,7 +22,7 @@ import com.badlogic.gdx.math.Rectangle;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.math.Vector3;
 import com.badlogic.gdx.utils.ScreenUtils;
-import com.undercooked.game.entities.Ingridient;
+import com.undercooked.game.entities.Ingredient;
 import com.undercooked.game.entities.Player;
 
 import java.util.ArrayList;
@@ -53,11 +53,11 @@ public class GameScreen implements Screen {
     OrthographicCamera camera;
     int dropsGathered;
     Player player1;
-    private ArrayList<Ingridient> ingridients = new ArrayList<Ingridient>();
+    private ArrayList<Ingredient> ingredients = new ArrayList<Ingredient>();
 
     double progress = 0;
     int dishesServed = 0;
-    boolean pickedUp = false;
+    boolean holdingSomething = false;
     boolean putDown = false;
 
     Vector2 playerMovementVector = new Vector2(0.0f, 0.0f);
@@ -128,22 +128,22 @@ public class GameScreen implements Screen {
         game.font.draw(game.batch, "Drops Collected: " + dropsGathered, 0, 480);
         game.font.draw(game.batch, "progress: " + progress, 0, 465);
         game.font.draw(game.batch, "Dishes served: " + dishesServed, 0, 450);
-        game.font.draw(game.batch, "picked up ingredient: " + pickedUp, 0, 435);
+        game.font.draw(game.batch, "player holding something: " + holdingSomething, 0, 435);
         game.font.draw(game.batch, "put down ingredient / ready to process: " + putDown, 0, 420);
         //game.batch.draw(dropImage, raindrops.x, raindrops.y);
         //game.batch.draw(broc.texture, broc.hitbox.x, broc.hitbox.y);
-        for (Ingridient ingridient: ingridients){
-            if(ingridient != null) {
+        for (Ingredient ingredient : ingredients){
+            if(ingredient != null) {
                 //TODO make draw in Area responsive to current Position
-                if(ingridient.getPickUp()) {
-                    game.batch.draw(ingridient.getTexture(), player1.getHitbox().x, player1.getHitbox().y);
+                if(ingredient.getPickUp()) {
+                    game.batch.draw(ingredient.getTexture(), player1.getHitbox().x, player1.getHitbox().y);
                 } else{
                     // if ingredient is put down, draw it there
-                    System.out.println(ingridient.getIsPreparing());
-                    if(ingridient.getIsServed()){
-                        drawInArea(servingArea, ingridient);
-                    }else if (ingridient.getIsPreparing()){
-                        drawInArea(preparingArea, ingridient);
+                    System.out.println(ingredient.getIsPreparing());
+                    if(ingredient.getIsServed()){
+                        drawInArea(servingArea, ingredient);
+                    }else if (ingredient.getIsPreparing()){
+                        drawInArea(preparingArea, ingredient);
                     }
 
                 }
@@ -176,17 +176,17 @@ public class GameScreen implements Screen {
                 servingArea =(RectangleMapObject) object;
                 currentLocation = getLocation((RectangleMapObject) object, player1.getHitbox());
 
-            } else if (object.getProperties().containsKey("ingridient")){
-                createIngridient((RectangleMapObject) object, player1.getHitbox());
+            } else if (object.getProperties().containsKey("ingredient")){ // TODO let's fix this, seems wrong to look for a key like this, no?
+                createIngredient((RectangleMapObject) object, player1.getHitbox());
             }
         }
             //System.out.println(currentLocation.getProperties().containsKey("Serving Area"));
 
-        //Iterator for interaction with Ingridients
-        for (Iterator<Ingridient> iter = ingridients.iterator(); iter.hasNext();){
-            Ingridient ingridient = iter.next();
-            servingAreaAction(servingArea, player1.getHitbox(), ingridient);
-            preparingAreaAction(preparingArea, player1.getHitbox(), ingridient);
+        //Iterator for interaction with Ingredients
+        for (Iterator<Ingredient> iter = ingredients.iterator(); iter.hasNext();){
+            Ingredient ingredient = iter.next();
+            servingAreaAction(servingArea, player1.getHitbox(), ingredient);
+            preparingAreaAction(preparingArea, player1.getHitbox(), ingredient);
         }
 
 
@@ -248,8 +248,8 @@ public class GameScreen implements Screen {
 
     }
 
-    public void drawInArea(RectangleMapObject areaObject, Ingridient ingridient){
-        game.batch.draw(ingridient.getTexture(), areaObject.getRectangle().x, areaObject.getRectangle().y);
+    public void drawInArea(RectangleMapObject areaObject, Ingredient ingredient){
+        game.batch.draw(ingredient.getTexture(), areaObject.getRectangle().x, areaObject.getRectangle().y);
     }
 
     public RectangleMapObject getLocation(RectangleMapObject object, Rectangle playerObject){
@@ -275,23 +275,25 @@ public class GameScreen implements Screen {
         }return new RectangleMapObject();
     }
 
-    //Create an ingridient according to the area the player is standing in
-    public void createIngridient(RectangleMapObject object, Rectangle playerObject){
+    //Create an ingredient according to the area the player is standing in
+    public void createIngredient(RectangleMapObject object, Rectangle playerObject){
         if (object.getProperties().containsKey("broccoli")){
             if (object.getRectangle().overlaps(playerObject)){
                 if(Gdx.input.isKeyJustPressed(Keys.A)){
-                     ingridients.add(new Ingridient("Broccoli", broccoliImage, new Rectangle(playerObject.x, playerObject.y, 32, 32)));
+                    ingredients.add(new Ingredient("Broccoli", broccoliImage, new Rectangle(playerObject.x, playerObject.y, 32, 32)));
+                    holdingSomething = true;
                 }
             }
         }
 
     }
 
-    public void servingAreaAction(RectangleMapObject areaObject, Rectangle playerObject, Ingridient ingridient){
+    public void servingAreaAction(RectangleMapObject areaObject, Rectangle playerObject, Ingredient ingredient){
             if (areaObject.getRectangle().overlaps(playerObject)){
-                if (ingridient.getPickUp() && Gdx.input.isKeyJustPressed(Keys.A)) {
-                    ingridient.putDown(areaObject);
+                if (ingredient.getPickUp() && Gdx.input.isKeyJustPressed(Keys.A)) {
+                    ingredient.putDown(areaObject);
                     dishesServed ++;
+                    holdingSomething = false;
                 }
         }
 
@@ -299,16 +301,18 @@ public class GameScreen implements Screen {
 
 
 
-    public void preparingAreaAction(RectangleMapObject areaObject, Rectangle playerObject, Ingridient ingridient ){
+    public void preparingAreaAction(RectangleMapObject areaObject, Rectangle playerObject, Ingredient ingredient){
         if (((RectangleMapObject) areaObject).getRectangle().overlaps(playerObject)){
             // put down food in order to process it
-            if (ingridient.getPickUp() && Gdx.input.isKeyJustPressed(Keys.A)) {
-                ingridient.putDown(areaObject);
+            if (ingredient.getPickUp() && Gdx.input.isKeyJustPressed(Keys.A)) {
+                ingredient.putDown(areaObject);
                 dropSound.play();
+                putDown = true;
+                holdingSomething = false;
             }
 
             // process the food that is put down
-            if (Gdx.input.isKeyPressed(Keys.Q) && ingridient.getIsPreparing()) {
+            if (Gdx.input.isKeyPressed(Keys.Q) && ingredient.getIsPreparing()) {
                 if(!soundLooping) {
                     dropSound.loop();
                     soundLooping = true;
@@ -317,8 +321,9 @@ public class GameScreen implements Screen {
 
                 if (progress > 100) {
                     progress = 0;
-                    ingridient.pickUp();
-                    dishesServed += 1;
+                    ingredient.pickUp();
+                    holdingSomething = true;
+                    putDown = false;
                     dropSound.stop();
                     soundLooping = false;
                 }

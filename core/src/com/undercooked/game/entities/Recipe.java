@@ -4,10 +4,10 @@ import java.util.Set;
 
 public class Recipe {
     //TODO: Create visual Repesentation
-    private Set<Ingridient> ingridients;
+    private Set<Ingredient> ingredients;
 
-    public Recipe(Set<Ingridient> ingridients){
-        this.ingridients = ingridients;
+    public Recipe(Set<Ingredient> ingredients){
+        this.ingredients = ingredients;
     }
 
 
