@@ -16,6 +16,9 @@ public class Undercooked extends Game {
 	ShapeRenderer shape;
 	Networking net;
 
+	float timeCount = 0;
+	int timer;
+
 	public void create() {
 		batch = new SpriteBatch();
 		// Use LibGDX's default Arial font.
@@ -23,6 +26,7 @@ public class Undercooked extends Game {
 		shape = new ShapeRenderer();
 		net = new Networking();
 		this.setScreen(new LogRegScreen(this, net));
+		timer = 30;
 	}
 
 	public void render() {
