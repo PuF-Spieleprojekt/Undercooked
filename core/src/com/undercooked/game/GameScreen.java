@@ -24,6 +24,13 @@ import com.badlogic.gdx.math.Vector3;
 import com.badlogic.gdx.utils.ScreenUtils;
 import com.undercooked.game.entities.Ingredient;
 import com.undercooked.game.entities.Player;
+import com.badlogic.gdx.graphics.g2d.BitmapFont;
+import com.badlogic.gdx.scenes.scene2d.Stage;
+import com.badlogic.gdx.scenes.scene2d.ui.Label;
+import com.badlogic.gdx.scenes.scene2d.ui.Skin;
+import com.badlogic.gdx.utils.viewport.FillViewport;
+
+
 
 import java.util.ArrayList;
 import java.util.Iterator;
@@ -69,6 +76,12 @@ public class GameScreen implements Screen {
 
     boolean soundLooping = false;
 
+    int timer = 30;
+    float timeCount;
+    Stage stage;
+    Label label;
+    Label.LabelStyle labelStyle;
+
     public GameScreen(final Undercooked game) {
         this.game = game;
 
@@ -88,7 +101,6 @@ public class GameScreen implements Screen {
                 mapLayers.getIndex("Tile Layer 3")
         };
 
-
         // load the drop sound effect and the rain background "music"
         dropSound = Gdx.audio.newSound(Gdx.files.internal("drop.mp3"));
         rainMusic = Gdx.audio.newMusic(Gdx.files.internal("rain.mp3"));
@@ -97,6 +109,9 @@ public class GameScreen implements Screen {
         // create the camera and the SpriteBatch
         camera = new OrthographicCamera();
         camera.setToOrtho(false, 800, 480);
+
+        FillViewport viewport = new FillViewport( 800, 480, camera);
+        stage = new Stage(viewport);
 
         // create a Rectangle to logically represent the bucket
         player1 = new Player("Player1");
@@ -245,6 +260,23 @@ public class GameScreen implements Screen {
         if (Gdx.input.isKeyPressed(Input.Keys.ESCAPE)){
             Gdx.app.exit();
         }
+        // activate stage
+        stage.act(Math.min(Gdx.graphics.getDeltaTime(), 1 / 30f));
+        stage.draw();
+
+
+        // Timer. Comment out this block when not needed
+        timeCount += delta;
+        if (timeCount >= 1){
+            timer --;
+            label.setText(" Timer: " + timer);
+            timeCount -= 1;
+        }
+        if (timer == 0){
+            game.setScreen(new RoundScreen(game));
+        }
+
+
 
     }
 
@@ -338,6 +370,12 @@ public class GameScreen implements Screen {
 
     @Override
     public void show() {
+        labelStyle = new Label.LabelStyle();
+        labelStyle.font = game.font;
+        label = new Label(" Timer: " + timer, labelStyle) ;
+        label.setPosition(600, 420);        // hardcoded position
+        stage.addActor(label);
+
         // start the playback of the background music
         // when the screen is shown
        // rainMusic.play();
