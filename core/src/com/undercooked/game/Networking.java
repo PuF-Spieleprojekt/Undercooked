@@ -8,6 +8,7 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
 
+import com.badlogic.gdx.math.Interpolation;
 import com.badlogic.gdx.net.Socket;
 import com.google.common.util.concurrent.AsyncFunction;
 import com.google.common.util.concurrent.FutureCallback;
@@ -16,11 +17,14 @@ import com.google.common.util.concurrent.ListenableFuture;
 import com.heroiclabs.nakama.AbstractSocketListener;
 import com.heroiclabs.nakama.DefaultClient;
 import com.heroiclabs.nakama.Match;
+import com.heroiclabs.nakama.MatchData;
 import com.heroiclabs.nakama.Session;
 import com.heroiclabs.nakama.SocketClient;
 import com.heroiclabs.nakama.SocketListener;
 import com.heroiclabs.nakama.api.Account;
 import com.sun.jmx.remote.internal.ClientListenerInfo;
+
+import org.checkerframework.checker.nullness.compatqual.NullableDecl;
 
 public class Networking {
     private static String hostUrl = "192.168.111.75";
@@ -30,6 +34,8 @@ public class Networking {
     private String email;
     private String password;
     private SocketClient socketClient;
+    private Match match;
+    private String id;
 
     private  final DefaultClient client;
     final ExecutorService executor;
@@ -40,6 +46,14 @@ public class Networking {
         client = new DefaultClient(serverKey, hostUrl, 7349, false);
         executor = Executors.newSingleThreadExecutor();
 
+        final SocketListener listener = new AbstractSocketListener() {
+            @Override
+            public void onMatchData(final MatchData matchData) {
+
+                System.out.format("Received match data %s with opcode %d", matchData.getData(), matchData.getOpCode());
+            }
+        };
+
         try {
             Futures.addCallback(client.authenticateEmail(email, password), new FutureCallback<Session>() {
                 @Override
@@ -47,20 +61,18 @@ public class Networking {
                     System.out.println("got session: " + result.getAuthToken());
                     socketClient = client.createSocket();
 
-                    Futures.addCallback(socketClient.connect(result, new AbstractSocketListener() {}), new FutureCallback<Session>() {
+                    Futures.addCallback(socketClient.connect(result, listener), new FutureCallback<Session>() {
                         @Override
                         public void onSuccess(Session result) {
                             authenticationSuccessful = true;
                             System.out.println( "Socket Created " + result.toString());
-                        }
 
+                        }
                         @Override
                         public void onFailure(Throwable t) {
                             System.out.println( "Socket Creation failed " + t.toString());
                         }
                     }, executor);
-
-
                     //executor.shutdown();
                 }
 
@@ -77,8 +89,38 @@ public class Networking {
     }
 
     public void createMatch() throws ExecutionException, InterruptedException {
-        Match match = socketClient.createMatch().get();
-        System.out.println("Created match with ID %s." + match.getMatchId());
+
+        try{
+
+            Futures.addCallback(socketClient.createMatch(), new FutureCallback<Match>() {
+
+                @Override
+                public void onSuccess(@NullableDecl Match result) {
+                    id = result.getMatchId();
+                    System.out.println("Match created with ID: " + result.getMatchId());
+                }
+
+                @Override
+                public void onFailure(Throwable t) {
+                    System.out.println("Match couldn't get created." + t.getMessage());
+
+                }
+            }, executor);
+        }catch (Exception e){
+            System.out.println(e.getMessage());
+        }
+        //match = socketClient.createMatch().get();
+        //System.out.println("Created match with ID %s." + match.getMatchId());
+    }
+
+    public void sendData() {
+        if(!id.isEmpty()){
+            long opCode = 1;
+            String data = "{\"message\":\"Test\"}";
+            byte [] byteData = data.getBytes();
+            socketClient.sendMatchData(id, opCode, byteData);
+        }
+
     }
 
 /*    public void authenticateWithEmail(String email, String password){

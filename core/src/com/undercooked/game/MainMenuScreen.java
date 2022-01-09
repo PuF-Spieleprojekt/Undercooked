@@ -116,7 +116,7 @@ public class MainMenuScreen extends ControlScreen implements Screen {
         label.setPosition(200, 300);        // hardcoded position
         super.stage.addActor(label);
         super.stage.addActor(play);
-        //TODO: Just for testing!!!!! Change Gamecreation again! 
+        //TODO: Just for testing!!!!! Change Gamecreation again!
         profile.addListener(new ChangeListener() {
             @Override
             public void changed(ChangeEvent event, Actor actor) {
@@ -127,6 +127,14 @@ public class MainMenuScreen extends ControlScreen implements Screen {
                 } catch (InterruptedException e) {
                     e.printStackTrace();
                 }
+            }
+        });
+
+        highscore.addListener(new ChangeListener(){
+
+            @Override
+            public void changed(ChangeEvent event, Actor actor) {
+                net.sendData();
             }
         });
 
