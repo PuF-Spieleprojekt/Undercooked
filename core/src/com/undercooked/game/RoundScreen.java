@@ -10,13 +10,17 @@ import com.badlogic.gdx.scenes.scene2d.ui.Table;
 import com.badlogic.gdx.scenes.scene2d.ui.TextButton;
 import com.badlogic.gdx.scenes.scene2d.utils.ChangeListener;
 
+import java.util.concurrent.ExecutionException;
+
 public class RoundScreen extends ControlScreen implements Screen {
 
     final Undercooked game;
+    final Networking net;
 
-    public RoundScreen (Undercooked game) {
+    public RoundScreen (Undercooked game, Networking net) {
         super();
         this.game = game;
+        this.net = net;
     }
 
     public void show() {
@@ -39,7 +43,9 @@ public class RoundScreen extends ControlScreen implements Screen {
         playAgain.addListener(new ChangeListener() {
             @Override
             public void changed(ChangeEvent event, Actor actor) {
-                game.setScreen(new GameScreen(game));
+
+                    game.setScreen(new GameScreen(game, net, true));
+
             }
         });
 

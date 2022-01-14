@@ -27,10 +27,13 @@ import com.undercooked.game.entities.Player;
 
 import java.util.ArrayList;
 import java.util.Iterator;
+import java.util.concurrent.ExecutionException;
 
 public class GameScreen implements Screen {
 
     final Undercooked game;
+    final Networking net;
+    final Boolean multiplayer;
 
    // Textures;
     Texture broccoliImage;
@@ -47,12 +50,14 @@ public class GameScreen implements Screen {
     RectangleMapObject preparingArea;
     RectangleMapObject blockingObject;
     RectangleMapObject currentLocation;
+    Networking testPlayer = new Networking();
 
     Sound dropSound;
     Music rainMusic;
     OrthographicCamera camera;
     int dropsGathered;
     Player player1;
+    Player player2;
     private ArrayList<Ingridient> ingridients = new ArrayList<Ingridient>();
 
     double progress = 0;
@@ -69,8 +74,10 @@ public class GameScreen implements Screen {
 
     boolean soundLooping = false;
 
-    public GameScreen(final Undercooked game) {
+    public GameScreen(final Undercooked game, Networking net, Boolean multiplayer) {
         this.game = game;
+        this.net = net;
+        this.multiplayer = multiplayer;
 
         // load the images for the droplet and the bucket, 64x64 pixels each
         broccoliImage = new Texture(Gdx.files.internal("textures/Broccoli.png"));
@@ -101,6 +108,18 @@ public class GameScreen implements Screen {
         // create a Rectangle to logically represent the bucket
         player1 = new Player("Player1");
 
+        if(multiplayer){
+            player2 = new Player("Player2");
+        }
+
+
+
+    }
+
+    public void createTestPlayer() throws ExecutionException, InterruptedException {
+
+        testPlayer.login("test@mail.com", "12345678");
+        testPlayer.createSocket();
 
     }
 
@@ -150,6 +169,9 @@ public class GameScreen implements Screen {
             }
         }
         game.batch.draw(player1.getTexture(), player1.getHitbox().x, player1.getHitbox().y);
+        if(multiplayer){
+            game.batch.draw(player2.getTexture(), player2.getHitbox().x + 100, player2.getHitbox().y + 100);
+        }
         game.batch.end();
 
         // draw progressbar
@@ -201,18 +223,54 @@ public class GameScreen implements Screen {
         if (Gdx.input.isKeyPressed(Keys.LEFT)){
             desired_velocity.x = -300 * Gdx.graphics.getDeltaTime();
             player1.changeTexture("left");
+            updateData(net, player1);
         }
         if (Gdx.input.isKeyPressed(Keys.RIGHT)) {
             desired_velocity.x = 300 * Gdx.graphics.getDeltaTime();
             player1.changeTexture("right");
+            updateData(net, player1);
         }
         if (Gdx.input.isKeyPressed(Keys.DOWN)){
             desired_velocity.y = -300 * Gdx.graphics.getDeltaTime();
             player1.changeTexture("down");
+            updateData(net, player1);
         }
         if (Gdx.input.isKeyPressed(Keys.UP)){
             desired_velocity.y = 300 * Gdx.graphics.getDeltaTime();
             player1.changeTexture("up");
+            updateData(net, player1);
+        }
+    /*    if (Gdx.input.isKeyPressed(Keys.ENTER)){
+            try {
+                createTestPlayer();
+            } catch (ExecutionException e) {
+                e.printStackTrace();
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
+        }
+        if (Gdx.input.isKeyPressed(Keys.O)){
+            try {
+                net.resendMatchData();
+            } catch (ExecutionException e) {
+                e.printStackTrace();
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
+        }
+        if (Gdx.input.isKeyPressed(Keys.P)){
+            try {
+                testPlayer.joinMatch();
+            } catch (ExecutionException e) {
+                e.printStackTrace();
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
+        }*/
+
+        if(net.joinedMatch){
+           String[] matchData =  net.getMatchdata();
+            player2.setPosition(matchData[1], matchData[2]);
         }
 
 
@@ -227,6 +285,8 @@ public class GameScreen implements Screen {
 
         player1.getHitbox().x += playerMovementVector.x;
         player1.getHitbox().y += playerMovementVector.y;
+
+
 
         player1.checkBoundaries();
 
@@ -247,6 +307,14 @@ public class GameScreen implements Screen {
         }
 
     }
+
+    public void updateData(Networking net, Player player){
+        if(multiplayer){
+            net.sendMatchData(player.getTextureName(), player.getPositionStringX(), player.getPositionStringY());
+        }
+    }
+
+
 
     public void drawInArea(RectangleMapObject areaObject, Ingridient ingridient){
         game.batch.draw(ingridient.getTexture(), areaObject.getRectangle().x, areaObject.getRectangle().y);

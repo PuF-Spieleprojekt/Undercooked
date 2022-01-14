@@ -98,16 +98,12 @@ public class MainMenuScreen extends ControlScreen implements Screen {
         super.show();
         Skin skin = new Skin(Gdx.files.internal("star-soldier-ui.json"));
         TextButton play = new TextButton("Play", skin);
+        TextButton multiplayer = new TextButton("Multiplayer", skin);
         TextButton profile = new TextButton("Profile", skin);
         TextButton highscore = new TextButton("Highscore", skin);
         TextButton quit = new TextButton("Quit", skin);
 
-        quit.addListener(new ClickListener() {
-            @Override
-            public void clicked(InputEvent event, float x, float y) {
-                Gdx.app.exit();
-            }
-        });
+
 
 
         labelStyle = new Label.LabelStyle();
@@ -116,36 +112,6 @@ public class MainMenuScreen extends ControlScreen implements Screen {
         label.setPosition(200, 300);        // hardcoded position
         super.stage.addActor(label);
         super.stage.addActor(play);
-        //TODO: Just for testing!!!!! Change Gamecreation again!
-        profile.addListener(new ChangeListener() {
-            @Override
-            public void changed(ChangeEvent event, Actor actor) {
-                try {
-                    net.createMatch();
-                } catch (ExecutionException e) {
-                    e.printStackTrace();
-                } catch (InterruptedException e) {
-                    e.printStackTrace();
-                }
-            }
-        });
-
-        highscore.addListener(new ChangeListener(){
-
-            @Override
-            public void changed(ChangeEvent event, Actor actor) {
-                net.sendData();
-            }
-        });
-
-
-        play.addListener(new ChangeListener() {
-            @Override
-            public void changed(ChangeEvent event, Actor actor) {
-                game.setScreen(new GameScreen(game));
-            }
-        });
-
 
         Table table = new Table();
         table.setFillParent(true);
@@ -154,12 +120,53 @@ public class MainMenuScreen extends ControlScreen implements Screen {
         stage.addActor(table);
         table.add(play);
         table.row();
+        table.add(multiplayer);
+        table.row();
         table.add(profile);
         table.row();
         table.add(highscore);
         table.row();
         table.add(quit);
 
+
+
+        play.addListener(new ChangeListener() {
+            @Override
+            public void changed(ChangeEvent event, Actor actor) {
+
+                    game.setScreen(new GameScreen(game, net, false));
+
+            }
+        });
+
+        multiplayer.addListener(new ChangeListener() {
+            @Override
+            public void changed(ChangeEvent event, Actor actor) {
+                game.setScreen(new MultiplayerScreen(game, net));
+            }
+        });
+
+        profile.addListener(new ChangeListener() {
+            @Override
+            public void changed(ChangeEvent event, Actor actor) {
+
+            }
+        });
+
+        highscore.addListener(new ChangeListener(){
+
+            @Override
+            public void changed(ChangeEvent event, Actor actor) {
+
+            }
+        });
+
+        quit.addListener(new ClickListener() {
+            @Override
+            public void clicked(InputEvent event, float x, float y) {
+                Gdx.app.exit();
+            }
+        });
 
     }
 
