@@ -1,5 +1,6 @@
 package com.undercooked.game;
 
+import com.badlogic.gdx.Game;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Net;
 import com.badlogic.gdx.Screen;
@@ -11,12 +12,12 @@ import java.awt.Color;
 import java.net.MalformedURLException;
 import java.util.concurrent.ExecutionException;
 
-public class LoginScreen extends ControlScreen implements Screen {
+public class MultiplayerScreen extends ControlScreen implements Screen {
 
     final Undercooked game;
     final Networking net;
 
-    public LoginScreen(Undercooked game, Networking net){
+    public MultiplayerScreen(Undercooked game, Networking net){
         super();
         this.game = game;
         this.net = net;
@@ -37,39 +38,45 @@ public class LoginScreen extends ControlScreen implements Screen {
 
         final Label.LabelStyle ls = new Label.LabelStyle();
         ls.font = game.font;
-        Label usernameLabel = new Label("E-Mail", ls);
-        Label passwordLabel = new Label("Password", ls);
-        final TextField usernameField = new TextField("", skin); // User Input
-        final TextField passwordField = new TextField("", skin); // user Input
-        TextButton submit = new TextButton("OK", skin);
+        TextButton createGame = new TextButton("Create Game", skin);
+        TextButton findGame = new TextButton("Join Game", skin);
 
-        table.add(usernameLabel);
+        table.columnDefaults(1);
+        table.add(createGame);
         table.row().pad(5, 0, 5, 0);
-        table.add(usernameField);
+        table.add(findGame);
         table.row().pad(5, 0, 5, 0);
-        table.add(passwordLabel);
-        table.row().pad(5, 0, 5, 0);
-        table.add(passwordField);
-        table.row().pad(5, 0, 5, 0);
-        table.add(submit);
 
-        submit.addListener(new ChangeListener() {
+
+        createGame.addListener(new ChangeListener() {
             @Override
             public void changed(ChangeEvent event, Actor actor) {
-
                 try {
-                    System.out.println(net.login(usernameField.getText(), passwordField.getText()));
-                    if(net.login(usernameField.getText(), passwordField.getText())){
-                        net.createSocket();
-                        game.setScreen(new MainMenuScreen(game, net));
+                    if(net.makeMatch()){
+                        game.setScreen(new GameScreen(game, net, true));
                     }
                 } catch (ExecutionException e) {
                     e.printStackTrace();
                 } catch (InterruptedException e) {
                     e.printStackTrace();
                 }
-
             }
+        });
+
+        findGame.addListener(new ChangeListener() {
+             @Override
+             public void changed(ChangeEvent event, Actor actor) {
+                 try {
+                     net.joinMatch();
+                     if(net.joinedMatch){
+                         game.setScreen(new GameScreen(game, net, true));
+                     }
+                 } catch (ExecutionException e) {
+                     e.printStackTrace();
+                 } catch (InterruptedException e) {
+                     e.printStackTrace();
+                 }
+             }
         });
     }
 
@@ -100,3 +107,4 @@ public class LoginScreen extends ControlScreen implements Screen {
 
     }
 }
+

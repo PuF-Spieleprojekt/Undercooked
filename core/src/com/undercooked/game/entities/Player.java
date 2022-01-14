@@ -13,7 +13,8 @@ public class Player {
     private Rectangle hitbox;
     private int step = 1;
     private Sprite sprite;
-    //TODO: Extend class from Sprite
+    private String textureString = "down1";
+
     TextureAtlas textureAtlas = new TextureAtlas(Gdx.files.internal("playermodel/player_naked_sprites.txt"));
 
     public Player(String name){
@@ -104,11 +105,27 @@ public class Player {
     }
 
     private void changeDirection(String name){
+        textureString = name;
         sprite.setRegion(textureAtlas.findRegion(name));
 
     }
 
+    public String getTextureName(){
+        return textureString;
+    }
 
+    public String getPositionStringX(){
+        return String.valueOf(hitbox.x);
+    }
+
+    public String getPositionStringY(){
+        return String.valueOf(hitbox.y);
+    }
+
+    public void setPosition(String x, String y){
+        hitbox.x = Float.parseFloat(x);
+        hitbox.y = Float.parseFloat(y);
+    }
 
 
     public Sprite getTexture(){
