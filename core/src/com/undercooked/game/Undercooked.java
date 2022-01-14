@@ -14,13 +14,15 @@ public class Undercooked extends Game {
 	SpriteBatch batch;
 	BitmapFont font;
 	ShapeRenderer shape;
+	Networking net;
 
 	public void create() {
 		batch = new SpriteBatch();
 		// Use LibGDX's default Arial font.
 		font = new BitmapFont();
 		shape = new ShapeRenderer();
-		this.setScreen(new LogRegScreen(this));
+		net = new Networking();
+		this.setScreen(new LogRegScreen(this, net));
 	}
 
 	public void render() {

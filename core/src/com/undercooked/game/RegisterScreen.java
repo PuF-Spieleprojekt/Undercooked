@@ -49,7 +49,7 @@ public class RegisterScreen extends ControlScreen implements Screen {
         submit.addListener(new ChangeListener() {
             @Override
             public void changed(ChangeEvent event, Actor actor) {
-                game.setScreen(new MainMenuScreen(game));
+               // game.setScreen(new MainMenuScreen(game));
             }
         });
 

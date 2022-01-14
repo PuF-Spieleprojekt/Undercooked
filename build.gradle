@@ -134,6 +134,10 @@ project(":core") {
         implementation "com.badlogicgames.gdx:gdx-freetype:$gdxVersion"
         implementation group: 'com.googlecode.json-simple', name: 'json-simple', version: '1.1.1'
 
+        implementation 'com.github.heroiclabs.nakama-java:nakama-java:08587dcdecc18efce0a0592451f81b31af59bb42'
+        compile('org.slf4j:slf4j-api:1.7.25') {
+            force = true // don't upgrade to "1.8.0-alpha2"
+        }
 
     }
 }

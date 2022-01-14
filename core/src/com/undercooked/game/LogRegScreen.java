@@ -9,8 +9,12 @@ import com.badlogic.gdx.scenes.scene2d.ui.Table;
 import com.badlogic.gdx.scenes.scene2d.ui.TextButton;
 import com.badlogic.gdx.scenes.scene2d.utils.ClickListener;
 
+import java.net.MalformedURLException;
+import java.util.concurrent.ExecutionException;
+
 public class LogRegScreen extends ControlScreen implements Screen {
     final Undercooked game;
+    final Networking net;
 //    OrthographicCamera camera;
 //    private FreeTypeFontGenerator fontGenerator;
 //    private FreeTypeFontGenerator.FreeTypeFontParameter fontParameter;
@@ -18,9 +22,10 @@ public class LogRegScreen extends ControlScreen implements Screen {
 //    private Stage stage;
 
 
-    public LogRegScreen(Undercooked game) {
+    public LogRegScreen(Undercooked game, Networking net) {
         super();
         this.game = game;
+        this.net = net;
     }
 
     @Override
@@ -70,7 +75,7 @@ public class LogRegScreen extends ControlScreen implements Screen {
         label.addListener(new ClickListener() {
             @Override
             public void clicked(InputEvent event, float x, float y) {
-                game.setScreen(new MainMenuScreen(game));
+                //game.setScreen(new MainMenuScreen(game));
             }
         });
 
@@ -90,6 +95,7 @@ public class LogRegScreen extends ControlScreen implements Screen {
         register.addListener(new ClickListener() {
             @Override
             public void clicked(InputEvent event, float x, float y) {
+                //TODO: Think if registration is necessary!
                 game.setScreen(new RegisterScreen(game));
             }
         });
@@ -97,7 +103,8 @@ public class LogRegScreen extends ControlScreen implements Screen {
         login.addListener(new ClickListener() {
             @Override
             public void clicked(InputEvent event, float x, float y) {
-                game.setScreen(new LoginScreen(game));
+                    game.setScreen(new LoginScreen(game, net));
+
             }
         });
     }

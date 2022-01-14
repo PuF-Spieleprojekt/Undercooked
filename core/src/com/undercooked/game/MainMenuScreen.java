@@ -2,6 +2,7 @@ package com.undercooked.game;
 
 
 import com.badlogic.gdx.Gdx;
+import com.badlogic.gdx.Net;
 import com.badlogic.gdx.Screen;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.OrthographicCamera;
@@ -21,9 +22,12 @@ import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.utils.viewport.FillViewport;
 import com.badlogic.gdx.utils.viewport.ScreenViewport;
 
+import java.util.concurrent.ExecutionException;
+
 public class MainMenuScreen extends ControlScreen implements Screen {
 
     final Undercooked game;
+    final Networking net;
     OrthographicCamera camera;
 //    private FreeTypeFontGenerator fontGenerator;
 //    private FreeTypeFontGenerator.FreeTypeFontParameter fontParameter;
@@ -32,11 +36,12 @@ public class MainMenuScreen extends ControlScreen implements Screen {
 //    private Label label;
 //    private Label.LabelStyle labelStyle;
 
-    public MainMenuScreen(final Undercooked gam) {
+    public MainMenuScreen(final Undercooked gam, final Networking net) {
 
         super();
         game = gam;
-        Networking.createUserWithEmail("test@mail.com", "test");
+        this.net = net;
+
 //        camera = new OrthographicCamera();
 //        camera.setToOrtho(false, 800, 480);
 //        FillViewport viewport = new FillViewport( 800, 480,camera);
@@ -93,16 +98,12 @@ public class MainMenuScreen extends ControlScreen implements Screen {
         super.show();
         Skin skin = new Skin(Gdx.files.internal("star-soldier-ui.json"));
         TextButton play = new TextButton("Play", skin);
+        TextButton multiplayer = new TextButton("Multiplayer", skin);
         TextButton profile = new TextButton("Profile", skin);
         TextButton highscore = new TextButton("Highscore", skin);
         TextButton quit = new TextButton("Quit", skin);
 
-        quit.addListener(new ClickListener() {
-            @Override
-            public void clicked(InputEvent event, float x, float y) {
-                Gdx.app.exit();
-            }
-        });
+
 
 
         labelStyle = new Label.LabelStyle();
@@ -112,15 +113,6 @@ public class MainMenuScreen extends ControlScreen implements Screen {
         super.stage.addActor(label);
         super.stage.addActor(play);
 
-
-        play.addListener(new ChangeListener() {
-            @Override
-            public void changed(ChangeEvent event, Actor actor) {
-                game.setScreen(new GameScreen(game));
-            }
-        });
-
-
         Table table = new Table();
         table.setFillParent(true);
         table.setY(-80);            // hardcoded position
@@ -128,12 +120,53 @@ public class MainMenuScreen extends ControlScreen implements Screen {
         stage.addActor(table);
         table.add(play);
         table.row();
+        table.add(multiplayer);
+        table.row();
         table.add(profile);
         table.row();
         table.add(highscore);
         table.row();
         table.add(quit);
 
+
+
+        play.addListener(new ChangeListener() {
+            @Override
+            public void changed(ChangeEvent event, Actor actor) {
+
+                    game.setScreen(new GameScreen(game, net, false));
+
+            }
+        });
+
+        multiplayer.addListener(new ChangeListener() {
+            @Override
+            public void changed(ChangeEvent event, Actor actor) {
+                game.setScreen(new MultiplayerScreen(game, net));
+            }
+        });
+
+        profile.addListener(new ChangeListener() {
+            @Override
+            public void changed(ChangeEvent event, Actor actor) {
+
+            }
+        });
+
+        highscore.addListener(new ChangeListener(){
+
+            @Override
+            public void changed(ChangeEvent event, Actor actor) {
+
+            }
+        });
+
+        quit.addListener(new ClickListener() {
+            @Override
+            public void clicked(InputEvent event, float x, float y) {
+                Gdx.app.exit();
+            }
+        });
 
     }
 
