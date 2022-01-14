@@ -50,7 +50,7 @@ public class GameScreen implements Screen {
     RectangleMapObject preparingArea;
     RectangleMapObject blockingObject;
     RectangleMapObject currentLocation;
-    Networking testPlayer = new Networking();
+
 
     Sound dropSound;
     Music rainMusic;
@@ -116,14 +116,6 @@ public class GameScreen implements Screen {
 
     }
 
-    public void createTestPlayer() throws ExecutionException, InterruptedException {
-
-        testPlayer.login("test@mail.com", "12345678");
-        testPlayer.createSocket();
-
-    }
-
-
     @Override
     public void render(float delta) {
         // clear the screen with a dark blue color. The
@@ -169,7 +161,7 @@ public class GameScreen implements Screen {
             }
         }
         game.batch.draw(player1.getTexture(), player1.getHitbox().x, player1.getHitbox().y);
-        if(multiplayer){
+        if(multiplayer && net.joinedMatch){
             game.batch.draw(player2.getTexture(), player2.getHitbox().x + 100, player2.getHitbox().y + 100);
         }
         game.batch.end();

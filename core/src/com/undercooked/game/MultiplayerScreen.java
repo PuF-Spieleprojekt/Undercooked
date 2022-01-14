@@ -68,6 +68,9 @@ public class MultiplayerScreen extends ControlScreen implements Screen {
              public void changed(ChangeEvent event, Actor actor) {
                  try {
                      net.joinMatch();
+                     if(net.joinedMatch){
+                         game.setScreen(new GameScreen(game, net, true));
+                     }
                  } catch (ExecutionException e) {
                      e.printStackTrace();
                  } catch (InterruptedException e) {
