@@ -29,6 +29,7 @@ public class MainMenuScreen extends ControlScreen implements Screen {
     final Undercooked game;
     final Networking net;
     OrthographicCamera camera;
+
 //    private FreeTypeFontGenerator fontGenerator;
 //    private FreeTypeFontGenerator.FreeTypeFontParameter fontParameter;
 //    private BitmapFont font;

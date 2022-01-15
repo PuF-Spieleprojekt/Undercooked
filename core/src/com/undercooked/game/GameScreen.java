@@ -68,9 +68,14 @@ public class GameScreen implements Screen {
     double transition_speed = 16;
 
     boolean soundLooping = false;
+    final Boolean multiplayer;
+    final Networking net;
 
-    public GameScreen(final Undercooked game) {
+    public GameScreen(final Undercooked game, Networking net, Boolean multiplayer) {
         this.game = game;
+        this.multiplayer = multiplayer;
+        this.net = net;
+
 
         // load the images for the droplet and the bucket, 64x64 pixels each
         broccoliImage = new Texture(Gdx.files.internal("textures/Broccoli.png"));
