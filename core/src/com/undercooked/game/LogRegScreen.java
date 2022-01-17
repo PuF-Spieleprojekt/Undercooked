@@ -99,8 +99,8 @@ public class LogRegScreen extends ControlScreen implements Screen {
             @Override
             public void clicked(InputEvent event, float x, float y) {
 
-                game.setScreen(new ProfileScreen(net));
-                // game.setScreen(new LoginScreen(game, net));
+                // game.setScreen(new ProfileScreen(net));
+                 game.setScreen(new LoginScreen(game, net));
 
             }
         });
