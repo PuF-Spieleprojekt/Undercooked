@@ -1,15 +1,11 @@
 package com.undercooked.game;
 
-import com.badlogic.gdx.Game;
 import com.badlogic.gdx.Gdx;
-import com.badlogic.gdx.Net;
 import com.badlogic.gdx.Screen;
 import com.badlogic.gdx.scenes.scene2d.Actor;
 import com.badlogic.gdx.scenes.scene2d.ui.*;
 import com.badlogic.gdx.scenes.scene2d.utils.ChangeListener;
 
-import java.awt.Color;
-import java.net.MalformedURLException;
 import java.util.concurrent.ExecutionException;
 
 public class MultiplayerScreen extends ControlScreen implements Screen {
@@ -67,8 +63,7 @@ public class MultiplayerScreen extends ControlScreen implements Screen {
              @Override
              public void changed(ChangeEvent event, Actor actor) {
                  try {
-                     net.joinMatch();
-                     if(net.joinedMatch){
+                     if(net.joinMatch()){
                          game.setScreen(new GameScreen(game, net, true));
                      }
                  } catch (ExecutionException e) {

@@ -1,14 +1,11 @@
 package com.undercooked.game;
 
 import com.badlogic.gdx.Gdx;
-import com.badlogic.gdx.Net;
 import com.badlogic.gdx.Screen;
 import com.badlogic.gdx.scenes.scene2d.Actor;
 import com.badlogic.gdx.scenes.scene2d.ui.*;
 import com.badlogic.gdx.scenes.scene2d.utils.ChangeListener;
 
-import java.awt.Color;
-import java.net.MalformedURLException;
 import java.util.concurrent.ExecutionException;
 
 public class LoginScreen extends ControlScreen implements Screen {
@@ -37,7 +34,7 @@ public class LoginScreen extends ControlScreen implements Screen {
 
         final Label.LabelStyle ls = new Label.LabelStyle();
         ls.font = game.font;
-        Label usernameLabel = new Label("E-Mail", ls);
+        final Label usernameLabel = new Label("E-Mail", ls);
         Label passwordLabel = new Label("Password", ls);
         final TextField usernameField = new TextField("", skin); // User Input
         final TextField passwordField = new TextField("", skin); // user Input
@@ -58,10 +55,11 @@ public class LoginScreen extends ControlScreen implements Screen {
             public void changed(ChangeEvent event, Actor actor) {
 
                 try {
-                    System.out.println(net.login(usernameField.getText(), passwordField.getText()));
                     if(net.login(usernameField.getText(), passwordField.getText())){
                         net.createSocket();
                         game.setScreen(new MainMenuScreen(game, net));
+                    } else {
+                        usernameLabel.setText("Login failed, please try again");
                     }
                 } catch (ExecutionException e) {
                     e.printStackTrace();

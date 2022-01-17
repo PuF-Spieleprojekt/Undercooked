@@ -3,14 +3,10 @@ package com.undercooked.game;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Screen;
 import com.badlogic.gdx.scenes.scene2d.InputEvent;
-import com.badlogic.gdx.scenes.scene2d.ui.Label;
 import com.badlogic.gdx.scenes.scene2d.ui.Skin;
 import com.badlogic.gdx.scenes.scene2d.ui.Table;
 import com.badlogic.gdx.scenes.scene2d.ui.TextButton;
 import com.badlogic.gdx.scenes.scene2d.utils.ClickListener;
-
-import java.net.MalformedURLException;
-import java.util.concurrent.ExecutionException;
 
 public class LogRegScreen extends ControlScreen implements Screen {
     final Undercooked game;
@@ -95,15 +91,16 @@ public class LogRegScreen extends ControlScreen implements Screen {
         register.addListener(new ClickListener() {
             @Override
             public void clicked(InputEvent event, float x, float y) {
-                //TODO: Think if registration is necessary!
-                game.setScreen(new RegisterScreen(game));
+                game.setScreen(new RegisterScreen(game, net));
             }
         });
 
         login.addListener(new ClickListener() {
             @Override
             public void clicked(InputEvent event, float x, float y) {
-                    game.setScreen(new LoginScreen(game, net));
+
+                game.setScreen(new ProfileScreen(net));
+                // game.setScreen(new LoginScreen(game, net));
 
             }
         });

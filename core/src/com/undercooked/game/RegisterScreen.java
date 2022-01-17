@@ -5,13 +5,15 @@ import com.badlogic.gdx.Screen;
 import com.badlogic.gdx.scenes.scene2d.Actor;
 import com.badlogic.gdx.scenes.scene2d.ui.*;
 import com.badlogic.gdx.scenes.scene2d.utils.ChangeListener;
-import com.badlogic.gdx.utils.viewport.Viewport;
+
+import java.util.concurrent.ExecutionException;
 
 public class RegisterScreen extends ControlScreen implements Screen {
     final Undercooked game;
-
-    public RegisterScreen(Undercooked game) {
+    final Networking net;
+    public RegisterScreen(Undercooked game, Networking net) {
         super();
+        this.net = net;
         this.game = game;
     }
 
@@ -30,12 +32,18 @@ public class RegisterScreen extends ControlScreen implements Screen {
 
         Label.LabelStyle ls = new Label.LabelStyle();
         ls.font = game.font;
+        Label emailLabel = new Label("E-Mail", ls);
         Label usernameLabel = new Label("Username", ls);
         Label passwordLabel = new Label("Password", ls);
-        TextField usernameField = new TextField("", skin); // User Input
-        TextField passwordField = new TextField("", skin); // user Input
+        final TextField emailField = new TextField("", skin);
+        final TextField usernameField = new TextField("", skin); // User Input
+        final TextField passwordField = new TextField("", skin); // user Input
         TextButton submit = new TextButton("Submit", skin);
 
+        table.add((emailLabel));
+        table.row().pad(5,0,5,0);
+        table.add(emailField);
+        table.row().pad(5, 0, 5, 0);
         table.add(usernameLabel);
         table.row().pad(5, 0, 5, 0);
         table.add(usernameField);
@@ -49,7 +57,17 @@ public class RegisterScreen extends ControlScreen implements Screen {
         submit.addListener(new ChangeListener() {
             @Override
             public void changed(ChangeEvent event, Actor actor) {
-               // game.setScreen(new MainMenuScreen(game));
+
+                try {
+                    if(net.register(emailField.getText(), passwordField.getText(), usernameField.getText()));
+                    net.createSocket();
+                    game.setScreen(new MainMenuScreen(game, net));
+                } catch (ExecutionException e) {
+                    e.printStackTrace();
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
+                //
             }
         });
 
