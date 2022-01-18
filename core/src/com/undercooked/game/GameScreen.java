@@ -184,6 +184,7 @@ public class GameScreen implements Screen {
                     game.batch.draw(ingredient.getTexture(), player1.getHitbox().x, player1.getHitbox().y);
                 } else{
                     // if ingredient is put down, draw it there
+                    System.out.println(ingredient.getIsPreparing());
                     if(ingredient.getIsServed()){
                         drawInArea(servingArea, ingredient);
                     }else if (ingredient.getIsPreparing()){
@@ -193,6 +194,11 @@ public class GameScreen implements Screen {
                 }
             }
         }
+        game.batch.draw(player1.getTexture(), player1.getHitbox().x, player1.getHitbox().y);
+        if(multiplayer && net.joinedMatch){
+            game.batch.draw(player2.getTexture(), player2.getHitbox().x + 100, player2.getHitbox().y + 100);
+        }
+
 
         if(Gdx.input.isKeyPressed(Keys.SPACE)){
             game.batch.draw((TextureRegion) player1.getCutAnimation().getKeyFrame(elapsedTime, true),player1.getHitbox().x, player1.getHitbox().y );
