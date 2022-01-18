@@ -24,10 +24,16 @@ import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.math.Vector3;
 import com.badlogic.gdx.utils.ScreenUtils;
 import com.undercooked.game.entities.Ingredient;
+import com.undercooked.game.entities.Order;
 import com.undercooked.game.entities.Player;
+import com.undercooked.game.entities.Recipe;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.Iterator;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Set;
 
 public class GameScreen implements Screen {
 
@@ -57,12 +63,13 @@ public class GameScreen implements Screen {
     OrthographicCamera camera;
     int dropsGathered;
     Player player1;
-    float elapsedTime;
+    float elapsedTime = 0;
     Player player2;
     private ArrayList<Ingredient> ingredients = new ArrayList<Ingredient>();
 
     double progress = 0;
     int dishesServed = 0;
+    int highScore = 0;
     boolean holdingSomething = false;
     boolean putDown = false;
     boolean isOnPlate = false;
@@ -79,10 +86,22 @@ public class GameScreen implements Screen {
     final Boolean multiplayer;
     final Networking net;
 
+    // order and recipe logic
+    Set<Ingredient> broccoliSoupIngredients = new HashSet<Ingredient>();
+    Ingredient broccoli = new Ingredient("Broccoli", broccoliImage, new Rectangle(0,0, 32, 32));
+    Recipe broccoliSoup = new Recipe("broccoli soup", broccoliSoupIngredients);
+    List<Order> ordersToBeServed = new LinkedList<Order>();
+    Order oneBroccoliSoupPlease = new Order(broccoliSoup, 60, elapsedTime);
+    float secondsLeft;
+
     public GameScreen(final Undercooked game, Networking net, Boolean multiplayer) {
         this.game = game;
         this.multiplayer = multiplayer;
         this.net = net;
+
+        // order and recipe logic
+        broccoliSoupIngredients.add(broccoli);
+        ordersToBeServed.add(oneBroccoliSoupPlease);
 
 
         // load the images for the droplet and the bucket, 64x64 pixels each
@@ -144,12 +163,18 @@ public class GameScreen implements Screen {
         game.batch.draw(bucketImage, plate.x, plate.y);
         if(isOnPlate) game.batch.draw(bucketImage, player1.getHitbox().getX(), player1.getHitbox().getY());
 
-        game.font.draw(game.batch, "Drops Collected: " + dropsGathered, 0, 480);
-        game.font.draw(game.batch, "progress: " + progress, 0, 465);
-        game.font.draw(game.batch, "Dishes served: " + dishesServed, 0, 450);
-        game.font.draw(game.batch, "player holding something: " + holdingSomething, 0, 435);
-        game.font.draw(game.batch, "player holding something processed: " + holdingSomethingProcessed, 0, 450);
-        game.font.draw(game.batch, "put down ingredient / ready to process: " + putDown, 0, 420);
+        game.font.draw(game.batch, "incoming orders: " + ordersToBeServed, 0, 480);
+        game.font.draw(game.batch, "time left: " + secondsLeft, 0, 465);
+        game.font.draw(game.batch, "progress: " + progress, 0, 450);
+        game.font.draw(game.batch, "Dishes served: " + dishesServed, 0, 435);
+        game.font.draw(game.batch, "player holding something processed: " + holdingSomethingProcessed, 0, 420);
+        game.font.draw(game.batch, "player holding something: " + holdingSomething, 0, 405);
+        game.font.draw(game.batch, "put down ingredient / ready to process: " + putDown, 0, 390);
+        game.font.draw(game.batch, "highscore: " + highScore, 0, 375);
+
+        elapsedTime += Gdx.graphics.getDeltaTime();
+        secondsLeft = 60 - elapsedTime;
+
         //game.batch.draw(dropImage, raindrops.x, raindrops.y);
         //game.batch.draw(broc.texture, broc.hitbox.x, broc.hitbox.y);
         for (Ingredient ingredient : ingredients){
@@ -168,7 +193,7 @@ public class GameScreen implements Screen {
                 }
             }
         }
-        elapsedTime += Gdx.graphics.getDeltaTime();
+
         if(Gdx.input.isKeyPressed(Keys.SPACE)){
             game.batch.draw((TextureRegion) player1.getCutAnimation().getKeyFrame(elapsedTime, true),player1.getHitbox().x, player1.getHitbox().y );
         }else {
@@ -346,6 +371,7 @@ public class GameScreen implements Screen {
 
                     ingredient.putDown(areaObject);
                     dishesServed ++;
+                    highScore += Math.ceil(secondsLeft / 20);
                     holdingSomething = false;
                     holdingSomethingProcessed = false;
                     isOnPlate = false;

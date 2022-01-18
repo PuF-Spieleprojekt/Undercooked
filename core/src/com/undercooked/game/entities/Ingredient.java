@@ -11,6 +11,8 @@ import org.w3c.dom.Text;
 public class Ingredient {
     String name;
    public Texture texture;
+    // TODO seperate ingredient from on-screen implementation. we need ingredients for the recipes,
+    //  too but the recipes don't use coordinates
    public Rectangle hitbox;
    private Boolean pickedUp = true;
    private Boolean isServed = false;
@@ -52,5 +54,10 @@ public class Ingredient {
 
     public Boolean getIsPreparing(){
         return isPreparing;
+    }
+
+    @Override
+    public String toString() {
+        return name;
     }
 }
