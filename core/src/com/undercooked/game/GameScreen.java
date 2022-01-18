@@ -58,7 +58,7 @@ public class GameScreen implements Screen {
     RectangleMapObject blockingObject;
     RectangleMapObject currentLocation;
 
-    Sound dropSound;
+    Sound dropSound, choppingSound, punchSound;
     Music rainMusic;
     OrthographicCamera camera;
     int dropsGathered;
@@ -122,8 +122,10 @@ public class GameScreen implements Screen {
 
 
         // load the drop sound effect and the rain background "music"
-        dropSound = Gdx.audio.newSound(Gdx.files.internal("drop.mp3"));
+        //dropSound = Gdx.audio.newSound(Gdx.files.internal("drop.mp3"));
         rainMusic = Gdx.audio.newMusic(Gdx.files.internal("rain.mp3"));
+        choppingSound = Gdx.audio.newSound(Gdx.files.internal("chopping.wav"));
+        dropSound = Gdx.audio.newSound(Gdx.files.internal("punch.wav"));
         rainMusic.setLooping(true);
 
         // create the camera and the SpriteBatch
