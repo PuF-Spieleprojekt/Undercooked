@@ -211,7 +211,7 @@ public class Networking {
     final SocketListener listener = new AbstractSocketListener() {
         @Override
         public void onMatchData(final MatchData matchData) {
-
+            joinedMatch = true;
             //System.out.format("Received match data %s with opcode %d", matchData.getData(), matchData.getOpCode());
             System.out.println(new String(matchData.getData()));
             //System.out.println(matchData.toString());
