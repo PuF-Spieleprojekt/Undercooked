@@ -4,9 +4,12 @@ import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.Sprite;
 import com.badlogic.gdx.graphics.g2d.TextureAtlas;
+import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.maps.objects.RectangleMapObject;
 import com.badlogic.gdx.math.Rectangle;
 import com.badlogic.gdx.utils.ObjectSet;
+import com.badlogic.gdx.graphics.g2d.Animation;
+
 
 public class Player {
     String name;
@@ -14,8 +17,10 @@ public class Player {
     private int step = 1;
     private Sprite sprite;
     private String textureString = "down1";
+    private Animation<TextureRegion> cutAnimation;
 
-    TextureAtlas textureAtlas = new TextureAtlas(Gdx.files.internal("playermodel/player_naked_sprites.txt"));
+
+    TextureAtlas textureAtlas = new TextureAtlas(Gdx.files.internal("playermodel/player_naked_sprites_apron.txt"));
 
     public Player(String name){
         this.name = name;
@@ -40,8 +45,9 @@ public class Player {
             }
 
             case "down" :
+                this.cutAnimation = new Animation<TextureRegion>(1f/10f, textureAtlas.findRegions("cut-front"));
                 if (step>=5 &&step<=8){
-                    changeDirection("down1");;
+                    changeDirection("down1");
                     break;
                 } else if(step>=1 &&step<=4){
                     changeDirection("down2");
@@ -52,6 +58,7 @@ public class Player {
                 }
 
             case "left" :
+                this.cutAnimation = new Animation<TextureRegion>(1f/10f, textureAtlas.findRegions("cut-left"));
                 if (step>=5 &&step<=8){
                     changeDirection("left1");
                     break;
@@ -64,6 +71,7 @@ public class Player {
                 }
 
             case "right" :
+                this.cutAnimation = new Animation<TextureRegion>(1f/10f, textureAtlas.findRegions("cut-right"));
                 if (step>=5 &&step<=8){
                     changeDirection("right1");
                     break;
@@ -132,6 +140,8 @@ public class Player {
         return sprite;
     }
     public Rectangle getHitbox() { return this.hitbox; }
+    public Animation<TextureRegion> getCutAnimation(){
+        return this.cutAnimation; }
 }
 
 

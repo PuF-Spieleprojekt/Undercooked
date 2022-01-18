@@ -9,6 +9,7 @@ import com.badlogic.gdx.audio.Sound;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.OrthographicCamera;
 import com.badlogic.gdx.graphics.Texture;
+import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
 import com.badlogic.gdx.maps.MapLayers;
 import com.badlogic.gdx.maps.MapObject;
@@ -53,6 +54,7 @@ public class GameScreen implements Screen {
     OrthographicCamera camera;
     int dropsGathered;
     Player player1;
+    float elapsedTime;
     private ArrayList<Ingredient> ingredients = new ArrayList<Ingredient>();
 
     double progress = 0;
@@ -154,8 +156,13 @@ public class GameScreen implements Screen {
                 }
             }
         }
-        game.batch.draw(player1.getTexture(), player1.getHitbox().x, player1.getHitbox().y);
-        game.batch.end();
+        elapsedTime += Gdx.graphics.getDeltaTime();
+        if(Gdx.input.isKeyPressed(Keys.SPACE)){
+            game.batch.draw((TextureRegion) player1.getCutAnimation().getKeyFrame(elapsedTime, true),player1.getHitbox().x, player1.getHitbox().y );
+        }else {
+            game.batch.draw(player1.getTexture(), player1.getHitbox().x, player1.getHitbox().y);
+        }
+            game.batch.end();
 
         // draw progressbar
         game.shape.setProjectionMatrix(camera.combined);
