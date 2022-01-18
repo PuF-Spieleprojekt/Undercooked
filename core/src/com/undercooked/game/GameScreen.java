@@ -269,24 +269,29 @@ public class GameScreen implements Screen {
         if (Gdx.input.isKeyPressed(Keys.LEFT)){
             desired_velocity.x = -300 * Gdx.graphics.getDeltaTime();
             player1.changeTexture("left");
+            updateData(net, player1);
         }
         if (Gdx.input.isKeyPressed(Keys.RIGHT)) {
             desired_velocity.x = 300 * Gdx.graphics.getDeltaTime();
             player1.changeTexture("right");
+            updateData(net, player1);
         }
         if (Gdx.input.isKeyPressed(Keys.DOWN)){
             desired_velocity.y = -300 * Gdx.graphics.getDeltaTime();
             player1.changeTexture("down");
+            updateData(net, player1);
         }
         if (Gdx.input.isKeyPressed(Keys.UP)){
             desired_velocity.y = 300 * Gdx.graphics.getDeltaTime();
             player1.changeTexture("up");
+            updateData(net, player1);
         }
 
         if(net.joinedMatch){
             String[] matchData =  net.getMatchdata();
             if(matchData.length > 1){
                 player2.setPosition(matchData[1], matchData[2]);
+                player2.checkBoundaries();
             }
 
         }
@@ -421,6 +426,11 @@ public class GameScreen implements Screen {
         }
     }
 
+    public void updateData(Networking net, Player player){
+        if(multiplayer){
+            net.sendMatchData(player.getTextureName(), player.getPositionStringX(), player.getPositionStringY());
+        }
+    }
 
     @Override
     public void resize(int width, int height) {
