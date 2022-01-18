@@ -38,6 +38,9 @@ public class GameScreen implements Screen {
     Texture bucketImage;
     Texture counterImage;
 
+    //other game object
+    Rectangle plate = new Rectangle(200,200,64,64);
+
     //Map properties
     TiledMap map;
     TiledMapRenderer tiledmaprenderer;
@@ -62,6 +65,8 @@ public class GameScreen implements Screen {
     int dishesServed = 0;
     boolean holdingSomething = false;
     boolean putDown = false;
+    boolean isOnPlate = false;
+    boolean holdingSomethingProcessed = false; // this would later be a property of each of the Set of ingredients being held
 
     Vector2 playerMovementVector = new Vector2(0.0f, 0.0f);
     float speed = 0;
@@ -136,11 +141,14 @@ public class GameScreen implements Screen {
         tiledmaprenderer.setView(camera);
         tiledmaprenderer.render(mapLayerIndices);
 
+        game.batch.draw(bucketImage, plate.x, plate.y);
+        if(isOnPlate) game.batch.draw(bucketImage, player1.getHitbox().getX(), player1.getHitbox().getY());
 
         game.font.draw(game.batch, "Drops Collected: " + dropsGathered, 0, 480);
         game.font.draw(game.batch, "progress: " + progress, 0, 465);
         game.font.draw(game.batch, "Dishes served: " + dishesServed, 0, 450);
         game.font.draw(game.batch, "player holding something: " + holdingSomething, 0, 435);
+        game.font.draw(game.batch, "player holding something processed: " + holdingSomethingProcessed, 0, 450);
         game.font.draw(game.batch, "put down ingredient / ready to process: " + putDown, 0, 420);
         //game.batch.draw(dropImage, raindrops.x, raindrops.y);
         //game.batch.draw(broc.texture, broc.hitbox.x, broc.hitbox.y);
@@ -151,7 +159,6 @@ public class GameScreen implements Screen {
                     game.batch.draw(ingredient.getTexture(), player1.getHitbox().x, player1.getHitbox().y);
                 } else{
                     // if ingredient is put down, draw it there
-                    System.out.println(ingredient.getIsPreparing());
                     if(ingredient.getIsServed()){
                         drawInArea(servingArea, ingredient);
                     }else if (ingredient.getIsPreparing()){
@@ -208,6 +215,13 @@ public class GameScreen implements Screen {
             Ingredient ingredient = iter.next();
             servingAreaAction(servingArea, player1.getHitbox(), ingredient);
             preparingAreaAction(preparingArea, player1.getHitbox(), ingredient);
+        }
+
+        // plate logic
+        if (plate.overlaps(player1.getHitbox())) {
+            if (Gdx.input.isKeyPressed(Keys.A)){
+                isOnPlate = true;
+            }
         }
 
 
@@ -285,19 +299,16 @@ public class GameScreen implements Screen {
         //System.out.println(currentLocation.getProperties().containsKey("blocked") + "-----Outside");
         if(object.getProperties().containsKey("blocked")){
             if (object.getRectangle().overlaps(playerObject)){
-                System.out.println("blocked");
                 return object;
             }
 
         }else if(object.getProperties().containsKey("Preparing Area")){
             if (object.getRectangle().overlaps(playerObject)){
-                System.out.println("preparing");
                 return object;
             }
 
         }else if(object.getProperties().containsKey("Serving Area")){
             if (object.getRectangle().overlaps(playerObject)){
-                System.out.println("serving");
                 return object;
             }
 
@@ -320,9 +331,24 @@ public class GameScreen implements Screen {
     public void servingAreaAction(RectangleMapObject areaObject, Rectangle playerObject, Ingredient ingredient){
             if (areaObject.getRectangle().overlaps(playerObject)){
                 if (ingredient.getPickUp() && Gdx.input.isKeyJustPressed(Keys.A)) {
+
+                    // I guess this would just result in no points or minus points for the player
+                    if(!holdingSomethingProcessed) {
+                        System.out.println("you can't serve raw ingredients");
+                        return;
+                    }
+                    // can't serve without a plate. TODO later: if holding.contains(plate) or something like that
+                    if(!isOnPlate) {
+                        System.out.println("must be served on a plate = bucket");
+                        return;
+                    }
+
+
                     ingredient.putDown(areaObject);
                     dishesServed ++;
                     holdingSomething = false;
+                    holdingSomethingProcessed = false;
+                    isOnPlate = false;
                 }
         }
 
@@ -352,6 +378,7 @@ public class GameScreen implements Screen {
                     progress = 0;
                     ingredient.pickUp();
                     holdingSomething = true;
+                    holdingSomethingProcessed = true;
                     putDown = false;
                     dropSound.stop();
                     soundLooping = false;
