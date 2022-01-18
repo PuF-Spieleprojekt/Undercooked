@@ -12,6 +12,7 @@ public class MultiplayerScreen extends ControlScreen implements Screen {
 
     final Undercooked game;
     final Networking net;
+    Boolean foundGame = false;
 
     public MultiplayerScreen(Undercooked game, Networking net){
         super();
@@ -35,7 +36,7 @@ public class MultiplayerScreen extends ControlScreen implements Screen {
         final Label.LabelStyle ls = new Label.LabelStyle();
         ls.font = game.font;
         TextButton createGame = new TextButton("Create Game", skin);
-        TextButton findGame = new TextButton("Join Game", skin);
+        final TextButton findGame = new TextButton("Find Game", skin);
 
         table.columnDefaults(1);
         table.add(createGame);
@@ -49,7 +50,7 @@ public class MultiplayerScreen extends ControlScreen implements Screen {
             public void changed(ChangeEvent event, Actor actor) {
                 try {
                     if(net.makeMatch()){
-                        game.setScreen(new GameScreen(game, net, true));
+                       // game.setScreen(new GameScreen(game, net, true));
                     }
                 } catch (ExecutionException e) {
                     e.printStackTrace();
@@ -63,9 +64,18 @@ public class MultiplayerScreen extends ControlScreen implements Screen {
              @Override
              public void changed(ChangeEvent event, Actor actor) {
                  try {
-                     if(net.joinMatch()){
-                         game.setScreen(new GameScreen(game, net, true));
+                     if(net.findMatch().getMatchesCount() !=0 && foundGame == false){
+                         findGame.setText("Join Match");
+                         foundGame = true;
+                     } else if(foundGame == true){
+                         if(net.joinMatch()){
+                             game.setScreen(new GameScreen(game, net, true));
+                         }
                      }
+
+                    /* if(net.joinMatch()){
+                         game.setScreen(new GameScreen(game, net, true));
+                     }*/
                  } catch (ExecutionException e) {
                      e.printStackTrace();
                  } catch (InterruptedException e) {

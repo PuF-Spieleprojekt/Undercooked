@@ -1,22 +1,14 @@
 package com.undercooked.game;
 
 
-import java.net.MalformedURLException;
-
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
-import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
-import java.util.regex.Pattern;
 
-import com.badlogic.gdx.math.Interpolation;
-import com.badlogic.gdx.net.Socket;
-import com.google.common.util.concurrent.AsyncFunction;
 import com.google.common.util.concurrent.FutureCallback;
 import com.google.common.util.concurrent.Futures;
 import com.google.common.util.concurrent.ListenableFuture;
-import com.google.rpc.context.AttributeContext;
 import com.heroiclabs.nakama.AbstractSocketListener;
 import com.heroiclabs.nakama.Channel;
 import com.heroiclabs.nakama.ChannelMessageAck;
@@ -31,14 +23,11 @@ import com.heroiclabs.nakama.SocketClient;
 import com.heroiclabs.nakama.SocketListener;
 import com.heroiclabs.nakama.StorageObjectWrite;
 import com.heroiclabs.nakama.UserPresence;
-import com.heroiclabs.nakama.api.Account;
 import com.heroiclabs.nakama.api.ChannelMessage;
+import com.heroiclabs.nakama.api.MatchList;
 import com.heroiclabs.nakama.api.StorageObjectAcks;
-import com.sun.jmx.remote.internal.ClientListenerInfo;
 
 import org.checkerframework.checker.nullness.compatqual.NullableDecl;
-
-import grpc.gateway.protoc_gen_openapiv2.options.Openapiv2;
 
 public class Networking {
     private static String hostUrl = "5.45.102.57";
@@ -60,8 +49,8 @@ public class Networking {
     private String messageID = "";
     private Channel channel;
     private String receivedData = "";
-    private Boolean authentiactaionSuccessful;
-    private String[] formatedData = new String[1];
+    private Boolean authenticationSuccessful;
+    private String[] formattedData = new String[1];
     public Boolean joinedMatch = false;
 
 
@@ -73,7 +62,7 @@ public class Networking {
             @Override
             public void onSuccess(@NullableDecl Session result) {
                 session = result;
-                authentiactaionSuccessful = true;
+                authenticationSuccessful = true;
                 System.out.println("Registration successful!");
                 System.out.println("Authentication successful. AuthToken created: " + session.getAuthToken());
                 executor.shutdown();
@@ -81,7 +70,7 @@ public class Networking {
 
             @Override
             public void onFailure(Throwable t) {
-                authentiactaionSuccessful = false;
+                authenticationSuccessful = false;
                 System.out.println("Registration failed " + t.getMessage());
                 executor.shutdown();
             }
@@ -90,12 +79,11 @@ public class Networking {
 
         try {
             executor.awaitTermination(5, TimeUnit.SECONDS);
-        }
-        catch (InterruptedException e) {
+        } catch (InterruptedException e) {
             System.out.println(e.getMessage());
         }
 
-        if(authentiactaionSuccessful){
+        if (authenticationSuccessful) {
             return true;
         }
         return false;
@@ -109,7 +97,7 @@ public class Networking {
             @Override
             public void onSuccess(@NullableDecl Session result) {
                 session = result;
-                authentiactaionSuccessful = true;
+                authenticationSuccessful = true;
                 System.out.println("Login successful!");
                 System.out.println("Authentication successful. AuthToken created: " + session.getAuthToken());
                 executor.shutdown();
@@ -117,7 +105,7 @@ public class Networking {
 
             @Override
             public void onFailure(Throwable t) {
-                authentiactaionSuccessful = false;
+                authenticationSuccessful = false;
                 System.out.println("Login failed " + t.getMessage());
                 executor.shutdown();
             }
@@ -127,13 +115,12 @@ public class Networking {
         try {
             executor.awaitTermination(5, TimeUnit.SECONDS);
 
-        }
-        catch (InterruptedException e) {
+        } catch (InterruptedException e) {
             System.out.println(e.getMessage());
         }
-        if(authentiactaionSuccessful){
+        if (authenticationSuccessful) {
             return true;
-        }else{
+        } else {
             return false;
         }
     }
@@ -147,7 +134,7 @@ public class Networking {
             @Override
             public void onSuccess(@NullableDecl Session result) {
                 session = result;
-                joinChat(socket);
+                //joinChat(socket);
                 System.out.println("Socket Creation successful!");
                 //Leave executor running so socket stays active
                 //executor.shutdown();
@@ -155,7 +142,7 @@ public class Networking {
 
             @Override
             public void onFailure(Throwable t) {
-                authentiactaionSuccessful = false;
+                authenticationSuccessful = false;
                 System.out.println("Socket Creation failed! " + t.getMessage());
                 executor.shutdown();
             }
@@ -163,19 +150,19 @@ public class Networking {
     }
 
     public Boolean makeMatch() throws ExecutionException, InterruptedException {
-        if(!matchID.isEmpty()){
+        if (!matchID.isEmpty()) {
             socket.leaveMatch(match.getMatchId()).get();
             System.out.println("Match still ongoing. First leave match..");
             System.out.println("Match " + matchID + "left.");
             matchID = "";
             extractedMatchID = "";
             return false;
-        }else{
-            if(!session.getAuthToken().isEmpty()){
+        } else {
+            if (!session.getAuthToken().isEmpty()) {
                 //TODO: Add Callbacklistener for Match creation
                 match = socket.createMatch().get();
-                matchID = "{\"matchID\":\""+ match.getMatchId() +"\"}";
-                ChannelMessageAck sendAck = socket.writeChatMessage(channel.getId(), matchID).get();
+                //matchID = "{\"matchID\":\""+ match.getMatchId() +"\"}";
+                //ChannelMessageAck sendAck = socket.writeChatMessage(channel.getId(), matchID).get();
                 System.out.println("Match created with ID: " + match.getMatchId());
                 return true;
             }
@@ -184,16 +171,17 @@ public class Networking {
 
     }
 
-    public void resendMatchData() throws ExecutionException, InterruptedException {
-        ChannelMessageAck sendAck = socket.writeChatMessage(channel.getId(), matchID).get();
-    }
 
     public boolean joinMatch() throws ExecutionException, InterruptedException {
-        if(!extractedMatchID.isEmpty()){
-            match = socket.joinMatch(extractedMatchID).get();
+        MatchList matchlist = findMatch();
+
+        if (matchlist.getMatchesCount() != 0) {
+            match = socket.joinMatch(matchlist.getMatches(0).getMatchId()).get();
             for (UserPresence presence : match.getPresences()) {
                 System.out.format("User id %s name %s.", presence.getUserId(), presence.getUsername());
             }
+            System.out.println("Match " + matchlist.getMatches(0).getMatchId() + " joined successfully");
+            joinedMatch = true;
             return true;
         } else {
             System.out.println("Can't connect hence no game is active..");
@@ -205,12 +193,19 @@ public class Networking {
     public void sendMatchData(String texture, String hitboxX, String hitboxY) {
         if (!match.getMatchId().isEmpty()) {
             long opCode = 1;
-            String data = "{\"texture\" : \""+ texture +"\", \" hitboxX \" : \""+ hitboxX +"\", \" hitboxY \" : \""+ hitboxY +"\" }" ;
+            String data = "{\"texture\" : \"" + texture + "\", \" hitboxX \" : \"" + hitboxX + "\", \" hitboxY \" : \"" + hitboxY + "\" }";
             byte[] byteData = data.getBytes();
             socket.sendMatchData(match.getMatchId(), opCode, byteData);
 
 
         }
+    }
+
+    public MatchList findMatch() throws ExecutionException, InterruptedException {
+        MatchList matchlist = client.listMatches(session, 1).get();
+
+        return matchlist;
+        //System.out.println(matchlist.getMatchesCount());
     }
 
     final SocketListener listener = new AbstractSocketListener() {
@@ -221,57 +216,18 @@ public class Networking {
             System.out.println(new String(matchData.getData()));
             //System.out.println(matchData.toString());
             receivedData = new String(matchData.getData());
-            formatedData = retrieveNetworkData(receivedData);
-            joinedMatch = true;
-
-        }
-        @Override
-        public void onChannelMessage(final ChannelMessage message) {
-
-            messageID = message.getMessageId();
-            extractedMatchID = message.getContent().split(":")[1].replaceAll("\"", "").replaceAll("}", "");
-            System.out.println(extractedMatchID);
-            System.out.format("Received a message on channel %s", message.getChannelId());
-            System.out.format("Message content: %s", message.getContent());
+            formattedData = retrieveNetworkData(receivedData);
         }
     };
 
-    public void joinChat(SocketClient socket) {
-        executor = Executors.newSingleThreadExecutor();
-        roomName = "GameRoom";
-        ListenableFuture<Channel> joinChat = socket.joinChat(roomName, ChannelType.ROOM);
-
-        Futures.addCallback(joinChat, new FutureCallback<Channel>() {
-            @Override
-            public void onSuccess(@NullableDecl Channel result) {
-                System.out.println("Joined Channel " + result.getRoomName());
-                executor.shutdown();
-            }
-
-            @Override
-            public void onFailure(Throwable t) {
-                executor.shutdown();
-            }
-        }, executor);
-
-
-        try {
-            executor.awaitTermination(5, TimeUnit.SECONDS);
-
-        }
-        catch (InterruptedException e) {
-            System.out.println(e.getMessage());
-        }
+    public String[] getMatchdata() {
+        return formattedData;
     }
 
-    public String[] getMatchdata(){
-        return formatedData;
-    }
-
-    public String[] retrieveNetworkData(String receivedData){
+    public String[] retrieveNetworkData(String receivedData) {
         String[] newData = receivedData.split(",");
         String[] trimmedData = new String[newData.length];
-        for(int i = 0; i < newData.length; i++){
+        for (int i = 0; i < newData.length; i++) {
             trimmedData[i] = newData[i].split(":")[1].replaceAll(",", "").replaceAll("\\{", "").replaceAll("\"", "").replaceAll("}", "");
         }
         return trimmedData;
@@ -289,11 +245,57 @@ public class Networking {
     }
 
 
+    public Networking() { };
+
+}
+          /*public void resendMatchData() throws ExecutionException, InterruptedException {
+        ChannelMessageAck sendAck = socket.writeChatMessage(channel.getId(), matchID).get();
+    }*/
+    //@Override
+  /*      public void onChannelMessage(final ChannelMessage message) {
+            messageID = message.getMessageId();
+            extractedMatchID = message.getContent().split(":")[1].replaceAll("\"", "").replaceAll("}", "");
+            System.out.println(extractedMatchID);
+            System.out.format("Received a message on channel %s", message.getChannelId());
+            System.out.format("Message content: %s", message.getContent());
+        }*/
 
 
-    public Networking() {
+/*    public void joinChat(SocketClient socket) {
+        executor = Executors.newSingleThreadExecutor();
+        roomName = "GameRoom";
+        ListenableFuture<Channel> joinChat = socket.joinChat(roomName, ChannelType.ROOM);
 
-    }
+        Futures.addCallback(joinChat, new FutureCallback<Channel>() {
+            @Override
+            public void onSuccess(@NullableDecl Channel result) {
+                System.out.println("Joined Channel " + result.getRoomName());
+                channel = result;
+                executor.shutdown();
+            }
+
+            @Override
+            public void onFailure(Throwable t) {
+                executor.shutdown();
+            }
+        }, executor);
+
+
+        try {
+            executor.awaitTermination(5, TimeUnit.SECONDS);
+
+        }
+        catch (InterruptedException e) {
+            System.out.println(e.getMessage());
+        }
+    }*/
+
+
+
+
+
+
+
 
    /* public Future<String> test(String email, String password) throws ExecutionException, InterruptedException {
         executor = Executors.newSingleThreadExecutor();
@@ -372,7 +374,7 @@ public class Networking {
     }*/
 
 
-    public void createMatch(final SocketClient socketClient) throws ExecutionException, InterruptedException {
+ /*   public void createMatch(final SocketClient socketClient) throws ExecutionException, InterruptedException {
 
         try{
 
@@ -401,16 +403,16 @@ public class Networking {
             }, executor);
         }catch (Exception e){
             System.out.println(e.getMessage());
-        }
+        }*/
         //match = socketClient.createMatch().get();
         //System.out.println("Created match with ID %s." + match.getMatchId());
-    }
+    //}
 
 
 
 
 
-    }
+   // }
 
 /*    public void authenticateWithEmail(String email, String password){
         final ListenableFuture<Session> authFuture = client.authenticateEmail(email, password);

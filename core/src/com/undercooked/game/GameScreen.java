@@ -55,6 +55,7 @@ public class GameScreen implements Screen {
     int dropsGathered;
     Player player1;
     float elapsedTime;
+    Player player2;
     private ArrayList<Ingredient> ingredients = new ArrayList<Ingredient>();
 
     double progress = 0;
@@ -107,6 +108,10 @@ public class GameScreen implements Screen {
 
         // create a Rectangle to logically represent the bucket
         player1 = new Player("Player1");
+
+        if(multiplayer){
+            player2 = new Player("Player2");
+        }
 
 
     }
@@ -162,7 +167,11 @@ public class GameScreen implements Screen {
         }else {
             game.batch.draw(player1.getTexture(), player1.getHitbox().x, player1.getHitbox().y);
         }
-            game.batch.end();
+            if(multiplayer && net.joinedMatch){
+            game.batch.draw(player2.getTexture(), player2.getHitbox().x + 100, player2.getHitbox().y + 100);
+        }
+
+        game.batch.end();
 
         // draw progressbar
         game.shape.setProjectionMatrix(camera.combined);
@@ -225,6 +234,14 @@ public class GameScreen implements Screen {
         if (Gdx.input.isKeyPressed(Keys.UP)){
             desired_velocity.y = 300 * Gdx.graphics.getDeltaTime();
             player1.changeTexture("up");
+        }
+
+        if(net.joinedMatch){
+            String[] matchData =  net.getMatchdata();
+            if(matchData.length > 1){
+                player2.setPosition(matchData[1], matchData[2]);
+            }
+
         }
 
 
