@@ -48,14 +48,7 @@ public class MainMenuScreen extends ControlScreen implements Screen {
         TextButton highscore = new TextButton("Highscore", skin);
         TextButton quit = new TextButton("Quit", skin);
 
-
-
-
-        labelStyle = new Label.LabelStyle();
-        labelStyle.font = font;
-        label = new Label("Undercooked!", labelStyle) ;
-        label.setPosition(200, 300);        // hardcoded position
-        super.stage.addActor(label);
+        
         super.stage.addActor(play);
 
         Table table = new Table();
@@ -73,7 +66,13 @@ public class MainMenuScreen extends ControlScreen implements Screen {
         table.row();
         table.add(quit);
 
-
+        super.backButton.addListener(new ChangeListener() {
+            //TODO: Here should be a logout
+            @Override
+            public void changed(ChangeEvent event, Actor actor) {
+                game.setScreen(new LoginScreen(game, net));
+            }
+        });
 
         play.addListener(new ChangeListener() {
             @Override
@@ -94,7 +93,7 @@ public class MainMenuScreen extends ControlScreen implements Screen {
         profile.addListener(new ChangeListener() {
             @Override
             public void changed(ChangeEvent event, Actor actor) {
-                game.setScreen(new ProfileScreen(net));
+                game.setScreen(new ProfileScreen(game, net));
             }
         });
 
@@ -102,7 +101,7 @@ public class MainMenuScreen extends ControlScreen implements Screen {
 
             @Override
             public void changed(ChangeEvent event, Actor actor) {
-
+                game.setScreen(new HighscoreScreen(game, net));
             }
         });
 

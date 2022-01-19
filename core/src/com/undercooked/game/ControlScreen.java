@@ -8,7 +8,10 @@ import com.badlogic.gdx.graphics.OrthographicCamera;
 import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.badlogic.gdx.graphics.g2d.freetype.FreeTypeFontGenerator;
 import com.badlogic.gdx.scenes.scene2d.Stage;
+import com.badlogic.gdx.scenes.scene2d.ui.Button;
 import com.badlogic.gdx.scenes.scene2d.ui.Label;
+import com.badlogic.gdx.scenes.scene2d.ui.Skin;
+import com.badlogic.gdx.scenes.scene2d.ui.TextButton;
 import com.badlogic.gdx.utils.viewport.FillViewport;
 
 public abstract class ControlScreen implements Screen{
@@ -20,6 +23,7 @@ public abstract class ControlScreen implements Screen{
     protected BitmapFont font;
     protected Stage stage;
     protected Label label;
+    protected TextButton backButton;
     protected Label.LabelStyle labelStyle;
 
     public ControlScreen(){
@@ -42,12 +46,16 @@ public abstract class ControlScreen implements Screen{
         fontParameter.borderColor = Color.FIREBRICK;
         fontParameter.color = Color.WHITE;
         font = fontGenerator.generateFont(fontParameter);
+        Skin skin = new Skin(Gdx.files.internal("star-soldier-ui.json"));
 
-         labelStyle = new Label.LabelStyle();
+        labelStyle = new Label.LabelStyle();
         labelStyle.font = font;
-         label = new Label("Undercooked!", labelStyle) ;
-        label.setPosition(200, 300);
+        label = new Label("Undercooked!", labelStyle);
+        label.setPosition(200, 350);
+        backButton = new TextButton("Back", skin);
+        backButton.setPosition(-10, stage.getHeight() - 50);
         stage.addActor(label);
+        stage.addActor(backButton);
     }
 
     @Override

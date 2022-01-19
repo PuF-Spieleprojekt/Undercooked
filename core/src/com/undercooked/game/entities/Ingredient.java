@@ -56,6 +56,23 @@ public class Ingredient {
         return isPreparing;
     }
 
+ /*   public String getTextureName(){
+        return textureString;
+    }
+*/
+    public String getPositionStringX(){
+        return String.valueOf(hitbox.x);
+    }
+
+    public String getPositionStringY(){
+        return String.valueOf(hitbox.y);
+    }
+
+    public void setPosition(String x, String y){
+        hitbox.x = Float.parseFloat(x);
+        hitbox.y = Float.parseFloat(y);
+    }
+
     @Override
     public String toString() {
         return name;

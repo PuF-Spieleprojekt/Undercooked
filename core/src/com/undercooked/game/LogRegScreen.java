@@ -2,10 +2,12 @@ package com.undercooked.game;
 
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Screen;
+import com.badlogic.gdx.scenes.scene2d.Actor;
 import com.badlogic.gdx.scenes.scene2d.InputEvent;
 import com.badlogic.gdx.scenes.scene2d.ui.Skin;
 import com.badlogic.gdx.scenes.scene2d.ui.Table;
 import com.badlogic.gdx.scenes.scene2d.ui.TextButton;
+import com.badlogic.gdx.scenes.scene2d.utils.ChangeListener;
 import com.badlogic.gdx.scenes.scene2d.utils.ClickListener;
 
 public class LogRegScreen extends ControlScreen implements Screen {
@@ -56,10 +58,12 @@ public class LogRegScreen extends ControlScreen implements Screen {
     @Override
     public void show() {
         super.show();
+        super.backButton.remove();
         Table table = new Table();
         table.setFillParent(true);
 //        table.setDebug(true);
         super.stage.addActor(table);
+
 
 //
 //        labelStyle = new Label.LabelStyle();
@@ -99,7 +103,7 @@ public class LogRegScreen extends ControlScreen implements Screen {
             @Override
             public void clicked(InputEvent event, float x, float y) {
 
-                // game.setScreen(new ProfileScreen(net));
+
                  game.setScreen(new LoginScreen(game, net));
 
             }

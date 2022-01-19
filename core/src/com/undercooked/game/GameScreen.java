@@ -35,6 +35,8 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Set;
 
+import grpc.gateway.protoc_gen_openapiv2.options.Openapiv2;
+
 public class GameScreen implements Screen {
 
     final Undercooked game;
@@ -248,6 +250,8 @@ public class GameScreen implements Screen {
             Ingredient ingredient = iter.next();
             servingAreaAction(servingArea, player1.getHitbox(), ingredient);
             preparingAreaAction(preparingArea, player1.getHitbox(), ingredient);
+            updateObjectData(net, ingredient);
+
         }
 
         // plate logic
@@ -269,22 +273,22 @@ public class GameScreen implements Screen {
         if (Gdx.input.isKeyPressed(Keys.LEFT)){
             desired_velocity.x = -300 * Gdx.graphics.getDeltaTime();
             player1.changeTexture("left");
-            updateData(net, player1);
+            updatePlayerData(net, player1);
         }
         if (Gdx.input.isKeyPressed(Keys.RIGHT)) {
             desired_velocity.x = 300 * Gdx.graphics.getDeltaTime();
             player1.changeTexture("right");
-            updateData(net, player1);
+            updatePlayerData(net, player1);
         }
         if (Gdx.input.isKeyPressed(Keys.DOWN)){
             desired_velocity.y = -300 * Gdx.graphics.getDeltaTime();
             player1.changeTexture("down");
-            updateData(net, player1);
+            updatePlayerData(net, player1);
         }
         if (Gdx.input.isKeyPressed(Keys.UP)){
             desired_velocity.y = 300 * Gdx.graphics.getDeltaTime();
             player1.changeTexture("up");
-            updateData(net, player1);
+            updatePlayerData(net, player1);
         }
 
         if(net.joinedMatch){
@@ -426,9 +430,15 @@ public class GameScreen implements Screen {
         }
     }
 
-    public void updateData(Networking net, Player player){
+    public void updatePlayerData(Networking net, Player player){
         if(multiplayer){
             net.sendMatchData(player.getTextureName(), player.getPositionStringX(), player.getPositionStringY());
+        }
+    }
+
+    public void updateObjectData(Networking net, Ingredient ingridient){
+        if(multiplayer){
+            net.sendMatchData(ingridient.getTexture().toString(), ingridient.getPositionStringX(), ingridient.getPositionStringY());
         }
     }
 

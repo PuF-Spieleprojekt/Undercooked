@@ -50,6 +50,13 @@ public class LoginScreen extends ControlScreen implements Screen {
         table.row().pad(5, 0, 5, 0);
         table.add(submit);
 
+        super.backButton.addListener(new ChangeListener() {
+            @Override
+            public void changed(ChangeEvent event, Actor actor) {
+                game.setScreen(new LogRegScreen(game, net));
+            }
+        });
+
         submit.addListener(new ChangeListener() {
             @Override
             public void changed(ChangeEvent event, Actor actor) {

@@ -1,5 +1,6 @@
 package com.undercooked.game;
 
+import com.badlogic.gdx.Game;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Screen;
 import com.badlogic.gdx.graphics.g2d.Sprite;
@@ -17,12 +18,14 @@ import com.badlogic.gdx.scenes.scene2d.utils.SpriteDrawable;
 public class ProfileScreen extends ControlScreen implements Screen {
     //TODO add Collection that shows which skins are already usable
     final Networking net;
+    final Undercooked game;
     TextureAtlas textureAtlas = new TextureAtlas(Gdx.files.internal("playermodel/player_naked_sprites.txt"));
     TextureAtlas textureAtlas2 = new TextureAtlas(Gdx.files.internal("playermodel/player_naked_sprites_apron.txt"));
 
 
-    public ProfileScreen(Networking net){
+    public ProfileScreen(Undercooked game, Networking net){
         super();
+        this.game = game;
         this.net = net;
     }
 
@@ -56,6 +59,13 @@ public class ProfileScreen extends ControlScreen implements Screen {
         table.row();
         table.add(chooseSkin).right();
         table.add(slider).left();
+
+        super.backButton.addListener(new ChangeListener() {
+            @Override
+            public void changed(ChangeEvent event, Actor actor) {
+                game.setScreen(new MainMenuScreen(game, net));
+            }
+        });
 
         slider.addListener(new ChangeListener() {
             @Override
