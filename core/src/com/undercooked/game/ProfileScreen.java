@@ -15,10 +15,13 @@ import com.badlogic.gdx.scenes.scene2d.ui.Window;
 import com.badlogic.gdx.scenes.scene2d.utils.ChangeListener;
 import com.badlogic.gdx.scenes.scene2d.utils.SpriteDrawable;
 
+import javax.swing.text.Utilities;
+
 public class ProfileScreen extends ControlScreen implements Screen {
     //TODO add Collection that shows which skins are already usable
     final Networking net;
     final Undercooked game;
+
     TextureAtlas textureAtlas = new TextureAtlas(Gdx.files.internal("playermodel/player_naked_sprites.txt"));
     TextureAtlas textureAtlas2 = new TextureAtlas(Gdx.files.internal("playermodel/player_naked_sprites_apron.txt"));
 
@@ -32,7 +35,7 @@ public class ProfileScreen extends ControlScreen implements Screen {
     @Override
     public void show() {
         super.show();
-
+        final String playername = net.getUsername();
 
         Skin skin = new Skin(Gdx.files.internal("star-soldier-ui.json"));
 
@@ -44,8 +47,8 @@ public class ProfileScreen extends ControlScreen implements Screen {
         Slider.SliderStyle sliderStyle = new Slider.SliderStyle();
         final Slider slider = new Slider(1,3,1,false, skin);
         Label username = new Label("Username: ", skin);
-        //TODO: GetUsername from Server
-        Label usernamePart2 = new Label("Testplayer1", skin);
+
+        Label usernamePart2 = new Label(playername, skin);
         Label chooseSkin = new Label("Choose Skin: ", skin);
         final Image image = new Image(new SpriteDrawable(textureAtlas.createSprite("down1")));
 
@@ -66,18 +69,20 @@ public class ProfileScreen extends ControlScreen implements Screen {
                 game.setScreen(new MainMenuScreen(game, net));
             }
         });
-
+        //TODO: Add more Skins.
         slider.addListener(new ChangeListener() {
             @Override
             public void changed(ChangeEvent event, Actor actor) {
                 if(slider.getValue() == 1){
                     System.out.println("Value1");
                     image.setDrawable(new SpriteDrawable(textureAtlas.createSprite("down1")));
+                    GlobalUtilities.skinAsString = "Naked";
                 }else if(slider.getValue() == 2){
                     System.out.println("Value2");
                     image.setDrawable(new SpriteDrawable(textureAtlas.createSprite("up1")));
                 } else if(slider.getValue() == 3){
-                    image.setDrawable(new SpriteDrawable(textureAtlas.createSprite("up1")));
+                    image.setDrawable(new SpriteDrawable(textureAtlas2.createSprite("down1")));
+                    GlobalUtilities.skinAsString = "WhiteApron";
                 }
             }
         });

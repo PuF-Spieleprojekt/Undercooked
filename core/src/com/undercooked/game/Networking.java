@@ -1,14 +1,22 @@
 package com.undercooked.game;
 
 
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
 
+
 import com.google.common.util.concurrent.FutureCallback;
 import com.google.common.util.concurrent.Futures;
 import com.google.common.util.concurrent.ListenableFuture;
+import com.google.gson.Gson;
+import com.google.gson.reflect.TypeToken;
 import com.heroiclabs.nakama.AbstractSocketListener;
 import com.heroiclabs.nakama.Channel;
 import com.heroiclabs.nakama.ChannelMessageAck;
@@ -21,11 +29,14 @@ import com.heroiclabs.nakama.PermissionWrite;
 import com.heroiclabs.nakama.Session;
 import com.heroiclabs.nakama.SocketClient;
 import com.heroiclabs.nakama.SocketListener;
+import com.heroiclabs.nakama.StorageObjectId;
 import com.heroiclabs.nakama.StorageObjectWrite;
 import com.heroiclabs.nakama.UserPresence;
 import com.heroiclabs.nakama.api.ChannelMessage;
 import com.heroiclabs.nakama.api.MatchList;
+import com.heroiclabs.nakama.api.StorageObject;
 import com.heroiclabs.nakama.api.StorageObjectAcks;
+import com.heroiclabs.nakama.api.StorageObjects;
 
 import org.checkerframework.checker.nullness.compatqual.NullableDecl;
 
@@ -50,9 +61,21 @@ public class Networking {
     private Channel channel;
     private String receivedData = "";
     private Boolean authenticationSuccessful;
-    private String[] formattedData = new String[1];
+    private String[] playerData = new String[1];
+    private String[] timerData = new String[1];
+    private String[] ingredientData = new String[1];
+
     public Boolean joinedMatch = false;
 
+    public String getUsername(){
+        return session.getUsername();
+    }
+
+/*++++++++++++++++++++++++++++++++++
+* ++++++++++++++++++++++++++++++++++
+* PLAYER-MANAGEMENT
+* +++++++++++++++++++++++++++++++++
+* +++++++++++++++++++++++++++++++++*/
 
     public boolean register(String email, String password, String username) throws ExecutionException, InterruptedException {
         executor = Executors.newSingleThreadExecutor();
@@ -65,6 +88,13 @@ public class Networking {
                 authenticationSuccessful = true;
                 System.out.println("Registration successful!");
                 System.out.println("Authentication successful. AuthToken created: " + session.getAuthToken());
+                try {
+                    createItemsCollection();
+                } catch (ExecutionException e) {
+                    e.printStackTrace();
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
                 executor.shutdown();
             }
 
@@ -149,6 +179,15 @@ public class Networking {
         }, socketExecutor);
     }
 
+
+
+
+    /*++++++++++++++++++++++++++++++++++
+     * ++++++++++++++++++++++++++++++++++
+     * MATCH-MAKING
+     * +++++++++++++++++++++++++++++++++
+     * +++++++++++++++++++++++++++++++++*/
+
     public Boolean makeMatch() throws ExecutionException, InterruptedException {
         if (!matchID.isEmpty()) {
             socket.leaveMatch(match.getMatchId()).get();
@@ -190,17 +229,6 @@ public class Networking {
 
     }
 
-    public void sendMatchData(String texture, String hitboxX, String hitboxY) {
-        if (!match.getMatchId().isEmpty()) {
-            long opCode = 1;
-            String data = "{\"texture\" : \"" + texture + "\", \" hitboxX \" : \"" + hitboxX + "\", \" hitboxY \" : \"" + hitboxY + "\" }";
-            byte[] byteData = data.getBytes();
-            socket.sendMatchData(match.getMatchId(), opCode, byteData);
-
-
-        }
-    }
-
     public MatchList findMatch() throws ExecutionException, InterruptedException {
         MatchList matchlist = client.listMatches(session, 1).get();
 
@@ -208,20 +236,14 @@ public class Networking {
         //System.out.println(matchlist.getMatchesCount());
     }
 
-    final SocketListener listener = new AbstractSocketListener() {
-        @Override
-        public void onMatchData(final MatchData matchData) {
-            joinedMatch = true;
-            //System.out.format("Received match data %s with opcode %d", matchData.getData(), matchData.getOpCode());
-            System.out.println(new String(matchData.getData()));
-            //System.out.println(matchData.toString());
-            receivedData = new String(matchData.getData());
-            formattedData = retrieveNetworkData(receivedData);
-        }
-    };
-
-    public String[] getMatchdata() {
-        return formattedData;
+    public String[] getPlayerData() {
+        return playerData;
+    }
+    public String[] getTimerData() {
+        return timerData;
+    }
+    public String[] getIngredientData() {
+        return ingredientData;
     }
 
     public String[] retrieveNetworkData(String receivedData) {
@@ -233,259 +255,132 @@ public class Networking {
         return trimmedData;
     }
 
-    public void createItemsCollection() throws ExecutionException, InterruptedException {
-        String saveGame = "{ \"item\": \"redHat\" }";
-        String myStats = "{ \"score\": 00000 }";
+    /*++++++++++++++++++++++++++++++++++
+     * ++++++++++++++++++++++++++++++++++
+     * DATA-SYNC
+     * +++++++++++++++++++++++++++++++++
+     * +++++++++++++++++++++++++++++++++*/
 
-        StorageObjectWrite saveGameObject = new StorageObjectWrite("items", "item", saveGame, PermissionRead.OWNER_READ, PermissionWrite.OWNER_WRITE);
-        StorageObjectWrite statsObject = new StorageObjectWrite("stats", "scores", myStats, PermissionRead.PUBLIC_READ, PermissionWrite.OWNER_WRITE);
+    public void sendPlayerData(String texture, String hitboxX, String hitboxY) {
+        if (!match.getMatchId().isEmpty()) {
+            long opCode = 1;
+            //String data = "{\"texture\" : \"" + texture + "\", \" hitboxX \" : \"" + hitboxX + "\", \" hitboxY \" : \"" + hitboxY + "\" }";
+            Map<String,String> dataString = new HashMap<>();
+
+            dataString.put("texture", texture);
+            dataString.put("hitboxX", hitboxX);
+            dataString.put("hitboxY", hitboxY);
+
+            String dataJson = new Gson().toJson(dataString);
+            byte[] byteData = dataJson.getBytes();
+            socket.sendMatchData(match.getMatchId(), opCode, byteData);
+        }
+    }
+
+    public void sendTimerData(String timerPurpose, String seconds){
+        if (!match.getMatchId().isEmpty()) {
+            long opCode = 2;
+
+            Map<String,String> dataString = new HashMap<>();
+
+            dataString.put("timerPuropse", timerPurpose);
+            dataString.put("seconds", seconds);
+
+            String dataJson = new Gson().toJson(dataString);
+            byte[] byteData = dataJson.getBytes();
+            socket.sendMatchData(match.getMatchId(), opCode, byteData);
+        }
+    }
+
+
+    final SocketListener listener = new AbstractSocketListener() {
+        @Override
+        public void onMatchData(final MatchData matchData) {
+            //As soon there is match data, a player has joined the Match
+            joinedMatch = true;
+
+            System.out.println(new String(matchData.getData()));
+            // received Data
+            receivedData = new String(matchData.getData());
+
+            // Data gets formatted so it can be used further on
+            switch (String.valueOf(matchData.getOpCode())){
+                case "1" :
+                    playerData = retrieveNetworkData(receivedData);
+                    break;
+                case "2" :
+                    timerData = retrieveNetworkData(receivedData);
+                    break;
+                case "3" :
+                    ingredientData = retrieveNetworkData(receivedData);
+
+            }
+
+        }
+    };
+
+    /*++++++++++++++++++++++++++++++++++
+     * ++++++++++++++++++++++++++++++++++
+     * STORAGE-MANAGEMENT
+     * +++++++++++++++++++++++++++++++++
+     * +++++++++++++++++++++++++++++++++*/
+
+
+    //creates collection for every user, that can be filled with items and highscores
+    public void createItemsCollection() throws ExecutionException, InterruptedException {
+        Map<String, List<String>> usableItems = new HashMap<>();
+        Map<String, List<String>> highscores = new HashMap<>();
+        //TODO: Fill with goo content
+        usableItems.put("Skins",  Arrays.asList("green", "blue"));
+        highscores.put("Highscores", Arrays.asList("0000"));
+
+        String usableItemsJson = new Gson().toJson(usableItems);
+        String highscoresJson = new Gson().toJson(highscores);
+
+        StorageObjectWrite saveGameObject = new StorageObjectWrite("items", "item", usableItemsJson, PermissionRead.OWNER_READ, PermissionWrite.OWNER_WRITE);
+        StorageObjectWrite statsObject = new StorageObjectWrite("stats", "scores", highscoresJson, PermissionRead.PUBLIC_READ, PermissionWrite.OWNER_WRITE);
 
         StorageObjectAcks acks = client.writeStorageObjects(session, saveGameObject, statsObject).get();
         System.out.format("Stored objects %s", acks.getAcksList());
     }
 
 
-    public Networking() { };
 
-}
-          /*public void resendMatchData() throws ExecutionException, InterruptedException {
-        ChannelMessageAck sendAck = socket.writeChatMessage(channel.getId(), matchID).get();
-    }*/
-    //@Override
-  /*      public void onChannelMessage(final ChannelMessage message) {
-            messageID = message.getMessageId();
-            extractedMatchID = message.getContent().split(":")[1].replaceAll("\"", "").replaceAll("}", "");
-            System.out.println(extractedMatchID);
-            System.out.format("Received a message on channel %s", message.getChannelId());
-            System.out.format("Message content: %s", message.getContent());
-        }*/
+    public void updateItemCollectionData(String collectionName, String keyName, String tableKey, List<String> newData ) throws ExecutionException, InterruptedException {
+        Map<String, List<String>> data = new HashMap<>();
 
+        data.put("tableKey", newData);
+        String dataJson = new Gson().toJson(data);
 
-/*    public void joinChat(SocketClient socket) {
-        executor = Executors.newSingleThreadExecutor();
-        roomName = "GameRoom";
-        ListenableFuture<Channel> joinChat = socket.joinChat(roomName, ChannelType.ROOM);
-
-        Futures.addCallback(joinChat, new FutureCallback<Channel>() {
-            @Override
-            public void onSuccess(@NullableDecl Channel result) {
-                System.out.println("Joined Channel " + result.getRoomName());
-                channel = result;
-                executor.shutdown();
-            }
-
-            @Override
-            public void onFailure(Throwable t) {
-                executor.shutdown();
-            }
-        }, executor);
-
-
-        try {
-            executor.awaitTermination(5, TimeUnit.SECONDS);
-
-        }
-        catch (InterruptedException e) {
-            System.out.println(e.getMessage());
-        }
-    }*/
-
-
-
-
-
-
-
-
-   /* public Future<String> test(String email, String password) throws ExecutionException, InterruptedException {
-        executor = Executors.newSingleThreadExecutor();
-       Future <Session> session = client.authenticateEmail(email, password);
-       String authToken = session.get().getAuthToken();
-
-       if(session.isDone()){
-           return response;
-       }
-
-    }*/
-
-
-
-   /* public void loginWithEmail(String email, String password){
-
-        executor = Executors.newSingleThreadExecutor();
-        try {
-            Futures.addCallback(client.authenticateEmail(email, password), new FutureCallback<Session>() {
-                @Override
-                public void onSuccess(final Session result) {
-                    System.out.println("got session: " + result.getAuthToken());
-                    authenticationSuccessful = true;
-                    SocketClient socketClient = client.createSocket();
-                  *//*  try {
-                        //createSocketListener(result, socketClient);
-                        System.out.println("Socket Created");
-                    } catch (ExecutionException e) {
-                        e.printStackTrace();
-                    } catch (InterruptedException e) {
-                        e.printStackTrace();
-                    }*//*
-                    *//*socketClient = client.createSocket();
-
-
-                    Futures.addCallback(socketClient.connect(result, listener), new FutureCallback<Session>() {
-                        @Override
-                        public void onSuccess(Session result) {
-                            authenticationSuccessful = true;
-                            session = result;
-                            System.out.println( "Socket Created " + result.toString());
-                            System.out.println(listener.toString());
-
-
-                        }
-                        @Override
-                        public void onFailure(Throwable t) {
-                            System.out.println( "Socket Creation failed " + t.toString());
-                        }
-                    }, executor);*//*
-                    //executor.shutdown();
-                }
-
-                @Override
-                public void onFailure(final Throwable throwable) {
-                    System.out.println(throwable.getMessage());
-                    //executor.shutdown();
-                }
-            }, executor);
-        } catch (Exception e) {
-            System.out.println(e.getMessage());
-        }
-
-    }*/
-
-
-
-
-  /*  public void createSocketListener(Session session, SocketClient socketClient) throws ExecutionException, InterruptedException {
-
-        socketClient.connect(session, listener).get();
-        createMatch(socketClient);
-
-
-
-    }*/
-
-
- /*   public void createMatch(final SocketClient socketClient) throws ExecutionException, InterruptedException {
-
-        try{
-
-            Futures.addCallback(socketClient.createMatch(), new FutureCallback<Match>() {
-
-                @Override
-                public void onSuccess(@NullableDecl Match result) {
-                    id = result.getMatchId();
-                    System.out.println("Match created with ID: " + result.getMatchId());
-                    try {
-                        socketClient.joinMatch(id).get();
-                    } catch (InterruptedException e) {
-                        e.printStackTrace();
-                    } catch (ExecutionException e) {
-                        e.printStackTrace();
-                    }
-                    //sendData(socketClient);
-
-                }
-
-                @Override
-                public void onFailure(Throwable t) {
-                    System.out.println("Match couldn't get created." + t.getMessage());
-
-                }
-            }, executor);
-        }catch (Exception e){
-            System.out.println(e.getMessage());
-        }*/
-        //match = socketClient.createMatch().get();
-        //System.out.println("Created match with ID %s." + match.getMatchId());
-    //}
-
-
-
-
-
-   // }
-
-/*    public void authenticateWithEmail(String email, String password){
-        final ListenableFuture<Session> authFuture = client.authenticateEmail(email, password);
-
-
-        AsyncFunction<Session, Account> accountFunction = new AsyncFunction<Session, Account>() {
-            public ListenableFuture<Account> apply(Session session) {
-                return client.getAccount(session);
-            }
-        };
-
-        ListenableFuture<Account> accountFuture = Futures.transformAsync(authFuture, accountFunction, executor);
-        Futures.addCallback(accountFuture, new FutureCallback<Account>() {
-            @Override
-            public void onSuccess(Account account) {
-                System.out.println("Got account: " + account.getUser().getId());
-                authenticationSuccessful = true;
-                executor.shutdown();
-            }
-
-            @Override
-            public void onFailure(Throwable e) {
-                System.out.println(e.getMessage());
-                executor.shutdown();
-            }
-
-        }, executor);
-
-        try {
-            executor.awaitTermination(5, TimeUnit.SECONDS);
-        } catch (InterruptedException e) {
-            errorMessage = e.getMessage();
-            System.out.println(e.getMessage());
-        }
+        StorageObjectWrite dataObject = new StorageObjectWrite(collectionName, keyName, dataJson, PermissionRead.PUBLIC_READ, PermissionWrite.OWNER_WRITE);
+        StorageObjectAcks acks = client.writeStorageObjects(session, dataObject).get();
     }
 
 
-    public static void createSocketSession(String email, String password){
-        final ExecutorService executor = Executors.newSingleThreadExecutor();
-        try {
-            Futures.addCallback(client.authenticateEmail(email, password), new FutureCallback<Session>() {
-                @Override
-                public void onSuccess(final Session result) {
-                    System.out.println("got session: " + result.getAuthToken());
-                    SocketClient socketClient = client.createSocket();
 
-                    Futures.addCallback(socketClient.connect(result, new AbstractSocketListener() {}), new FutureCallback<Session>() {
-                        @Override
-                        public void onSuccess(Session result) {
-                            authenticationSuccessful = true;
-                            System.out.println( "Socket Created " + result.toString());
-                        }
+    //gets data from server and converts it to a List<String>, so it can be displayed
+    public List<String> retrieveStorageData(String storageName, String key) throws ExecutionException, InterruptedException {
+        List<String> data = null;
+        StorageObjectId objectId = new StorageObjectId(storageName);
 
-                        @Override
-                        public void onFailure(Throwable t) {
-                            System.out.println( "Socket Creation failed " + t.toString());
-                        }
-                    }, executor);
+        objectId.setKey(key);
+        objectId.setUserId(session.getUserId());
+        //TODO: Implement proper logging maybe?
+        System.out.println("Retrieving storage data..");
+        StorageObjects objects = client.readStorageObjects(session, objectId).get();
+        System.out.println(objects.getObjectsCount());
 
-
-                    //executor.shutdown();
-                }
-
-                @Override
-                public void onFailure(final Throwable throwable) {
-                    System.out.println(throwable.getMessage());
-                    //executor.shutdown();
-                }
-            }, executor);
-        } catch (Exception e) {
-            System.out.println(e.getMessage());
+        for(StorageObject object : objects.getObjectsList()){
+            Map<String, List<String>> parsedObj = new Gson().fromJson(object.getValue(), new TypeToken<Map<String, List<String>>>(){}.getType());
+            String temp = parsedObj.values().toString().replaceAll("[\\[\\](){}]","");
+            data = new ArrayList<String>(Arrays.asList(temp.split(",")));
         }
+        return data;
+    }
 
 
-    }*/
+    public Networking() { };
+
+}
+
 

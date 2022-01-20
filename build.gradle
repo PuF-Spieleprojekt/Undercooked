@@ -138,6 +138,7 @@ project(":core") {
         compile('org.slf4j:slf4j-api:1.7.25') {
             force = true // don't upgrade to "1.8.0-alpha2"
         }
+        implementation 'com.google.code.gson:gson:2.8.9'
 
     }
 }
