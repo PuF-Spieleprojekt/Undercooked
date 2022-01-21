@@ -33,6 +33,7 @@ import java.util.HashSet;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 public class GameScreen implements Screen {
@@ -185,9 +186,9 @@ public class GameScreen implements Screen {
                 net.sendTimerData("globalTimer", String.valueOf(secondsLeft));
             }
         } else {
-            String[] timerData = net.getTimerData();
-            if(timerData[0] == "globalTimer")
-            secondsLeft = Float.parseFloat(timerData[1]);
+            Map<String, String> timerData = net.getTimerData();
+            if(timerData.get("timerPurpose") == "globalTimer")
+            secondsLeft = Float.parseFloat(timerData.get("seconds"));
         }
 
 
@@ -299,9 +300,9 @@ public class GameScreen implements Screen {
         }
 
         if(net.joinedMatch){
-            String[] matchData =  net.getPlayerData();
-            if(matchData.length > 1){
-                player2.setPosition(matchData[1], matchData[2]);
+            Map<String, String> matchData =  net.getPlayerData();
+            if(matchData.size() > 1){
+                player2.setPosition(matchData.get("hitboxX"), matchData.get("hitboxY"));
                 player2.checkBoundaries();
             }
 

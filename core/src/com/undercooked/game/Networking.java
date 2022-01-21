@@ -61,9 +61,9 @@ public class Networking {
     private Channel channel;
     private String receivedData = "";
     private Boolean authenticationSuccessful;
-    private String[] playerData = new String[1];
-    private String[] timerData = new String[1];
-    private String[] ingredientData = new String[1];
+    private Map<String, String> playerData = new HashMap<>();
+    private Map<String, String> timerData = new HashMap<>();
+    private Map<String, String> ingredientData = new HashMap<>();
 
     public Boolean joinedMatch = false;
 
@@ -236,23 +236,26 @@ public class Networking {
         //System.out.println(matchlist.getMatchesCount());
     }
 
-    public String[] getPlayerData() {
+    public Map<String, String> getPlayerData() {
         return playerData;
     }
-    public String[] getTimerData() {
+    public Map<String, String> getTimerData() {
         return timerData;
     }
-    public String[] getIngredientData() {
+    public Map<String, String> getIngredientData() {
         return ingredientData;
     }
 
-    public String[] retrieveNetworkData(String receivedData) {
+    public Map<String,String> retrieveNetworkData(String receivedData) {
         String[] newData = receivedData.split(",");
-        String[] trimmedData = new String[newData.length];
+        Map<String, String> dataMap = new HashMap<String, String>();
+
         for (int i = 0; i < newData.length; i++) {
-            trimmedData[i] = newData[i].split(":")[1].replaceAll(",", "").replaceAll("\\{", "").replaceAll("\"", "").replaceAll("}", "");
+            String key = newData[i].split(":")[0].replaceAll(",", "").replaceAll("\\{", "").replaceAll("\"", "").replaceAll("}", "");
+            String value = newData[i].split(":")[1].replaceAll(",", "").replaceAll("\\{", "").replaceAll("\"", "").replaceAll("}", "");
+            dataMap.put(key,value);
         }
-        return trimmedData;
+        return dataMap;
     }
 
     /*++++++++++++++++++++++++++++++++++
@@ -298,7 +301,7 @@ public class Networking {
         public void onMatchData(final MatchData matchData) {
             //As soon there is match data, a player has joined the Match
             joinedMatch = true;
-
+            System.out.println("Listener: ");
             System.out.println(new String(matchData.getData()));
             // received Data
             receivedData = new String(matchData.getData());
