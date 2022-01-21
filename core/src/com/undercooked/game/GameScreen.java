@@ -181,7 +181,9 @@ public class GameScreen implements Screen {
         if (isHost) {
             elapsedTime += Gdx.graphics.getDeltaTime();
             secondsLeft = 60 - elapsedTime;
-            net.sendTimerData("globalTimer", String.valueOf(secondsLeft));
+            if(multiplayer) {
+                net.sendTimerData("globalTimer", String.valueOf(secondsLeft));
+            }
         } else {
             String[] timerData = net.getTimerData();
             if(timerData[0] == "globalTimer")

@@ -283,7 +283,7 @@ public class Networking {
 
             Map<String,String> dataString = new HashMap<>();
 
-            dataString.put("timerPuropse", timerPurpose);
+            dataString.put("timerPurpose", timerPurpose);
             dataString.put("seconds", seconds);
 
             String dataJson = new Gson().toJson(dataString);
@@ -330,7 +330,7 @@ public class Networking {
     public void createItemsCollection() throws ExecutionException, InterruptedException {
         Map<String, List<String>> usableItems = new HashMap<>();
         Map<String, List<String>> highscores = new HashMap<>();
-        //TODO: Fill with goo content
+        //TODO: Fill with content
         usableItems.put("Skins",  Arrays.asList("green", "blue"));
         highscores.put("Highscores", Arrays.asList("0000"));
 
