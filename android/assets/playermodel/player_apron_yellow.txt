@@ -1,0 +1,131 @@
+sprites_yellow_hats.png
+size: 374, 64
+format: RGBA8888
+filter: Linear,Linear
+repeat: none
+down1
+  rotate: false
+  xy: 0, 0
+  size: 32, 75
+  orig: 33, 75
+  offset: 0, 0
+  index: -1
+down2
+  rotate: false
+  xy: 33, 0
+  size: 33, 75
+  orig: 33, 75
+  offset: 0, 0
+  index: -1
+down3
+  rotate: false
+  xy: 66, 0
+  size: 33, 75
+  orig: 33, 75
+  offset: 0, 0
+  index: -1
+left1
+  rotate: false
+  xy: 99, 0
+  size: 31, 75
+  orig: 31, 75
+  offset: 0, 0
+  index: -1
+left2
+  rotate: false
+  xy: 130, 0
+  size: 26, 75
+  orig: 26, 75
+  offset: 0, 0
+  index: -1
+left3
+  rotate: false
+  xy: 156, 0
+  size: 31, 75
+  orig: 31, 75
+  offset: 0, 0
+  index: -1
+right1
+  rotate: false
+  xy: 187, 0
+  size: 31, 75
+  orig: 31, 75
+  offset: 0, 0
+  index: -1
+right2
+  rotate: false
+  xy: 218, 0
+  size: 26, 75
+  orig: 26, 75
+  offset: 0, 0
+  index: -1
+right3
+  rotate: false
+  xy: 244, 0
+  size: 31, 75
+  orig: 31, 75
+  offset: 0, 0
+  index: -1
+up1
+  rotate: false
+  xy: 275, 0
+  size: 33, 75
+  orig: 33, 75
+  offset: 0, 0
+  index: -1
+up2
+  rotate: false
+  xy: 308, 0
+  size: 33, 75
+  orig: 33, 75
+  offset: 0, 0
+  index: -1
+up3
+  rotate: false
+  xy: 341, 0
+  size: 33, 75
+  orig: 33, 75
+  offset: 0, 0
+  index: -1
+cut-front
+  rotate: false
+  xy: 0, 75
+  size: 33, 75
+  orig: 33, 75
+  offset: 0, 0
+  index: 2
+cut-front
+  rotate: false
+  xy: 33, 75
+  size: 33, 75
+  orig: 33, 75
+  offset: 0, 0
+  index: 1
+cut-left
+  rotate: false
+  xy: 66, 75
+  size: 30, 75
+  orig: 30, 75
+  offset: 0, 0
+  index: 2
+cut-left
+  rotate: false
+  xy: 95, 75
+  size: 33, 75
+  orig: 33, 75
+  offset: 0, 0
+  index: 1
+cut-right
+  rotate: false
+  xy: 128, 75
+  size: 32, 75
+  orig: 32, 75
+  offset: 0, 0
+  index: 2
+cut-right
+  rotate: false
+  xy: 161, 75
+  size: 33, 75
+  orig: 33, 75
+  offset: 0, 0
+  index: 1

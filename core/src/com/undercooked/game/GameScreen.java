@@ -47,9 +47,10 @@ public class GameScreen implements Screen {
     Texture broccoliImage;
     Texture bucketImage;
     Texture counterImage;
+    Texture orderImage;
 
     //other game object
-    Rectangle plate = new Rectangle(200,200,64,64);
+    Rectangle plate = new Rectangle(200,200,32,32);
 
     //Map properties
     TiledMap map;
@@ -110,8 +111,9 @@ public class GameScreen implements Screen {
 
         // load the images for the droplet and the bucket, 64x64 pixels each
         broccoliImage = new Texture(Gdx.files.internal("textures/Broccoli.png"));
-        bucketImage = new Texture(Gdx.files.internal("bucket.png"));
+        bucketImage = new Texture(Gdx.files.internal("textures/plate1.png"));
         counterImage = new Texture(Gdx.files.internal("counter.jpeg"));
+        orderImage = new Texture(Gdx.files.internal("textures/order_sushi.png"));
 
         // load Tiled Map and generate Layerindex;
         map = new TmxMapLoader().load("map/map_v.0.1.tmx");
@@ -167,6 +169,7 @@ public class GameScreen implements Screen {
         tiledmaprenderer.render(mapLayerIndices);
 
         game.batch.draw(bucketImage, plate.x, plate.y);
+        game.batch.draw(orderImage, 700, 400 );
         if(isOnPlate) game.batch.draw(bucketImage, player1.getHitbox().getX(), player1.getHitbox().getY());
 
         game.font.draw(game.batch, "incoming orders: " + ordersToBeServed, 0, 480);
@@ -214,7 +217,7 @@ public class GameScreen implements Screen {
                 }
             }
         }
-        game.batch.draw(player1.getTexture(), player1.getHitbox().x, player1.getHitbox().y);
+//        game.batch.draw(player1.getTexture(), player1.getHitbox().x, player1.getHitbox().y);
         if(multiplayer && net.joinedMatch){
             game.batch.draw(player2.getTexture(), player2.getHitbox().x + 100, player2.getHitbox().y + 100);
         }
@@ -423,6 +426,9 @@ public class GameScreen implements Screen {
                     dropSound.loop();
                     soundLooping = true;
                 }
+                if(Gdx.input.isKeyJustPressed(Keys.SPACE)){
+                    choppingSound.play();
+                }
                 progress += 40 * Gdx.graphics.getDeltaTime();
 
                 if (progress > 100) {
@@ -479,6 +485,7 @@ public class GameScreen implements Screen {
         bucketImage.dispose();
         dropSound.dispose();
         rainMusic.dispose();
+
     }
 
 }
