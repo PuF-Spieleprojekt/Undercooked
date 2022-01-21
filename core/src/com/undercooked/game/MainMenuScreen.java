@@ -78,7 +78,7 @@ public class MainMenuScreen extends ControlScreen implements Screen {
             @Override
             public void changed(ChangeEvent event, Actor actor) {
 
-                    game.setScreen(new GameScreen(game, net, false));
+                    game.setScreen(new GameScreen(game, net, false, true));
 
             }
         });

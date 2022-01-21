@@ -56,7 +56,7 @@ public class MultiplayerScreen extends ControlScreen implements Screen {
             public void changed(ChangeEvent event, Actor actor) {
                 try {
                     if(net.makeMatch()){
-                        game.setScreen(new GameScreen(game, net, true));
+                        game.setScreen(new GameScreen(game, net, true, true));
                     }
                 } catch (ExecutionException e) {
                     e.printStackTrace();
@@ -75,7 +75,7 @@ public class MultiplayerScreen extends ControlScreen implements Screen {
                          foundGame = true;
                      } else if(foundGame == true){
                          if(net.joinMatch()){
-                             game.setScreen(new GameScreen(game, net, true));
+                             game.setScreen(new GameScreen(game, net, true, false));
                          }
                      }
 

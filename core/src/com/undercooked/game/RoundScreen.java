@@ -10,15 +10,23 @@ import com.badlogic.gdx.scenes.scene2d.ui.Table;
 import com.badlogic.gdx.scenes.scene2d.ui.TextButton;
 import com.badlogic.gdx.scenes.scene2d.utils.ChangeListener;
 
+import java.util.concurrent.ExecutionException;
+
 public class RoundScreen extends ControlScreen implements Screen {
 
     final Undercooked game;
     final Networking net;
 
-    public RoundScreen (Undercooked game, Networking net) {
+    public RoundScreen (Undercooked game, Networking net) throws ExecutionException, InterruptedException {
         super();
         this.game = game;
         this.net = net;
+
+        //as soon as this screen gets built the game is finished and the highscore is set
+        //the highscore is added to highscorelist and updated
+        GlobalUtilities.highscoreList.add(String.valueOf(GlobalUtilities.highscore));
+        net.updateItemCollectionData("stats", "scores", "Highscores", GlobalUtilities.sortHighscoreList());
+
     }
 
     public void show() {
@@ -41,8 +49,9 @@ public class RoundScreen extends ControlScreen implements Screen {
         playAgain.addListener(new ChangeListener() {
             @Override
             public void changed(ChangeEvent event, Actor actor) {
-
-                    game.setScreen(new GameScreen(game, net, true));
+                    //when leaving this screen highscore gets reset
+                    GlobalUtilities.resetHighscore();
+                    game.setScreen(new MainMenuScreen(game, net));
 
             }
         });

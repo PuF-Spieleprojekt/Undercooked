@@ -35,11 +35,13 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Set;
 
-import grpc.gateway.protoc_gen_openapiv2.options.Openapiv2;
-
 public class GameScreen implements Screen {
 
+    // Game-Settings
     final Undercooked game;
+    final Boolean multiplayer;
+    final Boolean isHost;
+    final Networking net;
 
    // Textures;
     Texture broccoliImage;
@@ -71,7 +73,7 @@ public class GameScreen implements Screen {
 
     double progress = 0;
     int dishesServed = 0;
-    int highScore = 0;
+    int highScore = GlobalUtilities.highscore;
     boolean holdingSomething = false;
     boolean putDown = false;
     boolean isOnPlate = false;
@@ -85,8 +87,7 @@ public class GameScreen implements Screen {
     double transition_speed = 16;
 
     boolean soundLooping = false;
-    final Boolean multiplayer;
-    final Networking net;
+
 
     // order and recipe logic
     Set<Ingredient> broccoliSoupIngredients = new HashSet<Ingredient>();
@@ -96,9 +97,10 @@ public class GameScreen implements Screen {
     Order oneBroccoliSoupPlease = new Order(broccoliSoup, 60, elapsedTime);
     float secondsLeft;
 
-    public GameScreen(final Undercooked game, Networking net, Boolean multiplayer) {
+    public GameScreen(final Undercooked game, Networking net, Boolean multiplayer, Boolean isHost) {
         this.game = game;
         this.multiplayer = multiplayer;
+        this.isHost = isHost;
         this.net = net;
 
         // order and recipe logic
@@ -176,14 +178,24 @@ public class GameScreen implements Screen {
         game.font.draw(game.batch, "put down ingredient / ready to process: " + putDown, 0, 390);
         game.font.draw(game.batch, "highscore: " + highScore, 0, 375);
 
-        elapsedTime += Gdx.graphics.getDeltaTime();
-        secondsLeft = 60 - elapsedTime;
+        if (isHost) {
+            elapsedTime += Gdx.graphics.getDeltaTime();
+            secondsLeft = 60 - elapsedTime;
+            net.sendTimerData("globalTimer", String.valueOf(secondsLeft));
+        } else {
+            String[] timerData = net.getTimerData();
+            if(timerData[0] == "globalTimer")
+            secondsLeft = Float.parseFloat(timerData[1]);
+        }
+
 
         //game.batch.draw(dropImage, raindrops.x, raindrops.y);
         //game.batch.draw(broc.texture, broc.hitbox.x, broc.hitbox.y);
+
+        //for loop through ingredient array
         for (Ingredient ingredient : ingredients){
             if(ingredient != null) {
-                //TODO make draw in Area responsive to current Position
+
                 if(ingredient.getPickUp()) {
                     game.batch.draw(ingredient.getTexture(), player1.getHitbox().x, player1.getHitbox().y);
                 } else{
@@ -195,6 +207,8 @@ public class GameScreen implements Screen {
                         drawInArea(preparingArea, ingredient);
                     }
 
+                    servingAreaAction(servingArea, player1.getHitbox(), ingredient);
+                    preparingAreaAction(preparingArea, player1.getHitbox(), ingredient);
                 }
             }
         }
@@ -245,15 +259,6 @@ public class GameScreen implements Screen {
         }
             //System.out.println(currentLocation.getProperties().containsKey("Serving Area"));
 
-        //Iterator for interaction with Ingredients
-        for (Iterator<Ingredient> iter = ingredients.iterator(); iter.hasNext();){
-            Ingredient ingredient = iter.next();
-            servingAreaAction(servingArea, player1.getHitbox(), ingredient);
-            preparingAreaAction(preparingArea, player1.getHitbox(), ingredient);
-            updateObjectData(net, ingredient);
-
-        }
-
         // plate logic
         if (plate.overlaps(player1.getHitbox())) {
             if (Gdx.input.isKeyPressed(Keys.A)){
@@ -292,7 +297,7 @@ public class GameScreen implements Screen {
         }
 
         if(net.joinedMatch){
-            String[] matchData =  net.getMatchdata();
+            String[] matchData =  net.getPlayerData();
             if(matchData.length > 1){
                 player2.setPosition(matchData[1], matchData[2]);
                 player2.checkBoundaries();
@@ -359,6 +364,7 @@ public class GameScreen implements Screen {
 
     //Create an ingredient according to the area the player is standing in
     public void createIngredient(RectangleMapObject object, Rectangle playerObject){
+        //TODO: Maybe other way to determine whisch ingredient will be created?
         if (object.getProperties().containsKey("broccoli")){
             if (object.getRectangle().overlaps(playerObject)){
                 if(Gdx.input.isKeyJustPressed(Keys.A)){
@@ -435,13 +441,13 @@ public class GameScreen implements Screen {
 
     public void updatePlayerData(Networking net, Player player){
         if(multiplayer){
-            net.sendMatchData(player.getTextureName(), player.getPositionStringX(), player.getPositionStringY());
+            net.sendPlayerData(player.getTextureName(), player.getPositionStringX(), player.getPositionStringY());
         }
     }
 
-    public void updateObjectData(Networking net, Ingredient ingridient){
+    public void updateObjectData(Networking net, Ingredient ingredient){
         if(multiplayer){
-            net.sendMatchData(ingridient.getTexture().toString(), ingridient.getPositionStringX(), ingridient.getPositionStringY());
+            net.sendPlayerData(ingredient.getTexture().toString(), ingredient.getPositionStringX(), ingredient.getPositionStringY());
         }
     }
 
