@@ -267,11 +267,9 @@ public class Networking {
             //String data = "{\"texture\" : \"" + texture + "\", \" hitboxX \" : \"" + hitboxX + "\", \" hitboxY \" : \"" + hitboxY + "\" }";
             Map<String,String> dataString = new HashMap<>();
 
-            dataString.put("hitboxY", hitboxY);
-            dataString.put("hitboxX", hitboxX);
             dataString.put("texture", texture);
-
-
+            dataString.put("hitboxX", hitboxX);
+            dataString.put("hitboxY", hitboxY);
 
             String dataJson = new Gson().toJson(dataString);
             byte[] byteData = dataJson.getBytes();
