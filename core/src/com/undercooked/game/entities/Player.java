@@ -20,7 +20,7 @@ public class Player {
     private Animation<TextureRegion> cutAnimation;
 
 
-    TextureAtlas textureAtlas = new TextureAtlas(Gdx.files.internal("playermodel/player_naked_sprites_apron.txt"));
+    TextureAtlas textureAtlas = new TextureAtlas(Gdx.files.internal("playermodel/player_apron_yellow.txt"));
 
     public Player(String name){
         this.name = name;

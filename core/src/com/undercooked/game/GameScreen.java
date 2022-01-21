@@ -47,7 +47,7 @@ public class GameScreen implements Screen {
     Texture counterImage;
 
     //other game object
-    Rectangle plate = new Rectangle(200,200,64,64);
+    Rectangle plate = new Rectangle(200,200,32,32);
 
     //Map properties
     TiledMap map;
@@ -108,7 +108,7 @@ public class GameScreen implements Screen {
 
         // load the images for the droplet and the bucket, 64x64 pixels each
         broccoliImage = new Texture(Gdx.files.internal("textures/Broccoli.png"));
-        bucketImage = new Texture(Gdx.files.internal("bucket.png"));
+        bucketImage = new Texture(Gdx.files.internal("textures/plate1.png"));
         counterImage = new Texture(Gdx.files.internal("counter.jpeg"));
 
         // load Tiled Map and generate Layerindex;
@@ -198,7 +198,7 @@ public class GameScreen implements Screen {
                 }
             }
         }
-        game.batch.draw(player1.getTexture(), player1.getHitbox().x, player1.getHitbox().y);
+//        game.batch.draw(player1.getTexture(), player1.getHitbox().x, player1.getHitbox().y);
         if(multiplayer && net.joinedMatch){
             game.batch.draw(player2.getTexture(), player2.getHitbox().x + 100, player2.getHitbox().y + 100);
         }
@@ -411,9 +411,12 @@ public class GameScreen implements Screen {
 
             // process the food that is put down
             if (Gdx.input.isKeyPressed(Keys.Q) && ingredient.getIsPreparing()) {
-                if(!soundLooping) {
-                    dropSound.loop();
-                    soundLooping = true;
+//                if(!soundLooping) {
+//                    dropSound.loop();
+//                    soundLooping = true;
+//                }
+                if(Gdx.input.isKeyJustPressed(Keys.SPACE)){
+                    choppingSound.play();
                 }
                 progress += 40 * Gdx.graphics.getDeltaTime();
 
@@ -471,6 +474,7 @@ public class GameScreen implements Screen {
         bucketImage.dispose();
         dropSound.dispose();
         rainMusic.dispose();
+
     }
 
 }
