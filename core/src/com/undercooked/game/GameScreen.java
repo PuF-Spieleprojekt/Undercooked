@@ -29,12 +29,15 @@ import com.undercooked.game.entities.Player;
 import com.undercooked.game.entities.Recipe;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+
+import grpc.gateway.protoc_gen_openapiv2.options.Openapiv2;
 
 public class GameScreen implements Screen {
 
@@ -179,6 +182,7 @@ public class GameScreen implements Screen {
         game.font.draw(game.batch, "put down ingredient / ready to process: " + putDown, 0, 390);
         game.font.draw(game.batch, "highscore: " + highScore, 0, 375);
 
+        //if host create Timer else get timerdata from network
         if (isHost) {
             elapsedTime += Gdx.graphics.getDeltaTime();
             secondsLeft = 60 - elapsedTime;
@@ -187,10 +191,19 @@ public class GameScreen implements Screen {
             }
         } else {
             Map<String, String> timerData = net.getTimerData();
-            if(timerData.get("timerPurpose") == "globalTimer")
-            secondsLeft = Float.parseFloat(timerData.get("seconds"));
+            if(timerData.get("timerPurpose").equals("globalTimer")) {
+                secondsLeft = Float.parseFloat(timerData.get("seconds"));
+            }
         }
 
+        if(!net.getIngredientData().isEmpty()){
+            if(net.getIngredientData().get("create").equals("true")){
+                Map<String, String> ingredient = new HashMap<String, String>();
+                float x = Float.parseFloat(ingredient.get("hitboxX"));
+                float y = Float.parseFloat(ingredient.get("hitboxY"));
+                ingredients.add(new Ingredient("Broccoli", broccoliImage, new Rectangle(x, y, 32, 32)));
+            }
+        }
 
         //game.batch.draw(dropImage, raindrops.x, raindrops.y);
         //game.batch.draw(broc.texture, broc.hitbox.x, broc.hitbox.y);
@@ -201,6 +214,9 @@ public class GameScreen implements Screen {
 
                 if(ingredient.getPickUp()) {
                     game.batch.draw(ingredient.getTexture(), player1.getHitbox().x, player1.getHitbox().y);
+                    if(multiplayer){
+                       updateIngredientData(net, ingredient, "false");
+                    }
                 } else{
                     // if ingredient is put down, draw it there
                     System.out.println(ingredient.getIsPreparing());
@@ -215,9 +231,11 @@ public class GameScreen implements Screen {
                 }
             }
         }
+
+        //TODO: Isn't that duplicate Code here?
         game.batch.draw(player1.getTexture(), player1.getHitbox().x, player1.getHitbox().y);
         if(multiplayer && net.joinedMatch){
-            game.batch.draw(player2.getTexture(), player2.getHitbox().x + 100, player2.getHitbox().y + 100);
+            game.batch.draw(player2.getTexture(), player2.getHitbox().x, player2.getHitbox().y);
         }
 
 
@@ -227,7 +245,7 @@ public class GameScreen implements Screen {
             game.batch.draw(player1.getTexture(), player1.getHitbox().x, player1.getHitbox().y);
         }
             if(multiplayer && net.joinedMatch){
-            game.batch.draw(player2.getTexture(), player2.getHitbox().x + 100, player2.getHitbox().y + 100);
+            game.batch.draw(player2.getTexture(), player2.getHitbox().x, player2.getHitbox().y);
         }
 
         game.batch.end();
@@ -367,11 +385,14 @@ public class GameScreen implements Screen {
 
     //Create an ingredient according to the area the player is standing in
     public void createIngredient(RectangleMapObject object, Rectangle playerObject){
-        //TODO: Maybe other way to determine whisch ingredient will be created?
+        //TODO: Maybe other way to determine which ingredient will be created?
         if (object.getProperties().containsKey("broccoli")){
             if (object.getRectangle().overlaps(playerObject)){
                 if(Gdx.input.isKeyJustPressed(Keys.A)){
                     ingredients.add(new Ingredient("Broccoli", broccoliImage, new Rectangle(playerObject.x, playerObject.y, 32, 32)));
+                    if (multiplayer) {
+                        updateIngredientData(net,new Ingredient("Broccoli", broccoliImage, new Rectangle(playerObject.x, playerObject.y, 32, 32)), "true");
+                    }
                     holdingSomething = true;
                 }
             }
@@ -445,9 +466,10 @@ public class GameScreen implements Screen {
         }
     }
 
-    public void updateObjectData(Networking net, Ingredient ingredient){
+
+    public void updateIngredientData(Networking net, Ingredient ingredient, String create){
         if(multiplayer){
-            net.sendPlayerData(ingredient.getTexture().toString(), ingredient.getPositionStringX(), ingredient.getPositionStringY());
+            net.sendIngredientData(create,ingredient.getTexture().toString(), ingredient.getPositionStringX(), ingredient.getPositionStringY());
         }
     }
 

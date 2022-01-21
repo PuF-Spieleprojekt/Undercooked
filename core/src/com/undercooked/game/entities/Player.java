@@ -18,8 +18,6 @@ public class Player {
     private Sprite sprite;
     private String textureString = "down1";
     private Animation<TextureRegion> cutAnimation;
-
-
     TextureAtlas textureAtlas = new TextureAtlas(Gdx.files.internal("playermodel/player_naked_sprites_apron.txt"));
 
     public Player(String name){

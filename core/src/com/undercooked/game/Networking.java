@@ -295,6 +295,23 @@ public class Networking {
         }
     }
 
+    public void sendIngredientData(String create, String texture, String hitboxX, String hitboxY){
+        if (!match.getMatchId().isEmpty()) {
+            long opCode = 3;
+
+            Map<String,String> dataString = new HashMap<>();
+
+            dataString.put("create", create);
+            dataString.put("texture", texture);
+            dataString.put("hitboxX", hitboxX);
+            dataString.put("hitboxY", hitboxY);
+
+            String dataJson = new Gson().toJson(dataString);
+            byte[] byteData = dataJson.getBytes();
+            socket.sendMatchData(match.getMatchId(), opCode, byteData);
+        }
+    }
+
 
     final SocketListener listener = new AbstractSocketListener() {
         @Override
