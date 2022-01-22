@@ -42,7 +42,7 @@ public class RoundScreen extends ControlScreen implements Screen {
         super.stage.addActor(table);
         Label.LabelStyle ls = new Label.LabelStyle();
         ls.font = game.font;
-        Label round_over = new Label("Round over", ls);
+        Label round_over = new Label("Round over. Your score: " + GlobalUtilities.highscore, ls);
         table.add(round_over);
 
         TextButton playAgain = new TextButton("Play again", skin);

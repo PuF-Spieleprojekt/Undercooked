@@ -7,7 +7,8 @@ import java.util.Set;
 public class Order {
     private Recipe recipe;
     private int secondsUntilCanceled;
-    private float orderTime;
+    public float secondsLeft;
+    public float orderTime;
 
     public Order(Recipe recipe, int secondsUntilCanceled, float orderTime){
         this.recipe = recipe;
@@ -15,12 +16,16 @@ public class Order {
         this.orderTime = orderTime;
     }
 
+    public void updateTimeLeft(float currentSecondsIntoGame) {
+        secondsLeft = secondsUntilCanceled - (currentSecondsIntoGame - orderTime);
+    }
+
     public int setServedGetPoints(){
         return (secondsUntilCanceled/20) > 0 ? (secondsUntilCanceled/20) : 1 ;
     }
 
     public String toString() {
-        return recipe.toString() + " " + secondsUntilCanceled;
+        return recipe.toString() + " " + (int)secondsLeft;
     }
 
 }
