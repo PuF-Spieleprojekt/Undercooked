@@ -34,6 +34,7 @@ import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Set;
+import java.util.concurrent.ExecutionException;
 
 public class GameScreen implements Screen {
 
@@ -68,7 +69,6 @@ public class GameScreen implements Screen {
     OrthographicCamera camera;
     int dropsGathered;
     Player player1;
-    float elapsedTime = 0;
     Player player2;
     private ArrayList<Ingredient> ingredients = new ArrayList<Ingredient>();
 
@@ -90,13 +90,19 @@ public class GameScreen implements Screen {
     boolean soundLooping = false;
 
 
+    // timing
+    public float elapsedTime = 0;
+    final float GAMETIME = 60; // one round lasts 180 seconds
+    float secondsLeft;
+
     // order and recipe logic
     Set<Ingredient> broccoliSoupIngredients = new HashSet<Ingredient>();
     Ingredient broccoli = new Ingredient("Broccoli", broccoliImage, new Rectangle(0,0, 32, 32));
     Recipe broccoliSoup = new Recipe("broccoli soup", broccoliSoupIngredients);
     List<Order> ordersToBeServed = new LinkedList<Order>();
     Order oneBroccoliSoupPlease = new Order(broccoliSoup, 60, elapsedTime);
-    float secondsLeft;
+    Order anotherBroccoliPlease = new Order(broccoliSoup, 60, elapsedTime);
+
 
     public GameScreen(final Undercooked game, Networking net, Boolean multiplayer, Boolean isHost) {
         this.game = game;
@@ -107,6 +113,7 @@ public class GameScreen implements Screen {
         // order and recipe logic
         broccoliSoupIngredients.add(broccoli);
         ordersToBeServed.add(oneBroccoliSoupPlease);
+        ordersToBeServed.add(anotherBroccoliPlease);
 
 
         // load the images for the droplet and the bucket, 64x64 pixels each
@@ -173,7 +180,7 @@ public class GameScreen implements Screen {
         if(isOnPlate) game.batch.draw(plateImage, player1.holdingPosition.x, player1.holdingPosition.y - 10);
 
         game.font.draw(game.batch, "incoming orders: " + ordersToBeServed, 0, 480);
-        game.font.draw(game.batch, "time left: " + secondsLeft, 0, 465);
+        game.font.draw(game.batch, "time left: " + (int)secondsLeft, 0, 465);
         game.font.draw(game.batch, "progress: " + progress, 0, 450);
         game.font.draw(game.batch, "Dishes served: " + dishesServed, 0, 435);
         game.font.draw(game.batch, "player holding something processed: " + holdingSomethingProcessed, 0, 420);
@@ -181,17 +188,34 @@ public class GameScreen implements Screen {
         game.font.draw(game.batch, "put down ingredient / ready to process: " + putDown, 0, 390);
         game.font.draw(game.batch, "highscore: " + highScore, 0, 375);
 
+        elapsedTime += Gdx.graphics.getDeltaTime();
         if (isHost) {
-            elapsedTime += Gdx.graphics.getDeltaTime();
-            secondsLeft = 60 - elapsedTime;
+            secondsLeft = GAMETIME - elapsedTime;
             if(multiplayer) {
                 net.sendTimerData("globalTimer", String.valueOf(secondsLeft));
             }
-        } else {
+        } else { // TODO we need elapsedTime in almost all scenarios so we should keep it synced between playes probably
             String[] timerData = net.getTimerData();
             if(timerData[0] == "globalTimer")
             secondsLeft = Float.parseFloat(timerData[1]);
         }
+
+        // TODO do this for all orders: for(Order order : orders) ...
+        oneBroccoliSoupPlease.updateTimeLeft(elapsedTime);
+        anotherBroccoliPlease.updateTimeLeft(elapsedTime);
+
+
+        // end round / level / game
+        if (elapsedTime > GAMETIME) {
+            try {
+                game.setScreen(new RoundScreen(game, net));
+            } catch (ExecutionException e) {
+                e.printStackTrace();
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
+        }
+
 
 
         //game.batch.draw(dropImage, raindrops.x, raindrops.y);
@@ -399,10 +423,22 @@ public class GameScreen implements Screen {
 
                     ingredient.putDown(areaObject);
                     dishesServed ++;
-                    highScore += Math.ceil(secondsLeft / 20);
+                    Order orderProcessed;
+                    if (oneBroccoliSoupPlease.secondsLeft > anotherBroccoliPlease.secondsLeft) {
+                        orderProcessed = anotherBroccoliPlease;
+                    } else {
+                        orderProcessed = oneBroccoliSoupPlease;
+                    }
+                    highScore += Math.ceil(orderProcessed.secondsLeft / 20);
+
+                    // reset state variables
                     holdingSomething = false;
                     holdingSomethingProcessed = false;
                     isOnPlate = false;
+
+                    // in this case reset order but really, this should be its own method randomly spawning new orders
+                    oneBroccoliSoupPlease.orderTime = elapsedTime;
+                    anotherBroccoliPlease.orderTime = elapsedTime;
                 }
         }
 
