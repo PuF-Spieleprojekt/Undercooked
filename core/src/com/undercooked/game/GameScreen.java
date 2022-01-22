@@ -92,7 +92,7 @@ public class GameScreen implements Screen {
 
     // timing
     public float elapsedTime = 0;
-    final float GAMETIME = 60; // one round lasts 180 seconds
+    final float GAMETIME = 120; // one round lasts 120 seconds
     float secondsLeft;
 
     // order and recipe logic
@@ -208,6 +208,7 @@ public class GameScreen implements Screen {
         // end round / level / game
         if (elapsedTime > GAMETIME) {
             try {
+                GlobalUtilities.highscore = highScore;
                 game.setScreen(new RoundScreen(game, net));
             } catch (ExecutionException e) {
                 e.printStackTrace();
@@ -258,14 +259,9 @@ public class GameScreen implements Screen {
 
         game.batch.end();
 
-        // draw progressbar
-        game.shape.setProjectionMatrix(camera.combined);
-        game.shape.begin(ShapeRenderer.ShapeType.Filled);
-        game.shape.setColor(Color.BLUE);
-        //game.shape.rect(counterBounds.x + 12, counterBounds.y + 70, (float) (0.7 * progress), 20);
-        game.shape.end();
 
         // Map Objects get initialized
+        // TODO why does this happen in every render? Shouldn't this be in the constructor?
         for (MapObject object : objects){
 
             if(object.getProperties().containsKey("blocked")) {
@@ -286,7 +282,6 @@ public class GameScreen implements Screen {
                 createIngredient((RectangleMapObject) object, player1.getHitbox());
             }
         }
-            //System.out.println(currentLocation.getProperties().containsKey("Serving Area"));
 
         // plate logic
         if (plate.overlaps(player1.getHitbox())) {
@@ -476,6 +471,13 @@ public class GameScreen implements Screen {
                     dropSound.stop();
                     soundLooping = false;
                 }
+
+                // draw progressbar
+                game.shape.setProjectionMatrix(camera.combined);
+                game.shape.begin(ShapeRenderer.ShapeType.Filled);
+                game.shape.setColor(Color.BLUE);
+                game.shape.rect(preparingArea.getRectangle().x + 12, preparingArea.getRectangle().y + 70, (float) (0.7 * progress), 20);
+                game.shape.end();
             }
         }
     }

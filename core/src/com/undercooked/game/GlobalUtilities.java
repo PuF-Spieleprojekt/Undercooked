@@ -10,8 +10,8 @@ public class GlobalUtilities {
     //Highscore management:
 
     public static int highscore = 0;
-    public static List<String> highscoreList;
-    public static List<String> highscoreListUpdated = new ArrayList<>();
+    public static List<String> highscoreList = new ArrayList<String>();
+    public static List<String> highscoreListUpdated = new ArrayList<String>();
 
     public static void resetHighscore(){
         highscore = 0;
