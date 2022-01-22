@@ -65,7 +65,7 @@ public class GameScreen implements Screen {
     RectangleMapObject currentLocation;
 
     Sound dropSound, choppingSound, punchSound;
-    Music rainMusic;
+    Music backgroundMusic;
     OrthographicCamera camera;
     int dropsGathered;
     Player player1;
@@ -136,10 +136,10 @@ public class GameScreen implements Screen {
 
         // load the drop sound effect and the rain background "music"
         //dropSound = Gdx.audio.newSound(Gdx.files.internal("drop.mp3"));
-        rainMusic = Gdx.audio.newMusic(Gdx.files.internal("rain.mp3"));
+        backgroundMusic = Gdx.audio.newMusic(Gdx.files.internal("backgroundMusic.mp3"));
         choppingSound = Gdx.audio.newSound(Gdx.files.internal("chopping.wav"));
         dropSound = Gdx.audio.newSound(Gdx.files.internal("punch.wav"));
-        rainMusic.setLooping(true);
+        backgroundMusic.setLooping(true);
 
         // create the camera and the SpriteBatch
         camera = new OrthographicCamera();
@@ -181,12 +181,8 @@ public class GameScreen implements Screen {
 
         game.font.draw(game.batch, "incoming orders: " + ordersToBeServed, 0, 480);
         game.font.draw(game.batch, "time left: " + (int)secondsLeft, 0, 465);
-        game.font.draw(game.batch, "progress: " + progress, 0, 450);
-        game.font.draw(game.batch, "Dishes served: " + dishesServed, 0, 435);
-        game.font.draw(game.batch, "player holding something processed: " + holdingSomethingProcessed, 0, 420);
-        game.font.draw(game.batch, "player holding something: " + holdingSomething, 0, 405);
-        game.font.draw(game.batch, "put down ingredient / ready to process: " + putDown, 0, 390);
-        game.font.draw(game.batch, "highscore: " + highScore, 0, 375);
+        game.font.draw(game.batch, "Dishes served: " + dishesServed, 0, 450);
+        game.font.draw(game.batch, "highscore: " + highScore, 0, 435);
 
         elapsedTime += Gdx.graphics.getDeltaTime();
         if (isHost) {
@@ -209,11 +205,36 @@ public class GameScreen implements Screen {
         if (elapsedTime > GAMETIME) {
             try {
                 GlobalUtilities.highscore = highScore;
+                backgroundMusic.stop();
                 game.setScreen(new RoundScreen(game, net));
             } catch (ExecutionException e) {
                 e.printStackTrace();
             } catch (InterruptedException e) {
                 e.printStackTrace();
+            }
+        }
+
+
+        // Map Objects get initialized
+        // TODO why does this happen in every render? Shouldn't this be in the constructor?
+        for (MapObject object : objects){
+
+            if(object.getProperties().containsKey("blocked")) {
+                blockingObject = (RectangleMapObject) object;
+                player1.collisionDetection(blockingObject);
+
+            } else if(object.getProperties().containsKey("Preparing Area")){
+
+                preparingArea = (RectangleMapObject) object;
+                currentLocation = getLocation((RectangleMapObject) object, player1.getHitbox());
+
+            } else if (object.getProperties().containsKey("Serving Area")){
+                //Set servingArea to be able to acces it in batch.draw
+                servingArea =(RectangleMapObject) object;
+                currentLocation = getLocation((RectangleMapObject) object, player1.getHitbox());
+
+            } else if (object.getProperties().containsKey("ingredient")){ // TODO let's fix this, seems wrong to look for a key like this, no?
+                createIngredient((RectangleMapObject) object, player1.getHitbox());
             }
         }
 
@@ -230,7 +251,6 @@ public class GameScreen implements Screen {
                     game.batch.draw(ingredient.getTexture(), player1.holdingPosition.x, player1.holdingPosition.y);
                 } else{
                     // if ingredient is put down, draw it there
-                    System.out.println(ingredient.getIsPreparing());
                     if(ingredient.getIsServed()){
                         drawInArea(servingArea, ingredient);
                     }else if (ingredient.getIsPreparing()){
@@ -259,29 +279,13 @@ public class GameScreen implements Screen {
 
         game.batch.end();
 
+        // draw progressbar
+        game.shape.setProjectionMatrix(camera.combined);
+        game.shape.begin(ShapeRenderer.ShapeType.Filled);
+        game.shape.setColor(Color.BLUE);
+        game.shape.rect(preparingArea.getRectangle().x + 12, preparingArea.getRectangle().y + 70, (float) (0.7 * progress), 20);
+        game.shape.end();
 
-        // Map Objects get initialized
-        // TODO why does this happen in every render? Shouldn't this be in the constructor?
-        for (MapObject object : objects){
-
-            if(object.getProperties().containsKey("blocked")) {
-                blockingObject = (RectangleMapObject) object;
-                player1.collisionDetection(blockingObject);
-
-            } else if(object.getProperties().containsKey("Preparing Area")){
-
-                preparingArea = (RectangleMapObject) object;
-                currentLocation = getLocation((RectangleMapObject) object, player1.getHitbox());
-
-            } else if (object.getProperties().containsKey("Serving Area")){
-                //Set servingArea to be able to acces it in batch.draw
-                servingArea =(RectangleMapObject) object;
-                currentLocation = getLocation((RectangleMapObject) object, player1.getHitbox());
-
-            } else if (object.getProperties().containsKey("ingredient")){ // TODO let's fix this, seems wrong to look for a key like this, no?
-                createIngredient((RectangleMapObject) object, player1.getHitbox());
-            }
-        }
 
         // plate logic
         if (plate.overlaps(player1.getHitbox())) {
@@ -367,7 +371,6 @@ public class GameScreen implements Screen {
     }
 
     public RectangleMapObject getLocation(RectangleMapObject object, Rectangle playerObject){
-        //System.out.println(currentLocation.getProperties().containsKey("blocked") + "-----Outside");
         if(object.getProperties().containsKey("blocked")){
             if (object.getRectangle().overlaps(playerObject)){
                 return object;
@@ -454,6 +457,7 @@ public class GameScreen implements Screen {
             // process the food that is put down
             if (Gdx.input.isKeyPressed(Keys.Q) && ingredient.getIsPreparing()) {
                 if(!soundLooping) {
+                    dropSound.play();
                     dropSound.loop();
                     soundLooping = true;
                 }
@@ -471,13 +475,9 @@ public class GameScreen implements Screen {
                     dropSound.stop();
                     soundLooping = false;
                 }
-
-                // draw progressbar
-                game.shape.setProjectionMatrix(camera.combined);
-                game.shape.begin(ShapeRenderer.ShapeType.Filled);
-                game.shape.setColor(Color.BLUE);
-                game.shape.rect(preparingArea.getRectangle().x + 12, preparingArea.getRectangle().y + 70, (float) (0.7 * progress), 20);
-                game.shape.end();
+            } else if(soundLooping && !Gdx.input.isKeyPressed(Keys.Q)) {
+                dropSound.stop();
+                soundLooping = false;
             }
         }
     }
@@ -502,7 +502,7 @@ public class GameScreen implements Screen {
     public void show() {
         // start the playback of the background music
         // when the screen is shown
-       // rainMusic.play();
+       backgroundMusic.play();
     }
 
     @Override
@@ -522,7 +522,7 @@ public class GameScreen implements Screen {
         broccoliImage.dispose();
         plateImage.dispose();
         dropSound.dispose();
-        rainMusic.dispose();
+        backgroundMusic.dispose();
 
     }
 
