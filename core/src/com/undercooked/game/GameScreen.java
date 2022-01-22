@@ -27,10 +27,10 @@ import com.undercooked.game.entities.Ingredient;
 import com.undercooked.game.entities.Order;
 import com.undercooked.game.entities.Player;
 import com.undercooked.game.entities.Recipe;
+import com.undercooked.game.utilities.enums.Direction;
 
 import java.util.ArrayList;
 import java.util.HashSet;
-import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Set;
@@ -45,7 +45,7 @@ public class GameScreen implements Screen {
 
    // Textures;
     Texture broccoliImage;
-    Texture bucketImage;
+    Texture plateImage;
     Texture counterImage;
     Texture orderImage;
 
@@ -111,7 +111,7 @@ public class GameScreen implements Screen {
 
         // load the images for the droplet and the bucket, 64x64 pixels each
         broccoliImage = new Texture(Gdx.files.internal("textures/Broccoli.png"));
-        bucketImage = new Texture(Gdx.files.internal("textures/plate1.png"));
+        plateImage = new Texture(Gdx.files.internal("textures/plate1.png"));
         counterImage = new Texture(Gdx.files.internal("counter.jpeg"));
         orderImage = new Texture(Gdx.files.internal("textures/order_sushi.png"));
 
@@ -168,9 +168,9 @@ public class GameScreen implements Screen {
         tiledmaprenderer.setView(camera);
         tiledmaprenderer.render(mapLayerIndices);
 
-        game.batch.draw(bucketImage, plate.x, plate.y);
+        game.batch.draw(plateImage, plate.x, plate.y);
         game.batch.draw(orderImage, 700, 400 );
-        if(isOnPlate) game.batch.draw(bucketImage, player1.getHitbox().getX(), player1.getHitbox().getY());
+        if(isOnPlate) game.batch.draw(plateImage, player1.holdingPosition.x, player1.holdingPosition.y - 10);
 
         game.font.draw(game.batch, "incoming orders: " + ordersToBeServed, 0, 480);
         game.font.draw(game.batch, "time left: " + secondsLeft, 0, 465);
@@ -202,7 +202,7 @@ public class GameScreen implements Screen {
             if(ingredient != null) {
 
                 if(ingredient.getPickUp()) {
-                    game.batch.draw(ingredient.getTexture(), player1.getHitbox().x, player1.getHitbox().y);
+                    game.batch.draw(ingredient.getTexture(), player1.holdingPosition.x, player1.holdingPosition.y);
                 } else{
                     // if ingredient is put down, draw it there
                     System.out.println(ingredient.getIsPreparing());
@@ -211,10 +211,10 @@ public class GameScreen implements Screen {
                     }else if (ingredient.getIsPreparing()){
                         drawInArea(preparingArea, ingredient);
                     }
-
-                    servingAreaAction(servingArea, player1.getHitbox(), ingredient);
-                    preparingAreaAction(preparingArea, player1.getHitbox(), ingredient);
                 }
+
+                servingAreaAction(servingArea, player1.getHitbox(), ingredient);
+                preparingAreaAction(preparingArea, player1.getHitbox(), ingredient);
             }
         }
 //        game.batch.draw(player1.getTexture(), player1.getHitbox().x, player1.getHitbox().y);
@@ -282,22 +282,22 @@ public class GameScreen implements Screen {
         desired_velocity.x = desired_velocity.y = 0.0f;
         if (Gdx.input.isKeyPressed(Keys.LEFT)){
             desired_velocity.x = -300 * Gdx.graphics.getDeltaTime();
-            player1.changeTexture("left");
+            player1.changeDirection(Direction.LEFT);
             updatePlayerData(net, player1);
         }
         if (Gdx.input.isKeyPressed(Keys.RIGHT)) {
             desired_velocity.x = 300 * Gdx.graphics.getDeltaTime();
-            player1.changeTexture("right");
+            player1.changeDirection(Direction.RIGHT);
             updatePlayerData(net, player1);
         }
         if (Gdx.input.isKeyPressed(Keys.DOWN)){
             desired_velocity.y = -300 * Gdx.graphics.getDeltaTime();
-            player1.changeTexture("down");
+            player1.changeDirection(Direction.DOWN);
             updatePlayerData(net, player1);
         }
         if (Gdx.input.isKeyPressed(Keys.UP)){
             desired_velocity.y = 300 * Gdx.graphics.getDeltaTime();
-            player1.changeTexture("up");
+            player1.changeDirection(Direction.UP);
             updatePlayerData(net, player1);
         }
 
@@ -482,7 +482,7 @@ public class GameScreen implements Screen {
     @Override
     public void dispose() {
         broccoliImage.dispose();
-        bucketImage.dispose();
+        plateImage.dispose();
         dropSound.dispose();
         rainMusic.dispose();
 
