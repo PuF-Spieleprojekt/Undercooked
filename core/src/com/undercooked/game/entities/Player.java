@@ -1,14 +1,18 @@
 package com.undercooked.game.entities;
 
 import com.badlogic.gdx.Gdx;
-import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.Sprite;
 import com.badlogic.gdx.graphics.g2d.TextureAtlas;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.maps.objects.RectangleMapObject;
 import com.badlogic.gdx.math.Rectangle;
-import com.badlogic.gdx.utils.ObjectSet;
 import com.badlogic.gdx.graphics.g2d.Animation;
+import com.badlogic.gdx.math.Vector2;
+import com.undercooked.game.utilities.enums.Direction;
+
+import java.awt.geom.Point2D;
+import java.util.EnumMap;
+import java.util.Map;
 
 
 public class Player {
@@ -17,67 +21,85 @@ public class Player {
     private int step = 1;
     private Sprite sprite;
     private String textureString = "down1";
+    private Byte direction = 3; // clockwise: 1=up 2=right 3=down 4=left
     private Animation<TextureRegion> cutAnimation;
-    TextureAtlas textureAtlas = new TextureAtlas(Gdx.files.internal("playermodel/player_naked_sprites_apron.txt"));
+
+
+    // some new ways of dealing with directions and where to draw the items being held
+    Direction facing = Direction.DOWN;
+    public Vector2 holdingPosition;
+    private Vector2 holdingOffset = new Vector2(0,0);
+    private EnumMap<Direction, Vector2> holdingOffsetDistances = new EnumMap<Direction, Vector2>(Direction.class);
+
+
+    TextureAtlas textureAtlas = new TextureAtlas(Gdx.files.internal("playermodel/player_apron_yellow.txt"));
+
 
     public Player(String name){
         this.name = name;
         this.sprite = textureAtlas.createSprite("down1");
         this.hitbox = sprite.getBoundingRectangle();
+        this.holdingPosition = new Vector2(hitbox.x, hitbox.y);
+
+        // initialize direction distances
+        holdingOffsetDistances.put(Direction.UP, new Vector2(0, 80));
+        holdingOffsetDistances.put(Direction.RIGHT, new Vector2(30, 15));
+        holdingOffsetDistances.put(Direction.DOWN, new Vector2(0, -30));
+        holdingOffsetDistances.put(Direction.LEFT, new Vector2(-30, 15));
     }
 
-    public void changeTexture(String direction){
+    public void changeTexture(Direction direction){
         if(step == 12){ step = 1;}
         step+=1;
         switch (direction){
-            case "up" :
+            case UP :
                 if (step>=5 &&step<=8){
-                   changeDirection("up1");
+                   changeAnimationStep("up1");
                     break;
                 } else if(step>=1 &&step<=4){
-                    changeDirection("up2");
+                    changeAnimationStep("up2");
                     break;
                 } else if (step>=9 &&step<=12){
-                    changeDirection("up3");
+                    changeAnimationStep("up3");
                     break;
             }
 
-            case "down" :
+            case DOWN :
                 this.cutAnimation = new Animation<TextureRegion>(1f/10f, textureAtlas.findRegions("cut-front"));
                 if (step>=5 &&step<=8){
-                    changeDirection("down1");
+                    changeAnimationStep("down1");
                     break;
                 } else if(step>=1 &&step<=4){
-                    changeDirection("down2");
+                    changeAnimationStep("down2");
                     break;
                 }else if(step>=9 &&step<=12){
-                    changeDirection("down3");
+                    changeAnimationStep("down3");
                     break;
                 }
 
-            case "left" :
+            case LEFT :
                 this.cutAnimation = new Animation<TextureRegion>(1f/10f, textureAtlas.findRegions("cut-left"));
                 if (step>=5 &&step<=8){
-                    changeDirection("left1");
+                    changeAnimationStep("left1");
                     break;
                 } else if(step>=1 &&step<=4){
-                    changeDirection("left2");
+                    changeAnimationStep("left2");
                     break;
                 }else if(step>=9 &&step<=12){
-                    changeDirection("left3");
+                    changeAnimationStep("left3");
                     break;
                 }
 
-            case "right" :
+            case RIGHT :
                 this.cutAnimation = new Animation<TextureRegion>(1f/10f, textureAtlas.findRegions("cut-right"));
                 if (step>=5 &&step<=8){
-                    changeDirection("right1");
+                    changeAnimationStep("right1");
                     break;
                 } else if(step>=1 &&step<=4){
-                    changeDirection("right2");
+                    changeAnimationStep("right2");
                     break;
                 }else if(step>=9 &&step<=12){
-                    changeDirection("right3");
+                    changeAnimationStep("right3");
                     break;
                 }
         }
@@ -110,10 +132,22 @@ public class Player {
         }
     }
 
-    private void changeDirection(String name){
+    private void changeAnimationStep(String name){
         textureString = name;
         sprite.setRegion(textureAtlas.findRegion(name));
 
+    }
+
+    public void changeDirection(Direction d) {
+        facing = d;
+        changeTexture(d);
+        updateHoldingPosition(d);
+    }
+
+    private void updateHoldingPosition(Direction d) {
+        holdingOffset = holdingOffsetDistances.get(d);
+        holdingPosition.x = hitbox.getX() + holdingOffset.x;
+        holdingPosition.y = hitbox.getY() + holdingOffset.y;
     }
 
     public String getTextureName(){
