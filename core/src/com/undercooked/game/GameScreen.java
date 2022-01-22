@@ -198,7 +198,7 @@ public class GameScreen implements Screen {
 
         if(!net.getIngredientData().isEmpty()){
             if(net.getIngredientData().get("create").equals("true")){
-                Map<String, String> ingredient = new HashMap<String, String>();
+                Map<String, String> ingredient = net.getIngredientData();
                 float x = Float.parseFloat(ingredient.get("hitboxX"));
                 float y = Float.parseFloat(ingredient.get("hitboxY"));
                 ingredients.add(new Ingredient("Broccoli", broccoliImage, new Rectangle(x, y, 32, 32)));
@@ -225,10 +225,9 @@ public class GameScreen implements Screen {
                     }else if (ingredient.getIsPreparing()){
                         drawInArea(preparingArea, ingredient);
                     }
-
-                    servingAreaAction(servingArea, player1.getHitbox(), ingredient);
-                    preparingAreaAction(preparingArea, player1.getHitbox(), ingredient);
                 }
+                servingAreaAction(servingArea, player1.getHitbox(), ingredient);
+                preparingAreaAction(preparingArea, player1.getHitbox(), ingredient);
             }
         }
 
