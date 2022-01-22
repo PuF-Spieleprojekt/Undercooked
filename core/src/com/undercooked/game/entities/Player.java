@@ -24,6 +24,7 @@ public class Player {
     private Byte direction = 3; // clockwise: 1=up 2=right 3=down 4=left
     private Animation<TextureRegion> cutAnimation;
 
+
     // some new ways of dealing with directions and where to draw the items being held
     Direction facing = Direction.DOWN;
     public Vector2 holdingPosition;
@@ -32,6 +33,7 @@ public class Player {
 
 
     TextureAtlas textureAtlas = new TextureAtlas(Gdx.files.internal("playermodel/player_apron_yellow.txt"));
+
 
     public Player(String name){
         this.name = name;

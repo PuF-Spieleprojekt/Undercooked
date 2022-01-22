@@ -30,11 +30,15 @@ import com.undercooked.game.entities.Recipe;
 import com.undercooked.game.utilities.enums.Direction;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ExecutionException;
+
+import grpc.gateway.protoc_gen_openapiv2.options.Openapiv2;
 
 public class GameScreen implements Screen {
 
@@ -184,17 +188,35 @@ public class GameScreen implements Screen {
         game.font.draw(game.batch, "Dishes served: " + dishesServed, 0, 450);
         game.font.draw(game.batch, "highscore: " + highScore, 0, 435);
 
+
+        
+
         elapsedTime += Gdx.graphics.getDeltaTime();
+
+        //if host create Timer else get timerdata from network
         if (isHost) {
             secondsLeft = GAMETIME - elapsedTime;
             if(multiplayer) {
                 net.sendTimerData("globalTimer", String.valueOf(secondsLeft));
             }
-        } else { // TODO we need elapsedTime in almost all scenarios so we should keep it synced between playes probably
-            String[] timerData = net.getTimerData();
-            if(timerData[0] == "globalTimer")
-            secondsLeft = Float.parseFloat(timerData[1]);
+
+        } else {
+            Map<String, String> timerData = net.getTimerData();
+            if(timerData.get("timerPurpose").equals("globalTimer")) {
+                secondsLeft = Float.parseFloat(timerData.get("seconds"));
+            }
         }
+
+        if(!net.getIngredientData().isEmpty()){
+            if(net.getIngredientData().get("create").equals("true")){
+                Map<String, String> ingredient = net.getIngredientData();
+                float x = Float.parseFloat(ingredient.get("hitboxX"));
+                float y = Float.parseFloat(ingredient.get("hitboxY"));
+                ingredients.add(new Ingredient("Broccoli", broccoliImage, new Rectangle(x, y, 32, 32)));
+            }
+        }
+
+        
 
         // TODO do this for all orders: for(Order order : orders) ...
         oneBroccoliSoupPlease.updateTimeLeft(elapsedTime);
@@ -240,6 +262,7 @@ public class GameScreen implements Screen {
 
 
 
+
         //game.batch.draw(dropImage, raindrops.x, raindrops.y);
         //game.batch.draw(broc.texture, broc.hitbox.x, broc.hitbox.y);
 
@@ -249,6 +272,10 @@ public class GameScreen implements Screen {
 
                 if(ingredient.getPickUp()) {
                     game.batch.draw(ingredient.getTexture(), player1.holdingPosition.x, player1.holdingPosition.y);
+                    if(multiplayer){
+                       updateIngredientData(net, ingredient, "false");
+                    }
+
                 } else{
                     // if ingredient is put down, draw it there
                     if(ingredient.getIsServed()){
@@ -257,25 +284,23 @@ public class GameScreen implements Screen {
                         drawInArea(preparingArea, ingredient);
                     }
                 }
-
                 servingAreaAction(servingArea, player1.getHitbox(), ingredient);
                 preparingAreaAction(preparingArea, player1.getHitbox(), ingredient);
             }
         }
-//        game.batch.draw(player1.getTexture(), player1.getHitbox().x, player1.getHitbox().y);
-        if(multiplayer && net.joinedMatch){
-            game.batch.draw(player2.getTexture(), player2.getHitbox().x + 100, player2.getHitbox().y + 100);
-        }
 
 
+
+        //TODO: Fix Bug
         if(Gdx.input.isKeyPressed(Keys.SPACE)){
             game.batch.draw((TextureRegion) player1.getCutAnimation().getKeyFrame(elapsedTime, true),player1.getHitbox().x, player1.getHitbox().y );
         }else {
             game.batch.draw(player1.getTexture(), player1.getHitbox().x, player1.getHitbox().y);
-        }
-            if(multiplayer && net.joinedMatch){
-            game.batch.draw(player2.getTexture(), player2.getHitbox().x + 100, player2.getHitbox().y + 100);
-        }
+          }
+        
+        if(multiplayer && net.joinedMatch){
+            game.batch.draw(player2.getTexture(), player2.getHitbox().x, player2.getHitbox().y);
+          }
 
         game.batch.end();
 
@@ -325,9 +350,9 @@ public class GameScreen implements Screen {
         }
 
         if(net.joinedMatch){
-            String[] matchData =  net.getPlayerData();
-            if(matchData.length > 1){
-                player2.setPosition(matchData[1], matchData[2]);
+            Map<String, String> matchData =  net.getPlayerData();
+            if(matchData.size() > 1){
+                player2.setPosition(matchData.get("hitboxX"), matchData.get("hitboxY"));
                 player2.checkBoundaries();
             }
 
@@ -391,11 +416,14 @@ public class GameScreen implements Screen {
 
     //Create an ingredient according to the area the player is standing in
     public void createIngredient(RectangleMapObject object, Rectangle playerObject){
-        //TODO: Maybe other way to determine whisch ingredient will be created?
+        //TODO: Maybe other way to determine which ingredient will be created?
         if (object.getProperties().containsKey("broccoli")){
             if (object.getRectangle().overlaps(playerObject)){
                 if(Gdx.input.isKeyJustPressed(Keys.A)){
                     ingredients.add(new Ingredient("Broccoli", broccoliImage, new Rectangle(playerObject.x, playerObject.y, 32, 32)));
+                    if (multiplayer) {
+                        updateIngredientData(net,new Ingredient("Broccoli", broccoliImage, new Rectangle(playerObject.x, playerObject.y, 32, 32)), "true");
+                    }
                     holdingSomething = true;
                 }
             }
@@ -488,9 +516,10 @@ public class GameScreen implements Screen {
         }
     }
 
-    public void updateObjectData(Networking net, Ingredient ingredient){
+
+    public void updateIngredientData(Networking net, Ingredient ingredient, String create){
         if(multiplayer){
-            net.sendPlayerData(ingredient.getTexture().toString(), ingredient.getPositionStringX(), ingredient.getPositionStringY());
+            net.sendIngredientData(create,ingredient.getTexture().toString(), ingredient.getPositionStringX(), ingredient.getPositionStringY());
         }
     }
 
