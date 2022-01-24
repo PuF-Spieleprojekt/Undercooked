@@ -223,14 +223,15 @@ public class GameScreen implements Screen {
             }
         }
         Map<String, String> ingredientData = net.getIngredientData();
+        Map<String, String> createCommand = net.getCreateIngredientCommand();
+        System.out.println(ingredientData);
         if(!ingredientData.isEmpty()){
-            System.out.println(ingredientData);
-            if(ingredientData.get("create").equals("true")){
+            if(createCommand.get("create").equals("true")){
                 float x = Float.parseFloat(ingredientData.get("hitboxX"));
                 float y = Float.parseFloat(ingredientData.get("hitboxY"));
                 String ownerID = ingredientData.get("ownerID");
-                System.out.println("NetworIngridenet method is accessed");
                 ingredients.add(new Ingredient("Broccoli", broccoliImage, new Rectangle(x, y, 32, 32),ownerID));
+                net.createIngredientCommand("false");
             }
         }
 
@@ -300,6 +301,9 @@ public class GameScreen implements Screen {
             if(ingredient != null) {
                 if(ingredient.getPickUp()) {
                     if(multiplayer){
+                        if(ingredientData.get("create").equals("true")){
+                            System.out.println("------------------------------------------------------------");
+                        }
                         if(ingredient.getOwner().equals(netPlayer1.getUserID())){
                             game.batch.draw(ingredient.getTexture(), netPlayer1.holdingPosition.x, netPlayer1.holdingPosition.y);
                         } else {
@@ -526,6 +530,7 @@ public class GameScreen implements Screen {
                   Ingredient newIngredient = new Ingredient("Broccoli", broccoliImage, new Rectangle(player.getHitbox().x, player.getHitbox().y, 32, 32), player.getUserID());
                   ingredients.add(newIngredient);
                   System.out.println("NetworkIngredient gets created");
+                  net.createIngredientCommand("true");
                   updateIngredientData(net,newIngredient, "true", newIngredient.getOwner());
                   holdingSomething = true;
                 }

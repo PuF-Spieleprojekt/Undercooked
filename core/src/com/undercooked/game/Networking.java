@@ -65,6 +65,7 @@ public class Networking {
     private Map<String, String> playerData = new HashMap<>();
     private Map<String, String> timerData = new HashMap<>();
     private Map<String, String> ingredientData = new HashMap<>();
+    private Map<String, String> createIngredientCommand = new HashMap<>();
 
     public Boolean joinedMatch = false;
 
@@ -258,6 +259,10 @@ public class Networking {
         return ingredientData;
     }
 
+    public Map<String, String> getCreateIngredientCommand() {
+        return createIngredientCommand;
+    }
+
     public Map<String,String> retrieveNetworkData(String receivedData) {
         String[] newData = receivedData.split(",");
         Map<String, String> dataMap = new HashMap<String, String>();
@@ -326,6 +331,20 @@ public class Networking {
         }
     }
 
+    public void createIngredientCommand(String create){
+        if (!match.getMatchId().isEmpty()) {
+            long opCode = 4;
+
+            Map<String,String> dataString = new HashMap<>();
+
+            dataString.put("create", create);
+
+            String dataJson = new Gson().toJson(dataString);
+            byte[] byteData = dataJson.getBytes();
+            socket.sendMatchData(match.getMatchId(), opCode, byteData);
+        }
+    }
+
 
     final SocketListener listener = new AbstractSocketListener() {
         @Override
@@ -347,7 +366,10 @@ public class Networking {
                     break;
                 case "3" :
                     ingredientData = retrieveNetworkData(receivedData);
-
+                    break;
+                case "4" :
+                    createIngredientCommand = retrieveNetworkData(receivedData);
+                    break;
             }
 
         }
