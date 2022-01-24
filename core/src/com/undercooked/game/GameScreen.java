@@ -224,11 +224,12 @@ public class GameScreen implements Screen {
         }
 
         if(!net.getIngredientData().isEmpty()){
-            if(net.getIngredientData().get("create").equals("true")){
-                Map<String, String> ingredient = net.getIngredientData();
+            Map<String, String> ingredient = net.getIngredientData();
+            if(ingredient.get("create").equals("true")){
                 float x = Float.parseFloat(ingredient.get("hitboxX"));
                 float y = Float.parseFloat(ingredient.get("hitboxY"));
                 String ownerID = ingredient.get("ownerID");
+                System.out.println("NetworIngridenet method is accessed");
                 ingredients.add(new Ingredient("Broccoli", broccoliImage, new Rectangle(x, y, 32, 32),ownerID));
             }
         }
@@ -297,7 +298,7 @@ public class GameScreen implements Screen {
         //for loop through ingredient array
         for (Ingredient ingredient : ingredients){
             if(ingredient != null) {
-
+                System.out.println(ingredients.size());
                 if(ingredient.getPickUp()) {
                     if(multiplayer){
                         if(ingredient.getOwner().equals(netPlayer1.getUserID())){
@@ -524,9 +525,8 @@ public class GameScreen implements Screen {
                 if(Gdx.input.isKeyJustPressed(Keys.A)){
                   Ingredient newIngredient = new Ingredient("Broccoli", broccoliImage, new Rectangle(player.getHitbox().x, player.getHitbox().y, 32, 32), player.getUserID());
                   ingredients.add(newIngredient);
-                  System.out.println(newIngredient.getOwner());
-                  updateIngredientData(net,new Ingredient("Broccoli", broccoliImage, new Rectangle(player.getHitbox().x, player.getHitbox().y, 32, 32)), "true", newIngredient.getOwner());
-
+                  System.out.println("NetworkIngredient gets created");
+                  updateIngredientData(net,newIngredient, "true", newIngredient.getOwner());
                   holdingSomething = true;
                 }
             }
