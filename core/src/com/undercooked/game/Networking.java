@@ -346,6 +346,7 @@ public class Networking {
                     timerData = retrieveNetworkData(receivedData);
                     break;
                 case "3" :
+                    System.out.println(new String(matchData.getData()));
                     ingredientData = retrieveNetworkData(receivedData);
 
             }

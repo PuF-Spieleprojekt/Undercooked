@@ -222,13 +222,12 @@ public class GameScreen implements Screen {
                 secondsLeft = Float.parseFloat(timerData.get("seconds"));
             }
         }
-
-        if(!net.getIngredientData().isEmpty()){
-            Map<String, String> ingredient = net.getIngredientData();
-            if(ingredient.get("create").equals("true")){
-                float x = Float.parseFloat(ingredient.get("hitboxX"));
-                float y = Float.parseFloat(ingredient.get("hitboxY"));
-                String ownerID = ingredient.get("ownerID");
+        Map<String, String> ingredientData = net.getIngredientData();
+        if(!ingredientData.isEmpty()){
+            if(ingredientData.get("create").equals("true")){
+                float x = Float.parseFloat(ingredientData.get("hitboxX"));
+                float y = Float.parseFloat(ingredientData.get("hitboxY"));
+                String ownerID = ingredientData.get("ownerID");
                 System.out.println("NetworIngridenet method is accessed");
                 ingredients.add(new Ingredient("Broccoli", broccoliImage, new Rectangle(x, y, 32, 32),ownerID));
             }
@@ -303,11 +302,13 @@ public class GameScreen implements Screen {
                     if(multiplayer){
                         if(ingredient.getOwner().equals(netPlayer1.getUserID())){
                             game.batch.draw(ingredient.getTexture(), netPlayer1.holdingPosition.x, netPlayer1.holdingPosition.y);
+                            updateIngredientData(net, ingredient, "false", ingredient.getOwner());
                         } else {
                             game.batch.draw(ingredient.getTexture(), netPlayer2.holdingPosition.x, netPlayer2.holdingPosition.y);
+                            updateIngredientData(net, ingredient, "false", ingredient.getOwner());
                         }
 
-                        updateIngredientData(net, ingredient, "false", ingredient.getOwner());
+
                     } else {
                         game.batch.draw(ingredient.getTexture(), player1.holdingPosition.x, player1.holdingPosition.y);
                     }
