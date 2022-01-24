@@ -332,8 +332,8 @@ public class Networking {
         public void onMatchData(final MatchData matchData) {
             //As soon there is match data, a player has joined the Match
             joinedMatch = true;
-            System.out.println("Listener: ");
-            System.out.println(new String(matchData.getData()));
+            //System.out.println("Listener: ");
+            //System.out.println(new String(matchData.getData()));
             // received Data
             receivedData = new String(matchData.getData());
 
