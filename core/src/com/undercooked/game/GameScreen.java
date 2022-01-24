@@ -235,7 +235,7 @@ public class GameScreen implements Screen {
             }
         }
         // To let the other Cient know to stop producing more new ingredients
-        if(createCommand.get("create").equals("false")){
+        if(!createCommand.isEmpty() && createCommand.get("create").equals("false") ){
             net.createIngredientCommand("false");
         }
 
