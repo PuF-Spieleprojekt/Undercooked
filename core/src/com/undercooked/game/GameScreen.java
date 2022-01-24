@@ -24,6 +24,7 @@ import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.math.Vector3;
 import com.badlogic.gdx.utils.ScreenUtils;
 import com.undercooked.game.entities.Ingredient;
+import com.undercooked.game.entities.NetworkPlayer;
 import com.undercooked.game.entities.Order;
 import com.undercooked.game.entities.Player;
 import com.undercooked.game.entities.Recipe;
@@ -66,6 +67,7 @@ public class GameScreen implements Screen {
     RectangleMapObject servingArea;
     RectangleMapObject preparingArea;
     RectangleMapObject blockingObject;
+    RectangleMapObject ingredientArea;
     RectangleMapObject currentLocation;
 
     Sound dropSound, choppingSound, punchSound;
@@ -73,7 +75,9 @@ public class GameScreen implements Screen {
     OrthographicCamera camera;
     int dropsGathered;
     Player player1;
-    Player player2;
+    NetworkPlayer netPlayer1;
+    NetworkPlayer netPlayer2;
+    private ArrayList <Player> players = new ArrayList<Player>();
     private ArrayList<Ingredient> ingredients = new ArrayList<Ingredient>();
 
     double progress = 0;
@@ -150,10 +154,13 @@ public class GameScreen implements Screen {
         camera.setToOrtho(false, 800, 480);
 
         // create a Rectangle to logically represent the bucket
-        player1 = new Player("Player1");
+
 
         if(multiplayer){
-            player2 = new Player("Player2");
+            netPlayer1 = new NetworkPlayer(net);
+            netPlayer2 = new NetworkPlayer(net);
+        } else {
+            player1 = new Player("Player1");
         }
 
 
@@ -181,7 +188,14 @@ public class GameScreen implements Screen {
 
         game.batch.draw(plateImage, plate.x, plate.y);
         game.batch.draw(orderImage, 700, 400 );
-        if(isOnPlate) game.batch.draw(plateImage, player1.holdingPosition.x, player1.holdingPosition.y - 10);
+
+        if(isOnPlate) {
+            if(!multiplayer) {
+                game.batch.draw(plateImage, player1.holdingPosition.x, player1.holdingPosition.y - 10);
+            } else {
+                game.batch.draw(plateImage, netPlayer1.holdingPosition.x, netPlayer1.holdingPosition.y - 10);
+            }
+        }
 
         game.font.draw(game.batch, "incoming orders: " + ordersToBeServed, 0, 480);
         game.font.draw(game.batch, "time left: " + (int)secondsLeft, 0, 465);
@@ -239,28 +253,39 @@ public class GameScreen implements Screen {
 
         // Map Objects get initialized
         // TODO why does this happen in every render? Shouldn't this be in the constructor?
+
         for (MapObject object : objects){
 
             if(object.getProperties().containsKey("blocked")) {
                 blockingObject = (RectangleMapObject) object;
-                player1.collisionDetection(blockingObject);
+
+                if(!multiplayer){
+                    player1.collisionDetection(blockingObject);
+                } else {
+                    netPlayer1.collisionDetection(blockingObject);
+                }
+
 
             } else if(object.getProperties().containsKey("Preparing Area")){
 
                 preparingArea = (RectangleMapObject) object;
-                currentLocation = getLocation((RectangleMapObject) object, player1.getHitbox());
+               // currentLocation = getLocation((RectangleMapObject) object, player1.getHitbox());
 
             } else if (object.getProperties().containsKey("Serving Area")){
                 //Set servingArea to be able to acces it in batch.draw
                 servingArea =(RectangleMapObject) object;
-                currentLocation = getLocation((RectangleMapObject) object, player1.getHitbox());
+              //  currentLocation = getLocation((RectangleMapObject) object, player1.getHitbox());
 
             } else if (object.getProperties().containsKey("ingredient")){ // TODO let's fix this, seems wrong to look for a key like this, no?
-                createIngredient((RectangleMapObject) object, player1.getHitbox());
+                ingredientArea = (RectangleMapObject) object;
+                if(!multiplayer){
+                    createIngredient(ingredientArea, player1.getHitbox());
+                } else {
+                    createIngredient(ingredientArea, netPlayer1.getHitbox());
+                }
+
             }
         }
-
-
 
 
         //game.batch.draw(dropImage, raindrops.x, raindrops.y);
@@ -271,9 +296,11 @@ public class GameScreen implements Screen {
             if(ingredient != null) {
 
                 if(ingredient.getPickUp()) {
-                    game.batch.draw(ingredient.getTexture(), player1.holdingPosition.x, player1.holdingPosition.y);
                     if(multiplayer){
-                       updateIngredientData(net, ingredient, "false");
+                        game.batch.draw(ingredient.getTexture(), netPlayer1.holdingPosition.x, netPlayer1.holdingPosition.y);
+                        updateIngredientData(net, ingredient, "false");
+                    } else {
+                        game.batch.draw(ingredient.getTexture(), player1.holdingPosition.x, player1.holdingPosition.y);
                     }
 
                 } else{
@@ -284,22 +311,37 @@ public class GameScreen implements Screen {
                         drawInArea(preparingArea, ingredient);
                     }
                 }
-                servingAreaAction(servingArea, player1.getHitbox(), ingredient);
-                preparingAreaAction(preparingArea, player1.getHitbox(), ingredient);
+                if(!multiplayer){
+                    servingAreaAction(servingArea, player1.getHitbox(), ingredient);
+                    preparingAreaAction(preparingArea, player1.getHitbox(), ingredient);
+                } else {
+                    servingAreaAction(servingArea, netPlayer1.getHitbox(), ingredient);
+                    preparingAreaAction(preparingArea, netPlayer1.getHitbox(), ingredient);
+                }
+
             }
         }
 
 
 
         //TODO: Fix Bug
-        if(Gdx.input.isKeyPressed(Keys.SPACE)){
-            game.batch.draw((TextureRegion) player1.getCutAnimation().getKeyFrame(elapsedTime, true),player1.getHitbox().x, player1.getHitbox().y );
-        }else {
-            game.batch.draw(player1.getTexture(), player1.getHitbox().x, player1.getHitbox().y);
-          }
+        if(!multiplayer){
+            if(Gdx.input.isKeyPressed(Keys.SPACE)){
+                game.batch.draw((TextureRegion) player1.getCutAnimation().getKeyFrame(elapsedTime, true),player1.getHitbox().x, player1.getHitbox().y );
+            }else {
+                game.batch.draw(player1.getTexture(), player1.getHitbox().x, player1.getHitbox().y);
+            }
+        } else {
+            if(Gdx.input.isKeyPressed(Keys.SPACE)){
+                game.batch.draw((TextureRegion) netPlayer1.getCutAnimation().getKeyFrame(elapsedTime, true),netPlayer1.getHitbox().x, netPlayer1.getHitbox().y );
+            }else {
+                game.batch.draw(netPlayer1.getTexture(), netPlayer1.getHitbox().x, netPlayer1.getHitbox().y);
+            }
+        }
+
         
         if(multiplayer && net.joinedMatch){
-            game.batch.draw(player2.getTexture(), player2.getHitbox().x, player2.getHitbox().y);
+            game.batch.draw(netPlayer2.getTexture(), netPlayer2.getHitbox().x, netPlayer2.getHitbox().y);
           }
 
         game.batch.end();
@@ -313,11 +355,20 @@ public class GameScreen implements Screen {
 
 
         // plate logic
-        if (plate.overlaps(player1.getHitbox())) {
-            if (Gdx.input.isKeyPressed(Keys.A)){
-                isOnPlate = true;
+        if(!multiplayer){
+            if (plate.overlaps(player1.getHitbox())) {
+                if (Gdx.input.isKeyPressed(Keys.A)){
+                    isOnPlate = true;
+                }
+            }
+        } else {
+            if (plate.overlaps(netPlayer1.getHitbox())) {
+                if (Gdx.input.isKeyPressed(Keys.A)){
+                    isOnPlate = true;
+                }
             }
         }
+
 
 
         // process user input
@@ -330,30 +381,46 @@ public class GameScreen implements Screen {
         desired_velocity.x = desired_velocity.y = 0.0f;
         if (Gdx.input.isKeyPressed(Keys.LEFT)){
             desired_velocity.x = -300 * Gdx.graphics.getDeltaTime();
-            player1.changeDirection(Direction.LEFT);
-            updatePlayerData(net, player1);
+            if(!multiplayer){
+                player1.changeDirection(Direction.LEFT);
+            }else{
+                netPlayer1.changeDirection(Direction.LEFT);
+                updatePlayerData(net, netPlayer1);
+            }
         }
         if (Gdx.input.isKeyPressed(Keys.RIGHT)) {
             desired_velocity.x = 300 * Gdx.graphics.getDeltaTime();
-            player1.changeDirection(Direction.RIGHT);
-            updatePlayerData(net, player1);
+            if(!multiplayer){
+                player1.changeDirection(Direction.RIGHT);
+            }else{
+                netPlayer1.changeDirection(Direction.RIGHT);
+                updatePlayerData(net, netPlayer1);
+            }
         }
         if (Gdx.input.isKeyPressed(Keys.DOWN)){
             desired_velocity.y = -300 * Gdx.graphics.getDeltaTime();
-            player1.changeDirection(Direction.DOWN);
-            updatePlayerData(net, player1);
+            if(!multiplayer){
+                player1.changeDirection(Direction.DOWN);
+            }else{
+                netPlayer1.changeDirection(Direction.DOWN);
+                updatePlayerData(net, netPlayer1);
+            }
         }
         if (Gdx.input.isKeyPressed(Keys.UP)){
             desired_velocity.y = 300 * Gdx.graphics.getDeltaTime();
-            player1.changeDirection(Direction.UP);
-            updatePlayerData(net, player1);
+            if(!multiplayer){
+                player1.changeDirection(Direction.UP);
+            }else{
+                netPlayer1.changeDirection(Direction.UP);
+                updatePlayerData(net, netPlayer1);
+            }
         }
 
         if(net.joinedMatch){
             Map<String, String> matchData =  net.getPlayerData();
             if(matchData.size() > 1){
-                player2.setPosition(matchData.get("hitboxX"), matchData.get("hitboxY"));
-                player2.checkBoundaries();
+                netPlayer2.setPosition(matchData.get("hitboxX"), matchData.get("hitboxY"));
+                // netPlayer2.checkBoundaries();
             }
 
         }
@@ -368,10 +435,16 @@ public class GameScreen implements Screen {
             playerMovementVector.scl(100 / speed);
         }
 
-        player1.getHitbox().x += playerMovementVector.x;
-        player1.getHitbox().y += playerMovementVector.y;
+        if(!multiplayer){
+            player1.getHitbox().x += playerMovementVector.x;
+            player1.getHitbox().y += playerMovementVector.y;
+            player1.checkBoundaries();
+        } else {
+            netPlayer1.getHitbox().x += playerMovementVector.x;
+            netPlayer1.getHitbox().y += playerMovementVector.y;
+            netPlayer1.checkBoundaries();
+        }
 
-        player1.checkBoundaries();
 
         // move the raindrops, remove any that are beneath the bottom edge of
         // the screen or that hit the bucket. In the later case we play back
@@ -386,6 +459,7 @@ public class GameScreen implements Screen {
         }*/
         // Closes the window using ecs button.
         if (Gdx.input.isKeyPressed(Input.Keys.ESCAPE)){
+            //TODO: Create logic for quiting gane without closing app
             Gdx.app.exit();
         }
 
@@ -510,7 +584,7 @@ public class GameScreen implements Screen {
         }
     }
 
-    public void updatePlayerData(Networking net, Player player){
+    public void updatePlayerData(Networking net, NetworkPlayer player){
         if(multiplayer){
             net.sendPlayerData(player.getTextureName(), player.getPositionStringX(), player.getPositionStringY());
         }

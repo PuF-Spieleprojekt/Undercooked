@@ -61,12 +61,15 @@ public class Networking {
     private Channel channel;
     private String receivedData = "";
     private Boolean authenticationSuccessful;
+    private Map<String, String> userData = new HashMap<>();
     private Map<String, String> playerData = new HashMap<>();
     private Map<String, String> timerData = new HashMap<>();
     private Map<String, String> ingredientData = new HashMap<>();
 
     public Boolean joinedMatch = false;
 
+
+    //TODO: replace with get userData()
     public String getUsername(){
         return session.getUsername();
     }
@@ -236,12 +239,21 @@ public class Networking {
         //System.out.println(matchlist.getMatchesCount());
     }
 
+    public Map<String, String> getUserdata(){
+        userData.put("Username", session.getUsername());
+        userData.put("UserID", session.getUserId());
+
+        return userData;
+    }
+
     public Map<String, String> getPlayerData() {
         return playerData;
     }
+
     public Map<String, String> getTimerData() {
         return timerData;
     }
+
     public Map<String, String> getIngredientData() {
         return ingredientData;
     }
@@ -273,8 +285,6 @@ public class Networking {
             dataString.put("hitboxY", hitboxY);
             dataString.put("hitboxX", hitboxX);
             dataString.put("texture", texture);
-
-
 
             String dataJson = new Gson().toJson(dataString);
             byte[] byteData = dataJson.getBytes();

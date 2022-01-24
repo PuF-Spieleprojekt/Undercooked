@@ -82,6 +82,7 @@ public class LogRegScreen extends ControlScreen implements Screen {
         Skin skin = new Skin(Gdx.files.internal("star-soldier-ui.json"));
         TextButton register = new TextButton("Register", skin);
         TextButton login = new TextButton("Login", skin);
+        TextButton justPlay = new TextButton("Just PLay", skin);
         register.setPosition(230, 180);
         login.setPosition(230, 130);
         super.stage.addActor(register);
@@ -90,6 +91,8 @@ public class LogRegScreen extends ControlScreen implements Screen {
         table.add(register);
         table.row();
         table.add(login);
+        table.row();
+        table.add(justPlay);
 
 
         register.addListener(new ClickListener() {
@@ -106,6 +109,12 @@ public class LogRegScreen extends ControlScreen implements Screen {
 
                  game.setScreen(new LoginScreen(game, net));
 
+            }
+        });
+        justPlay.addListener(new ChangeListener() {
+            @Override
+            public void changed(ChangeEvent event, Actor actor) {
+                game.setScreen(new GameScreen(game, net, false, true));
             }
         });
     }

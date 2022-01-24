@@ -1,29 +1,30 @@
 package com.undercooked.game.entities;
 
 import com.badlogic.gdx.Gdx;
+import com.badlogic.gdx.graphics.g2d.Animation;
 import com.badlogic.gdx.graphics.g2d.Sprite;
 import com.badlogic.gdx.graphics.g2d.TextureAtlas;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.maps.objects.RectangleMapObject;
 import com.badlogic.gdx.math.Rectangle;
-import com.badlogic.gdx.graphics.g2d.Animation;
 import com.badlogic.gdx.math.Vector2;
+import com.undercooked.game.Networking;
 import com.undercooked.game.utilities.enums.Direction;
 
-import java.awt.geom.Point2D;
 import java.util.EnumMap;
-import java.util.Map;
 
 
-public class Player {
-    String name;
+public class NetworkPlayer {
+
+    private Networking net;
     private Rectangle hitbox;
     private int step = 1;
     private Sprite sprite;
     private String textureString = "down1";
     private Byte direction = 3; // clockwise: 1=up 2=right 3=down 4=left
     private Animation<TextureRegion> cutAnimation;
-    private String UserID;
+    private String userID;
+    private String userName;
 
 
     // some new ways of dealing with directions and where to draw the items being held
@@ -36,11 +37,13 @@ public class Player {
     TextureAtlas textureAtlas = new TextureAtlas(Gdx.files.internal("playermodel/player_apron_yellow.txt"));
 
 
-    public Player(String name){
-        this.name = name;
+    public NetworkPlayer(Networking net){
+        this.net = net;
         this.sprite = textureAtlas.createSprite("down1");
         this.hitbox = sprite.getBoundingRectangle();
         this.holdingPosition = new Vector2(hitbox.x, hitbox.y);
+        this.userID = net.getUserdata().get("UserID");
+        this.userName = net.getUserdata().get("UserName");
 
         // initialize direction distances
         holdingOffsetDistances.put(Direction.UP, new Vector2(0, 80));
@@ -156,6 +159,7 @@ public class Player {
         hitbox.y = Float.parseFloat(y);
     }
 
+
     // Getters
     public String getTextureName(){
         return textureString;
@@ -176,6 +180,10 @@ public class Player {
     public Rectangle getHitbox() { return this.hitbox; }
 
     public Animation<TextureRegion> getCutAnimation(){ return this.cutAnimation; }
+
+    public String getUserID () { return userID; }
+
+    public String getUserName () { return userName; }
 }
 
 
