@@ -308,7 +308,7 @@ public class GameScreen implements Screen {
                         if(ingredient.getOwner().equals(netPlayer1.getUserID())){
                             game.batch.draw(ingredient.getTexture(), netPlayer1.holdingPosition.x, netPlayer1.holdingPosition.y);
                         } else {
-                            game.batch.draw(ingredient.getTexture(), netPlayer2.holdingPosition.x, netPlayer2.holdingPosition.y);
+                            game.batch.draw(ingredient.getTexture(), netPlayer2.getHitbox().getX(), netPlayer2.getHitbox().getY());
                         }
                         updateIngredientData(net, ingredient, "false", ingredient.getOwner());
 
