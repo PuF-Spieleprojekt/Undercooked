@@ -224,6 +224,7 @@ public class GameScreen implements Screen {
         }
         Map<String, String> ingredientData = net.getIngredientData();
         if(!ingredientData.isEmpty()){
+            System.out.println(ingredientData);
             if(ingredientData.get("create").equals("true")){
                 float x = Float.parseFloat(ingredientData.get("hitboxX"));
                 float y = Float.parseFloat(ingredientData.get("hitboxY"));
@@ -297,17 +298,14 @@ public class GameScreen implements Screen {
         //for loop through ingredient array
         for (Ingredient ingredient : ingredients){
             if(ingredient != null) {
-                System.out.println(ingredients.size());
                 if(ingredient.getPickUp()) {
                     if(multiplayer){
                         if(ingredient.getOwner().equals(netPlayer1.getUserID())){
                             game.batch.draw(ingredient.getTexture(), netPlayer1.holdingPosition.x, netPlayer1.holdingPosition.y);
-                            updateIngredientData(net, ingredient, "false", ingredient.getOwner());
                         } else {
                             game.batch.draw(ingredient.getTexture(), netPlayer2.holdingPosition.x, netPlayer2.holdingPosition.y);
-                            updateIngredientData(net, ingredient, "false", ingredient.getOwner());
                         }
-
+                        updateIngredientData(net, ingredient, "false", ingredient.getOwner());
 
                     } else {
                         game.batch.draw(ingredient.getTexture(), player1.holdingPosition.x, player1.holdingPosition.y);
@@ -330,6 +328,7 @@ public class GameScreen implements Screen {
                 }
 
             }
+
         }
 
 
