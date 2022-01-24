@@ -17,7 +17,11 @@ public class Ingredient {
    private Boolean pickedUp = true;
    private Boolean isServed = false;
    private Boolean isPreparing = false;
+
+   // String for identifying which player is currently carrying the ingredient
+   private String ownerID = "";
    //TODO: Create Method for is preaderd additional Textures
+
 
     public Ingredient(String name, Texture texture, Rectangle hitbox){
         this.name = name;
@@ -73,6 +77,13 @@ public class Ingredient {
         hitbox.y = Float.parseFloat(y);
     }
 
+    public void setOwner(String ownerID){
+        ownerID = ownerID;
+    }
+
+    public String getOwner(){
+        return ownerID;
+    }
     @Override
     public String toString() {
         return name;

@@ -240,8 +240,8 @@ public class Networking {
     }
 
     public Map<String, String> getUserdata(){
-        userData.put("Username", session.getUsername());
-        userData.put("UserID", session.getUserId());
+        userData.put("username", session.getUsername());
+        userData.put("userID", session.getUserId());
 
         return userData;
     }
@@ -307,7 +307,7 @@ public class Networking {
         }
     }
 
-    public void sendIngredientData(String create, String texture, String hitboxX, String hitboxY){
+    public void sendIngredientData(String create, String texture, String hitboxX, String hitboxY, String ownerID){
         if (!match.getMatchId().isEmpty()) {
             long opCode = 3;
 
@@ -317,6 +317,7 @@ public class Networking {
             dataString.put("texture", texture);
             dataString.put("hitboxX", hitboxX);
             dataString.put("hitboxY", hitboxY);
+            dataString.put("ownerID", ownerID);
 
             String dataJson = new Gson().toJson(dataString);
             byte[] byteData = dataJson.getBytes();

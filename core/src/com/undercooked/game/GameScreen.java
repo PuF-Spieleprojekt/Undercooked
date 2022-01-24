@@ -77,7 +77,7 @@ public class GameScreen implements Screen {
     Player player1;
     NetworkPlayer netPlayer1;
     NetworkPlayer netPlayer2;
-    private ArrayList <Player> players = new ArrayList<Player>();
+    private ArrayList <NetworkPlayer> players = new ArrayList<NetworkPlayer>();
     private ArrayList<Ingredient> ingredients = new ArrayList<Ingredient>();
 
     double progress = 0;
@@ -157,8 +157,10 @@ public class GameScreen implements Screen {
 
 
         if(multiplayer){
-            netPlayer1 = new NetworkPlayer(net);
-            netPlayer2 = new NetworkPlayer(net);
+            players.add(new NetworkPlayer(net));
+            players.add(new NetworkPlayer(net));
+            netPlayer1 = players.get(0);
+            netPlayer2 = players.get(1);
         } else {
             player1 = new Player("Player1");
         }
@@ -281,7 +283,7 @@ public class GameScreen implements Screen {
                 if(!multiplayer){
                     createIngredient(ingredientArea, player1.getHitbox());
                 } else {
-                    createIngredient(ingredientArea, netPlayer1.getHitbox());
+                    createNetworkIngredient(ingredientArea, netPlayer1);
                 }
 
             }
@@ -297,8 +299,13 @@ public class GameScreen implements Screen {
 
                 if(ingredient.getPickUp()) {
                     if(multiplayer){
-                        game.batch.draw(ingredient.getTexture(), netPlayer1.holdingPosition.x, netPlayer1.holdingPosition.y);
-                        updateIngredientData(net, ingredient, "false");
+                        if(ingredient.getOwner().equals(netPlayer1.getUserID())){
+                            game.batch.draw(ingredient.getTexture(), netPlayer1.holdingPosition.x, netPlayer1.holdingPosition.y);
+                        } else {
+                            game.batch.draw(ingredient.getTexture(), netPlayer2.holdingPosition.x, netPlayer2.holdingPosition.y);
+                        }
+
+                        updateIngredientData(net, ingredient, "false", ingredient.getOwner());
                     } else {
                         game.batch.draw(ingredient.getTexture(), player1.holdingPosition.x, player1.holdingPosition.y);
                     }
@@ -495,14 +502,28 @@ public class GameScreen implements Screen {
             if (object.getRectangle().overlaps(playerObject)){
                 if(Gdx.input.isKeyJustPressed(Keys.A)){
                     ingredients.add(new Ingredient("Broccoli", broccoliImage, new Rectangle(playerObject.x, playerObject.y, 32, 32)));
-                    if (multiplayer) {
-                        updateIngredientData(net,new Ingredient("Broccoli", broccoliImage, new Rectangle(playerObject.x, playerObject.y, 32, 32)), "true");
-                    }
                     holdingSomething = true;
                 }
             }
         }
 
+    }
+
+    public void createNetworkIngredient(RectangleMapObject object, NetworkPlayer player){
+        //TODO: Maybe other way to determine which ingredient will be created?
+        if (object.getProperties().containsKey("broccoli")){
+            if (object.getRectangle().overlaps(player.getHitbox())){
+                if(Gdx.input.isKeyJustPressed(Keys.A)){
+                  Ingredient newIngredient = new Ingredient("Broccoli", broccoliImage, new Rectangle(player.getHitbox().x, player.getHitbox().y, 32, 32));
+
+                  newIngredient.setOwner(net.getUserdata().get("userID"));
+                  ingredients.add(newIngredient);
+                  updateIngredientData(net,new Ingredient("Broccoli", broccoliImage, new Rectangle(player.getHitbox().x, player.getHitbox().y, 32, 32)), "true", player.getUserID());
+
+                  holdingSomething = true;
+                }
+            }
+        }
     }
 
     public void servingAreaAction(RectangleMapObject areaObject, Rectangle playerObject, Ingredient ingredient){
@@ -591,9 +612,9 @@ public class GameScreen implements Screen {
     }
 
 
-    public void updateIngredientData(Networking net, Ingredient ingredient, String create){
+    public void updateIngredientData(Networking net, Ingredient ingredient, String create, String ownerID){
         if(multiplayer){
-            net.sendIngredientData(create,ingredient.getTexture().toString(), ingredient.getPositionStringX(), ingredient.getPositionStringY());
+            net.sendIngredientData(create,ingredient.getTexture().toString(), ingredient.getPositionStringX(), ingredient.getPositionStringY(), ownerID);
         }
     }
 
