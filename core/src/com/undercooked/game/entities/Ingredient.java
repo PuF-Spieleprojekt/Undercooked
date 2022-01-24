@@ -19,14 +19,19 @@ public class Ingredient {
    private Boolean isPreparing = false;
 
    // String for identifying which player is currently carrying the ingredient
-   private String ownerID = "";
+   private String ownerID;
    //TODO: Create Method for is preaderd additional Textures
 
 
-    public Ingredient(String name, Texture texture, Rectangle hitbox){
+    public Ingredient(String name, Texture texture, Rectangle hitbox, String ownerID){
         this.name = name;
         this.texture = texture;
         this.hitbox = hitbox;
+        this.ownerID = ownerID;
+    }
+
+    public Ingredient(String name, Texture texture, Rectangle hitbox){
+        this(name, texture, hitbox, "");
     }
     public Texture getTexture(){
         return this.texture;

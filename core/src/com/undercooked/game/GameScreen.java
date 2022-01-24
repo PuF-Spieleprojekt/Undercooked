@@ -228,7 +228,8 @@ public class GameScreen implements Screen {
                 Map<String, String> ingredient = net.getIngredientData();
                 float x = Float.parseFloat(ingredient.get("hitboxX"));
                 float y = Float.parseFloat(ingredient.get("hitboxY"));
-                ingredients.add(new Ingredient("Broccoli", broccoliImage, new Rectangle(x, y, 32, 32)));
+                String ownerID = ingredient.get("ownerID");
+                ingredients.add(new Ingredient("Broccoli", broccoliImage, new Rectangle(x, y, 32, 32),ownerID));
             }
         }
 
@@ -348,6 +349,13 @@ public class GameScreen implements Screen {
 
         
         if(multiplayer && net.joinedMatch){
+            //TODO: Maybe inject UserID through Constructor...
+            int i = 0;
+            while(i >= 1){
+                String newUserID = net.getPlayerData().get("userID");
+                netPlayer2.setUserID(newUserID);
+                i++;
+            }
             game.batch.draw(netPlayer2.getTexture(), netPlayer2.getHitbox().x, netPlayer2.getHitbox().y);
           }
 
@@ -514,11 +522,10 @@ public class GameScreen implements Screen {
         if (object.getProperties().containsKey("broccoli")){
             if (object.getRectangle().overlaps(player.getHitbox())){
                 if(Gdx.input.isKeyJustPressed(Keys.A)){
-                  Ingredient newIngredient = new Ingredient("Broccoli", broccoliImage, new Rectangle(player.getHitbox().x, player.getHitbox().y, 32, 32));
-
-                  newIngredient.setOwner(net.getUserdata().get("userID"));
+                  Ingredient newIngredient = new Ingredient("Broccoli", broccoliImage, new Rectangle(player.getHitbox().x, player.getHitbox().y, 32, 32), player.getUserID());
                   ingredients.add(newIngredient);
-                  updateIngredientData(net,new Ingredient("Broccoli", broccoliImage, new Rectangle(player.getHitbox().x, player.getHitbox().y, 32, 32)), "true", player.getUserID());
+                  System.out.println(newIngredient.getOwner());
+                  updateIngredientData(net,new Ingredient("Broccoli", broccoliImage, new Rectangle(player.getHitbox().x, player.getHitbox().y, 32, 32)), "true", newIngredient.getOwner());
 
                   holdingSomething = true;
                 }
@@ -607,7 +614,7 @@ public class GameScreen implements Screen {
 
     public void updatePlayerData(Networking net, NetworkPlayer player){
         if(multiplayer){
-            net.sendPlayerData(player.getTextureName(), player.getPositionStringX(), player.getPositionStringY());
+            net.sendPlayerData(player.getTextureName(), player.getPositionStringX(), player.getPositionStringY(), player.getUserID());
         }
     }
 

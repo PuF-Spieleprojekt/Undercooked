@@ -276,7 +276,7 @@ public class Networking {
      * +++++++++++++++++++++++++++++++++
      * +++++++++++++++++++++++++++++++++*/
 
-    public void sendPlayerData(String texture, String hitboxX, String hitboxY) {
+    public void sendPlayerData(String texture, String hitboxX, String hitboxY, String userID) {
         if (!match.getMatchId().isEmpty()) {
             long opCode = 1;
             //String data = "{\"texture\" : \"" + texture + "\", \" hitboxX \" : \"" + hitboxX + "\", \" hitboxY \" : \"" + hitboxY + "\" }";
@@ -285,6 +285,7 @@ public class Networking {
             dataString.put("hitboxY", hitboxY);
             dataString.put("hitboxX", hitboxX);
             dataString.put("texture", texture);
+            dataString.put("userID", userID);
 
             String dataJson = new Gson().toJson(dataString);
             byte[] byteData = dataJson.getBytes();

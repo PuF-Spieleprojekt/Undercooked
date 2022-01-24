@@ -42,8 +42,8 @@ public class NetworkPlayer {
         this.sprite = textureAtlas.createSprite("down1");
         this.hitbox = sprite.getBoundingRectangle();
         this.holdingPosition = new Vector2(hitbox.x, hitbox.y);
-        this.userID = net.getUserdata().get("UserID");
-        this.userName = net.getUserdata().get("UserName");
+        this.userID = net.getUserdata().get("userID");
+        this.userName = net.getUserdata().get("userName");
 
         // initialize direction distances
         holdingOffsetDistances.put(Direction.UP, new Vector2(0, 80));
@@ -157,6 +157,14 @@ public class NetworkPlayer {
     public void setPosition(String x, String y){
         hitbox.x = Float.parseFloat(x);
         hitbox.y = Float.parseFloat(y);
+    }
+
+    public void setUserID(String newID){
+        userID = newID;
+    }
+
+    public void setUserName(String newUsername){
+        userName = newUsername;
     }
 
 
