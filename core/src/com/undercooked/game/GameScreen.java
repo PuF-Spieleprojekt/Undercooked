@@ -234,6 +234,10 @@ public class GameScreen implements Screen {
                 net.createIngredientCommand("false");
             }
         }
+        // To let the other Cient know to stop producing more new ingredients
+        if(createCommand.get("create").equals("false")){
+            net.createIngredientCommand("false");
+        }
 
         
 
@@ -301,9 +305,6 @@ public class GameScreen implements Screen {
             if(ingredient != null) {
                 if(ingredient.getPickUp()) {
                     if(multiplayer){
-                        if(ingredientData.get("create").equals("true")){
-                            System.out.println("------------------------------------------------------------");
-                        }
                         if(ingredient.getOwner().equals(netPlayer1.getUserID())){
                             game.batch.draw(ingredient.getTexture(), netPlayer1.holdingPosition.x, netPlayer1.holdingPosition.y);
                         } else {
