@@ -37,6 +37,7 @@ import com.undercooked.game.entities.Recipe;
 import com.undercooked.game.utilities.enums.Direction;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
@@ -213,6 +214,8 @@ public class GameScreen implements Screen {
         // blue and alpha component in the range [0,1]
         // of the color to be used to clear the screen.
         ScreenUtils.clear(0, 0, 0.2f, 1);
+
+        Map<String, String> matchData = new HashMap<>();
 
         // tell the camera to update its matrices.
         camera.update();
@@ -489,6 +492,7 @@ public class GameScreen implements Screen {
             }else{
                 netPlayer1.changeDirection(Direction.LEFT);
                 updatePlayerData(net, netPlayer1);
+                if(net.joinedMatch && !matchData.isEmpty()) netPlayer2.setNetworkDirection(matchData.get("direction"));
 
             }
         }
@@ -499,6 +503,7 @@ public class GameScreen implements Screen {
             }else{
                 netPlayer1.changeDirection(Direction.RIGHT);
                 updatePlayerData(net, netPlayer1);
+                if(net.joinedMatch && !matchData.isEmpty()) netPlayer2.setNetworkDirection(matchData.get("direction"));
 
             }
         }
@@ -509,6 +514,7 @@ public class GameScreen implements Screen {
             }else{
                 netPlayer1.changeDirection(Direction.DOWN);
                 updatePlayerData(net, netPlayer1);
+                if(net.joinedMatch && !matchData.isEmpty()) netPlayer2.setNetworkDirection(matchData.get("direction"));
 
             }
         }
@@ -519,15 +525,15 @@ public class GameScreen implements Screen {
             }else{
                 netPlayer1.changeDirection(Direction.UP);
                 updatePlayerData(net, netPlayer1);
+                if(net.joinedMatch && !matchData.isEmpty()) netPlayer2.setNetworkDirection(matchData.get("direction"));
 
             }
         }
 
         if(net.joinedMatch){
-            Map<String, String> matchData =  net.getPlayerData();
+            matchData =  net.getPlayerData();
             if(matchData.size() > 1){
                 netPlayer2.setNetworkPosition(matchData.get("hitboxX"), matchData.get("hitboxY"));
-                netPlayer2.setNetworkDirection(matchData.get("direction"));
                 // netPlayer2.checkBoundaries();
             }
 
