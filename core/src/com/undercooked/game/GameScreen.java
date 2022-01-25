@@ -443,8 +443,9 @@ public class GameScreen implements Screen {
                 i++;
             }
             game.batch.draw(netPlayer2.getTexture(), netPlayer2.getHitbox().x, netPlayer2.getHitbox().y);
-            if(!net.getPlayerData().isEmpty()) {
-                if (net.getPlayerData().get("hasPlate").equals("true")) {
+
+            if(!net.getPlateData().isEmpty()) {
+                if (net.getPlateData().get("hasPlate").equals("true")) {
                     game.batch.draw(plateImage, netPlayer2.holdingPosition.x, netPlayer2.holdingPosition.y - 10);
                 }
             }
@@ -533,6 +534,7 @@ public class GameScreen implements Screen {
             if(matchData.size() > 1){
                 netPlayer2.setNetworkPosition(matchData.get("hitboxX"), matchData.get("hitboxY"));
                 netPlayer2.setNetworkDirection(matchData.get("direction"));
+                updatePlateData(net, netPlayer1);
             }
 
         }
@@ -718,6 +720,10 @@ public class GameScreen implements Screen {
         if(multiplayer){
             net.sendIngredientData(create,ingredient.getTexture().toString(), ingredient.getPositionStringX(), ingredient.getPositionStringY(), ownerID);
         }
+    }
+
+    public void updatePlateData(Networking net, NetworkPlayer player){
+        net.sendPlateData(player.getPlate());
     }
 
     @Override

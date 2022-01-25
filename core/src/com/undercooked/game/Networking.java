@@ -66,6 +66,7 @@ public class Networking {
     private Map<String, String> timerData = new HashMap<>();
     private Map<String, String> ingredientData = new HashMap<>();
     private Map<String, String> createIngredientCommand = new HashMap<>();
+    private Map<String, String> plateData = new HashMap<>();
 
     public Boolean joinedMatch = false;
 
@@ -297,6 +298,21 @@ public class Networking {
         }
     }
 
+    public void sendPlateData(String hasPlate){
+        if (!match.getMatchId().isEmpty()) {
+            long opCode = 2;
+
+            Map<String,String> dataString = new HashMap<>();
+
+            dataString.put("hasPlate", hasPlate);
+
+
+            String dataJson = new Gson().toJson(dataString);
+            byte[] byteData = dataJson.getBytes();
+            socket.sendMatchData(match.getMatchId(), opCode, byteData);
+        }
+    }
+
     public void createIngredientCommand(String create){
         if (!match.getMatchId().isEmpty()) {
             long opCode = 4;
@@ -333,6 +349,8 @@ public class Networking {
     public Map<String, String> getCreateIngredientCommand() {
         return createIngredientCommand;
     }
+
+    public Map<String, String> getPlateData(){ return plateData; }
 
 
     final SocketListener listener = new AbstractSocketListener() {
