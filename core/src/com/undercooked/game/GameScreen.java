@@ -290,7 +290,7 @@ public class GameScreen implements Screen {
         // for checking if the other client has any created ingredients
         Map<String, String> ingredientData = net.getIngredientData();
         Map<String, String> createCommand = net.getCreateIngredientCommand();
-        System.out.println(ingredientData);
+
 
         // when the networklistener has data this data gets searched for a create command
         if(!ingredientData.isEmpty()){

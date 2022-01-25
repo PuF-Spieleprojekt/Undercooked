@@ -300,7 +300,7 @@ public class Networking {
 
     public void sendPlateData(String hasPlate){
         if (!match.getMatchId().isEmpty()) {
-            long opCode = 2;
+            long opCode = 5;
 
             Map<String,String> dataString = new HashMap<>();
 
@@ -377,6 +377,8 @@ public class Networking {
                 case "4" :
                     createIngredientCommand = retrieveNetworkData(receivedData);
                     break;
+                case "5" :
+                    plateData = retrieveNetworkData(receivedData);
             }
 
         }
