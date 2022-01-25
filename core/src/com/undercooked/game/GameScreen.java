@@ -486,6 +486,7 @@ public class GameScreen implements Screen {
                 player1.changeDirection(Direction.LEFT);
             }else{
                 netPlayer1.changeDirection(Direction.LEFT);
+                updatePlayerData(net, netPlayer1);
 
             }
         }
@@ -495,6 +496,7 @@ public class GameScreen implements Screen {
                 player1.changeDirection(Direction.RIGHT);
             }else{
                 netPlayer1.changeDirection(Direction.RIGHT);
+                updatePlayerData(net, netPlayer1);
 
             }
         }
@@ -504,6 +506,7 @@ public class GameScreen implements Screen {
                 player1.changeDirection(Direction.DOWN);
             }else{
                 netPlayer1.changeDirection(Direction.DOWN);
+                updatePlayerData(net, netPlayer1);
 
             }
         }
@@ -513,6 +516,7 @@ public class GameScreen implements Screen {
                 player1.changeDirection(Direction.UP);
             }else{
                 netPlayer1.changeDirection(Direction.UP);
+                updatePlayerData(net, netPlayer1);
 
             }
         }
@@ -564,10 +568,6 @@ public class GameScreen implements Screen {
             //TODO: Create logic for quiting gane without closing app
             Gdx.app.exit();
         }
-        if(multiplayer){
-            updatePlayerData(net, netPlayer1);
-        }
-
     }
 
     public void drawInArea(RectangleMapObject areaObject, Ingredient ingredient){
