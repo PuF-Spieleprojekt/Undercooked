@@ -22,8 +22,10 @@ public class ProfileScreen extends ControlScreen implements Screen {
     final Networking net;
     final Undercooked game;
 
-    TextureAtlas textureAtlas = new TextureAtlas(Gdx.files.internal("playermodel/player_naked_sprites.txt"));
-    TextureAtlas textureAtlas2 = new TextureAtlas(Gdx.files.internal("playermodel/player_naked_sprites_apron.txt"));
+    TextureAtlas atlasYellow = new TextureAtlas(Gdx.files.internal("playermodel/player_apron_yellow.txt"));
+    TextureAtlas atlasGreen = new TextureAtlas(Gdx.files.internal("playermodel/player_apron_green.txt"));
+    TextureAtlas atlasBlue = new TextureAtlas(Gdx.files.internal("playermodel/player_apron_blue.txt"));
+    TextureAtlas atlasRed = new TextureAtlas(Gdx.files.internal("playermodel/player_apron_red.txt"));
 
 
     public ProfileScreen(Undercooked game, Networking net){
@@ -45,12 +47,12 @@ public class ProfileScreen extends ControlScreen implements Screen {
         stage.addActor(table);
 
         Slider.SliderStyle sliderStyle = new Slider.SliderStyle();
-        final Slider slider = new Slider(1,3,1,false, skin);
+        final Slider slider = new Slider(1,4,1,false, skin);
         Label username = new Label("Username: ", skin);
 
         Label usernamePart2 = new Label(playername, skin);
         Label chooseSkin = new Label("Choose Skin: ", skin);
-        final Image image = new Image(new SpriteDrawable(textureAtlas.createSprite("down1")));
+        final Image image = new Image(new SpriteDrawable(atlasYellow.createSprite("down1")));
 
 
 
@@ -75,14 +77,18 @@ public class ProfileScreen extends ControlScreen implements Screen {
             public void changed(ChangeEvent event, Actor actor) {
                 if(slider.getValue() == 1){
                     System.out.println("Value1");
-                    image.setDrawable(new SpriteDrawable(textureAtlas.createSprite("down1")));
-                    GlobalUtilities.skinAsString = "Naked";
+                    image.setDrawable(new SpriteDrawable(atlasYellow.createSprite("down1")));
+                    GlobalUtilities.skinAsString = "playermodel/yellow.txt";
                 }else if(slider.getValue() == 2){
                     System.out.println("Value2");
-                    image.setDrawable(new SpriteDrawable(textureAtlas.createSprite("up1")));
+                    image.setDrawable(new SpriteDrawable(atlasGreen.createSprite("down1")));
+                    GlobalUtilities.skinAsString = "playermodel/player_apron_green.txt";
                 } else if(slider.getValue() == 3){
-                    image.setDrawable(new SpriteDrawable(textureAtlas2.createSprite("down1")));
-                    GlobalUtilities.skinAsString = "WhiteApron";
+                    image.setDrawable(new SpriteDrawable(atlasBlue.createSprite("down1")));
+                    GlobalUtilities.skinAsString = "playermodel/player_apron_blue.txt";
+                }else if(slider.getValue() == 4){
+                    image.setDrawable(new SpriteDrawable(atlasRed.createSprite("down1")));
+                    GlobalUtilities.skinAsString = "playermodel/player_apron_red.txt";
                 }
             }
         });

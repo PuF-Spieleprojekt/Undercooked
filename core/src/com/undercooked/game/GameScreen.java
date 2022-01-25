@@ -28,7 +28,9 @@ import com.badlogic.gdx.scenes.scene2d.Stage;
 import com.badlogic.gdx.scenes.scene2d.ui.Label;
 import com.badlogic.gdx.scenes.scene2d.ui.Skin;
 import com.badlogic.gdx.utils.ScreenUtils;
+import com.badlogic.gdx.utils.viewport.ExtendViewport;
 import com.badlogic.gdx.utils.viewport.FillViewport;
+import com.badlogic.gdx.utils.viewport.FitViewport;
 import com.undercooked.game.entities.Ingredient;
 import com.undercooked.game.entities.NetworkPlayer;
 import com.undercooked.game.entities.Order;
@@ -150,7 +152,7 @@ public class GameScreen implements Screen {
         broccoliImage = new Texture(Gdx.files.internal("textures/Broccoli.png"));
         plateImage = new Texture(Gdx.files.internal("textures/plate1.png"));
         counterImage = new Texture(Gdx.files.internal("counter.jpeg"));
-        orderImage = new Texture(Gdx.files.internal("textures/order_sushi.png"));
+        orderImage = new Texture(Gdx.files.internal("textures/order_broc.png"));
 
         // load Tiled Map and generate Layerindex;
         map = new TmxMapLoader().load("map/map_v.0.1.tmx");
@@ -188,7 +190,7 @@ public class GameScreen implements Screen {
         }
 
         // in-game UI (user interface)
-        FillViewport viewport = new FillViewport( 800, 480, camera);
+        FitViewport viewport = new FitViewport( 800, 480, camera);
         stage = new Stage(viewport);
         Gdx.input.setInputProcessor(stage);
 
@@ -235,8 +237,8 @@ public class GameScreen implements Screen {
         game.batch.draw(plateImage, plate.x, plate.y);
         int orderNumber = 0;
         for(Order order : ordersToBeServed) {
-            game.batch.draw(orderImage, 30 + (orderNumber * 60), 420 );
-            game.font.draw(game.batch, "" + (int)order.secondsLeft, 45 + (orderNumber * 60), 405);
+            game.batch.draw(orderImage, 30 + (orderNumber * 60), 350 );
+            game.font.draw(game.batch, "" + (int)order.secondsLeft, 62 + (orderNumber * 60), 340);
             orderNumber++;
         }
 
@@ -429,13 +431,13 @@ public class GameScreen implements Screen {
 
         //TODO: Fix Bug
         if(!multiplayer){
-            if(Gdx.input.isKeyPressed(Keys.SPACE)){
+            if(Gdx.input.isKeyPressed(Keys.Q)){
                 game.batch.draw((TextureRegion) player1.getCutAnimation().getKeyFrame(elapsedTime, true),player1.getHitbox().x, player1.getHitbox().y );
             }else {
                 game.batch.draw(player1.getTexture(), player1.getHitbox().x, player1.getHitbox().y);
             }
         } else {
-            if(Gdx.input.isKeyPressed(Keys.SPACE)){
+            if(Gdx.input.isKeyPressed(Keys.Q)){
                 game.batch.draw((TextureRegion) netPlayer1.getCutAnimation().getKeyFrame(elapsedTime, true),netPlayer1.getHitbox().x, netPlayer1.getHitbox().y );
             }else {
                 game.batch.draw(netPlayer1.getTexture(), netPlayer1.getHitbox().x, netPlayer1.getHitbox().y);

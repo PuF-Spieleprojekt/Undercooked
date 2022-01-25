@@ -13,6 +13,7 @@ import com.badlogic.gdx.scenes.scene2d.ui.Label;
 import com.badlogic.gdx.scenes.scene2d.ui.Skin;
 import com.badlogic.gdx.scenes.scene2d.ui.TextButton;
 import com.badlogic.gdx.utils.viewport.FillViewport;
+import com.badlogic.gdx.utils.viewport.FitViewport;
 
 public abstract class ControlScreen implements Screen{
 
@@ -35,7 +36,7 @@ public abstract class ControlScreen implements Screen{
     public void show(){
         camera = new OrthographicCamera();
         camera.setToOrtho(false, 800, 480);
-        FillViewport viewport = new FillViewport( 800, 480, camera);
+        FitViewport viewport = new FitViewport( 800, 480, camera);
         stage = new Stage(viewport);
         Gdx.input.setInputProcessor(stage);
 

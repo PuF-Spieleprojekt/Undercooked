@@ -8,6 +8,7 @@ import com.badlogic.gdx.maps.objects.RectangleMapObject;
 import com.badlogic.gdx.math.Rectangle;
 import com.badlogic.gdx.graphics.g2d.Animation;
 import com.badlogic.gdx.math.Vector2;
+import com.undercooked.game.GlobalUtilities;
 import com.undercooked.game.utilities.enums.Direction;
 
 import java.awt.geom.Point2D;
@@ -23,7 +24,7 @@ public class Player {
     private String textureString = "down1";
     private Byte direction = 3; // clockwise: 1=up 2=right 3=down 4=left
     private Animation<TextureRegion> cutAnimation;
-
+    private TextureAtlas atlas;
 
 
 
@@ -34,12 +35,16 @@ public class Player {
     private EnumMap<Direction, Vector2> holdingOffsetDistances = new EnumMap<Direction, Vector2>(Direction.class);
 
 
-    TextureAtlas textureAtlas = new TextureAtlas(Gdx.files.internal("playermodel/player_apron_yellow.txt"));
-
 
     public Player(String name){
         this.name = name;
-        this.sprite = textureAtlas.createSprite("down1");
+        if (GlobalUtilities.skinAsString != null){
+            this.atlas = new TextureAtlas(Gdx.files.internal(GlobalUtilities.skinAsString));
+        } else {
+            this.atlas = new TextureAtlas(Gdx.files.internal("playermodel/player_apron_yellow.txt"));
+        }
+        this.sprite = atlas.createSprite("down1");
+
         this.hitbox = sprite.getBoundingRectangle();
         this.holdingPosition = new Vector2(hitbox.x, hitbox.y);
 
@@ -67,7 +72,7 @@ public class Player {
             }
 
             case DOWN :
-                this.cutAnimation = new Animation<TextureRegion>(1f/10f, textureAtlas.findRegions("cut-front"));
+                this.cutAnimation = new Animation<TextureRegion>(1f/10f, atlas.findRegions("cut-front"));
                 if (step>=5 &&step<=8){
                     changeAnimationStep("down1");
                     break;
@@ -80,7 +85,7 @@ public class Player {
                 }
 
             case LEFT :
-                this.cutAnimation = new Animation<TextureRegion>(1f/10f, textureAtlas.findRegions("cut-left"));
+                this.cutAnimation = new Animation<TextureRegion>(1f/10f, atlas.findRegions("cut-left"));
                 if (step>=5 &&step<=8){
                     changeAnimationStep("left1");
                     break;
@@ -93,7 +98,7 @@ public class Player {
                 }
 
             case RIGHT :
-                this.cutAnimation = new Animation<TextureRegion>(1f/10f, textureAtlas.findRegions("cut-right"));
+                this.cutAnimation = new Animation<TextureRegion>(1f/10f, atlas.findRegions("cut-right"));
                 if (step>=5 &&step<=8){
                     changeAnimationStep("right1");
                     break;
@@ -136,7 +141,7 @@ public class Player {
 
     private void changeAnimationStep(String name){
         textureString = name;
-        sprite.setRegion(textureAtlas.findRegion(name));
+        sprite.setRegion(atlas.findRegion(name));
 
     }
 
