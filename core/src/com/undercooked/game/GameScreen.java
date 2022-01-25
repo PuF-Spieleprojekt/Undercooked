@@ -440,8 +440,10 @@ public class GameScreen implements Screen {
                 i++;
             }
             game.batch.draw(netPlayer2.getTexture(), netPlayer2.getHitbox().x, netPlayer2.getHitbox().y);
-            if(net.getPlayerData().get("hasPlate").equals("true")){
-                game.batch.draw(plateImage, netPlayer2.holdingPosition.x, netPlayer2.holdingPosition.y - 10);
+            if(!net.getPlayerData().isEmpty()) {
+                if (net.getPlayerData().get("hasPlate").equals("true")) {
+                    game.batch.draw(plateImage, netPlayer2.holdingPosition.x, netPlayer2.holdingPosition.y - 10);
+                }
             }
           }
 
