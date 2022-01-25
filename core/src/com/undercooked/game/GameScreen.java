@@ -9,7 +9,9 @@ import com.badlogic.gdx.audio.Sound;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.OrthographicCamera;
 import com.badlogic.gdx.graphics.Texture;
+import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
+import com.badlogic.gdx.graphics.g2d.freetype.FreeTypeFontGenerator;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
 import com.badlogic.gdx.maps.MapLayers;
 import com.badlogic.gdx.maps.MapObject;
@@ -22,7 +24,11 @@ import com.badlogic.gdx.maps.tiled.renderers.OrthogonalTiledMapRenderer;
 import com.badlogic.gdx.math.Rectangle;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.math.Vector3;
+import com.badlogic.gdx.scenes.scene2d.Stage;
+import com.badlogic.gdx.scenes.scene2d.ui.Label;
+import com.badlogic.gdx.scenes.scene2d.ui.Skin;
 import com.badlogic.gdx.utils.ScreenUtils;
+import com.badlogic.gdx.utils.viewport.FillViewport;
 import com.undercooked.game.entities.Ingredient;
 import com.undercooked.game.entities.NetworkPlayer;
 import com.undercooked.game.entities.Order;
@@ -31,7 +37,6 @@ import com.undercooked.game.entities.Recipe;
 import com.undercooked.game.utilities.enums.Direction;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
@@ -108,9 +113,22 @@ public class GameScreen implements Screen {
     Ingredient broccoli = new Ingredient("Broccoli", broccoliImage, new Rectangle(0,0, 32, 32));
     Recipe broccoliSoup = new Recipe("broccoli soup", broccoliSoupIngredients);
     List<Order> ordersToBeServed = new LinkedList<Order>();
-    Order oneBroccoliSoupPlease = new Order(broccoliSoup, 60, elapsedTime);
-    Order anotherBroccoliPlease = new Order(broccoliSoup, 60, elapsedTime);
 
+    // stuff to be able to use font in in-game UI
+    protected FreeTypeFontGenerator fontGenerator;
+    protected FreeTypeFontGenerator.FreeTypeFontParameter fontParameter;
+    protected BitmapFont font;
+    protected Stage stage;
+    protected Label timeScoreLabel;
+    protected Label orderCompleteAddScoreLabel;
+    protected Label.LabelStyle labelStyle;
+
+    private int counter = 90;
+    private int totalOrderCounter = 0;
+
+    // simple vars to track an animation
+    private float animationStartTime = 0;
+    private Boolean animating = false;
 
     public GameScreen(final Undercooked game, Networking net, Boolean multiplayer, Boolean isHost) {
         this.game = game;
@@ -118,10 +136,8 @@ public class GameScreen implements Screen {
         this.isHost = isHost;
         this.net = net;
 
-        // order and recipe logic
+        // recipe logic
         broccoliSoupIngredients.add(broccoli);
-        ordersToBeServed.add(oneBroccoliSoupPlease);
-        ordersToBeServed.add(anotherBroccoliPlease);
 
 
         // load the images for the droplet and the bucket, 64x64 pixels each
@@ -165,7 +181,28 @@ public class GameScreen implements Screen {
             player1 = new Player("Player1");
         }
 
+        // in-game UI (user interface)
+        FillViewport viewport = new FillViewport( 800, 480, camera);
+        stage = new Stage(viewport);
+        Gdx.input.setInputProcessor(stage);
 
+        fontGenerator = new FreeTypeFontGenerator(Gdx.files.internal("AgentOrange.ttf"));
+        fontParameter = new FreeTypeFontGenerator.FreeTypeFontParameter();
+        fontParameter.size = 35;
+        fontParameter.borderWidth = 2;
+        fontParameter.borderColor = Color.FIREBRICK;
+        fontParameter.color = Color.WHITE;
+        font = fontGenerator.generateFont(fontParameter);
+        Skin skin = new Skin(Gdx.files.internal("star-soldier-ui.json"));
+
+        labelStyle = new Label.LabelStyle();
+        labelStyle.font = font;
+        timeScoreLabel = new Label("Score " + highScore + " Time " + counter, labelStyle);
+        orderCompleteAddScoreLabel = new Label("", labelStyle);
+        timeScoreLabel.setPosition(300, 420);
+        orderCompleteAddScoreLabel.setPosition(690, 300);
+        stage.addActor(timeScoreLabel);
+        stage.addActor(orderCompleteAddScoreLabel);
     }
 
 
@@ -189,7 +226,25 @@ public class GameScreen implements Screen {
         tiledmaprenderer.render(mapLayerIndices);
 
         game.batch.draw(plateImage, plate.x, plate.y);
-        game.batch.draw(orderImage, 700, 400 );
+        int orderNumber = 0;
+        for(Order order : ordersToBeServed) {
+            game.batch.draw(orderImage, 30 + (orderNumber * 60), 420 );
+            game.font.draw(game.batch, "" + (int)order.secondsLeft, 45 + (orderNumber * 60), 405);
+            orderNumber++;
+        }
+
+        if (animating) {
+            float animatedTime = elapsedTime - animationStartTime;
+
+            orderCompleteAddScoreLabel.setPosition(690, 280 + (animatedTime *30));
+
+            if (animatedTime > 2) {
+                animating = false;
+                animatedTime = 0;
+                orderCompleteAddScoreLabel.setText("");
+            }
+        }
+
 
         if(isOnPlate) {
             if(!multiplayer) {
@@ -199,15 +254,17 @@ public class GameScreen implements Screen {
             }
         }
 
-        game.font.draw(game.batch, "incoming orders: " + ordersToBeServed, 0, 480);
-        game.font.draw(game.batch, "time left: " + (int)secondsLeft, 0, 465);
-        game.font.draw(game.batch, "Dishes served: " + dishesServed, 0, 450);
-        game.font.draw(game.batch, "highscore: " + highScore, 0, 435);
+        // bigger / featured / headline font for the round / game timer
+        stage.act(Math.min(Gdx.graphics.getDeltaTime(), 1 / 30f));
+        stage.draw();
 
-
-        
-
+        // total game time counter
         elapsedTime += Gdx.graphics.getDeltaTime();
+        // animation timer
+
+
+        counter = (int)secondsLeft;
+        timeScoreLabel.setText("Score " + highScore + " Time " + counter);
 
         //if host create Timer else get timerdata from network
         if (isHost) {
@@ -242,9 +299,19 @@ public class GameScreen implements Screen {
         
 
         // TODO do this for all orders: for(Order order : orders) ...
-        oneBroccoliSoupPlease.updateTimeLeft(elapsedTime);
-        anotherBroccoliPlease.updateTimeLeft(elapsedTime);
+        for (Order order: ordersToBeServed) {
+            order.updateTimeLeft(elapsedTime);
+            if (order.secondsLeft <= 0) {
+                ordersToBeServed.remove(order);
+            }
+        }
 
+        // create new orders
+
+        if (elapsedTime / 15 > totalOrderCounter) {
+            totalOrderCounter++;
+            ordersToBeServed.add(new Order(broccoliSoup, 45, elapsedTime));
+        }
 
         // end round / level / game
         if (elapsedTime > GAMETIME) {
@@ -557,22 +624,20 @@ public class GameScreen implements Screen {
 
                     ingredient.putDown(areaObject);
                     dishesServed ++;
-                    Order orderProcessed;
-                    if (oneBroccoliSoupPlease.secondsLeft > anotherBroccoliPlease.secondsLeft) {
-                        orderProcessed = anotherBroccoliPlease;
-                    } else {
-                        orderProcessed = oneBroccoliSoupPlease;
-                    }
-                    highScore += Math.ceil(orderProcessed.secondsLeft / 20);
+                    Order orderProcessed = ordersToBeServed.remove(0); // dummy: remove the first order every time something is served. TODO replace this with sensible logic
+                    int scoreEarned = (int)Math.ceil(orderProcessed.secondsLeft / 20);
+                    highScore += scoreEarned;
+
+                    // animate the little + score text that appears after delivering an order
+                    orderCompleteAddScoreLabel.setText("+" + scoreEarned);
+                    orderCompleteAddScoreLabel.setPosition(690, 280);
+                    animating = true;
+                    animationStartTime = elapsedTime;
 
                     // reset state variables
                     holdingSomething = false;
                     holdingSomethingProcessed = false;
                     isOnPlate = false;
-
-                    // in this case reset order but really, this should be its own method randomly spawning new orders
-                    oneBroccoliSoupPlease.orderTime = elapsedTime;
-                    anotherBroccoliPlease.orderTime = elapsedTime;
                 }
         }
 
