@@ -285,7 +285,7 @@ public class Networking {
 
             Map<String,String> dataString = new HashMap<>();
 
-            dataString.put("create", create);
+            dataString.put("holding", create);
             dataString.put("texture", texture);
             dataString.put("hitboxX", hitboxX);
             dataString.put("hitboxY", hitboxY);
