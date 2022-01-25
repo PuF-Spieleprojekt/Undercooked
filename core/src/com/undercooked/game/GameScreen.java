@@ -498,10 +498,6 @@ public class GameScreen implements Screen {
             }else{
                 netPlayer1.changeDirection(Direction.LEFT);
                 updatePlayerData(net, netPlayer1);
-                if(net.joinedMatch && matchData.size() > 1) {
-                    netPlayer2.setNetworkDirection(matchData.get("direction"));
-                }
-
             }
         }
         if (Gdx.input.isKeyPressed(Keys.RIGHT)) {
@@ -511,10 +507,6 @@ public class GameScreen implements Screen {
             }else{
                 netPlayer1.changeDirection(Direction.RIGHT);
                 updatePlayerData(net, netPlayer1);
-                if(net.joinedMatch && matchData.size() > 1) {
-                    netPlayer2.setNetworkDirection(matchData.get("direction"));
-                }
-
             }
         }
         if (Gdx.input.isKeyPressed(Keys.DOWN)){
@@ -524,10 +516,6 @@ public class GameScreen implements Screen {
             }else{
                 netPlayer1.changeDirection(Direction.DOWN);
                 updatePlayerData(net, netPlayer1);
-                if(net.joinedMatch && matchData.size() > 1) {
-                    netPlayer2.setNetworkDirection(matchData.get("direction"));
-                }
-
             }
         }
         if (Gdx.input.isKeyPressed(Keys.UP)){
@@ -537,10 +525,6 @@ public class GameScreen implements Screen {
             }else{
                 netPlayer1.changeDirection(Direction.UP);
                 updatePlayerData(net, netPlayer1);
-                if(net.joinedMatch && matchData.size() > 1) {
-                    netPlayer2.setNetworkDirection(matchData.get("direction"));
-                }
-
             }
         }
 
@@ -548,7 +532,7 @@ public class GameScreen implements Screen {
             matchData = net.getPlayerData();
             if(matchData.size() > 1){
                 netPlayer2.setNetworkPosition(matchData.get("hitboxX"), matchData.get("hitboxY"));
-                // netPlayer2.checkBoundaries();
+                netPlayer2.setNetworkDirection(matchData.get("direction"));
             }
 
         }
@@ -590,6 +574,7 @@ public class GameScreen implements Screen {
             //TODO: Create logic for quiting gane without closing app
             Gdx.app.exit();
         }
+        net.resetPlayerData();
     }
 
     public void drawInArea(RectangleMapObject areaObject, Ingredient ingredient){

@@ -376,7 +376,9 @@ public class Networking {
         }
         return dataMap;
     }
-
+    public void resetPlayerData(){
+        playerData.clear();
+    }
     /*++++++++++++++++++++++++++++++++++
      * ++++++++++++++++++++++++++++++++++
      * STORAGE-MANAGEMENT
