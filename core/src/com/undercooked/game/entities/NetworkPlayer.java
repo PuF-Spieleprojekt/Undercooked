@@ -25,6 +25,7 @@ public class NetworkPlayer {
     private Animation<TextureRegion> cutAnimation;
     private String userID;
     private String userName;
+    private boolean hasPlate;
 
 
     // some new ways of dealing with directions and where to draw the items being held
@@ -166,6 +167,12 @@ public class NetworkPlayer {
         updateHoldingPosition(d);
     }
 
+    public void setHasPlate(boolean carrying){
+        hasPlate = carrying;
+    }
+
+
+
 
     public void setUserID(String newID){
         userID = newID;
@@ -201,6 +208,10 @@ public class NetworkPlayer {
     public String getUserID () { return userID; }
 
     public String getUserName () { return userName; }
+
+    public String getPlate() {
+        return String.valueOf(hasPlate);
+    }
 }
 
 

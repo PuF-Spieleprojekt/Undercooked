@@ -23,7 +23,8 @@ public class Player {
     private String textureString = "down1";
     private Byte direction = 3; // clockwise: 1=up 2=right 3=down 4=left
     private Animation<TextureRegion> cutAnimation;
-    private String UserID;
+
+
 
 
     // some new ways of dealing with directions and where to draw the items being held
@@ -155,6 +156,8 @@ public class Player {
         hitbox.x = Float.parseFloat(x);
         hitbox.y = Float.parseFloat(y);
     }
+
+
 
     // Getters
     public String getTextureName(){

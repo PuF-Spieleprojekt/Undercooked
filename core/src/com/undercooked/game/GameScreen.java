@@ -250,7 +250,12 @@ public class GameScreen implements Screen {
             if(!multiplayer) {
                 game.batch.draw(plateImage, player1.holdingPosition.x, player1.holdingPosition.y - 10);
             } else {
+                netPlayer1.setHasPlate(true);
                 game.batch.draw(plateImage, netPlayer1.holdingPosition.x, netPlayer1.holdingPosition.y - 10);
+            }
+        } else {
+            if(multiplayer){
+                netPlayer1.setHasPlate(false);
             }
         }
 
@@ -279,9 +284,12 @@ public class GameScreen implements Screen {
                 secondsLeft = Float.parseFloat(timerData.get("seconds"));
             }
         }
+        // for checking if the other client has any created ingredients
         Map<String, String> ingredientData = net.getIngredientData();
         Map<String, String> createCommand = net.getCreateIngredientCommand();
         System.out.println(ingredientData);
+
+        // when the networklistener has data this data gets searched for a create command
         if(!ingredientData.isEmpty()){
             if(createCommand.get("create").equals("true")){
                 float x = Float.parseFloat(ingredientData.get("hitboxX"));
@@ -291,7 +299,7 @@ public class GameScreen implements Screen {
                 net.createIngredientCommand("false");
             }
         }
-        // To let the other Cient know to stop producing more new ingredients
+        // IMPORTANT! To let the other Client know to stop producing more new ingredients
         if(!createCommand.isEmpty() && createCommand.get("create").equals("false") ){
             net.createIngredientCommand("false");
         }
@@ -299,6 +307,7 @@ public class GameScreen implements Screen {
         
 
         // TODO do this for all orders: for(Order order : orders) ...
+        // TODO fix bug, if order runs out of time the game crashes and if a dish is served without an order as well
         for (Order order: ordersToBeServed) {
             order.updateTimeLeft(elapsedTime);
             if (order.secondsLeft <= 0) {
@@ -329,6 +338,7 @@ public class GameScreen implements Screen {
 
         // Map Objects get initialized
         // TODO why does this happen in every render? Shouldn't this be in the constructor?
+        // I tried to put that into the constructor but then it didn't work anymore
 
         for (MapObject object : objects){
 
@@ -375,7 +385,6 @@ public class GameScreen implements Screen {
                         if(ingredient.getOwner().equals(netPlayer1.getUserID())){
                             game.batch.draw(ingredient.getTexture(), netPlayer1.holdingPosition.x, netPlayer1.holdingPosition.y);
                         } else {
-                            //game.batch.draw(ingredient.getTexture(), netPlayer2.getHitbox().getX(), netPlayer2.getHitbox().getY());
                             game.batch.draw(ingredient.getTexture(), netPlayer2.holdingPosition.x, netPlayer2.holdingPosition.y);
                         }
                         updateIngredientData(net, ingredient, "false", ingredient.getOwner());
@@ -431,6 +440,9 @@ public class GameScreen implements Screen {
                 i++;
             }
             game.batch.draw(netPlayer2.getTexture(), netPlayer2.getHitbox().x, netPlayer2.getHitbox().y);
+            if(net.getPlayerData().get("hasPlate").equals("true")){
+                game.batch.draw(plateImage, netPlayer2.holdingPosition.x, netPlayer2.holdingPosition.y - 10);
+            }
           }
 
         game.batch.end();
@@ -474,7 +486,7 @@ public class GameScreen implements Screen {
                 player1.changeDirection(Direction.LEFT);
             }else{
                 netPlayer1.changeDirection(Direction.LEFT);
-                updatePlayerData(net, netPlayer1);
+
             }
         }
         if (Gdx.input.isKeyPressed(Keys.RIGHT)) {
@@ -483,7 +495,7 @@ public class GameScreen implements Screen {
                 player1.changeDirection(Direction.RIGHT);
             }else{
                 netPlayer1.changeDirection(Direction.RIGHT);
-                updatePlayerData(net, netPlayer1);
+
             }
         }
         if (Gdx.input.isKeyPressed(Keys.DOWN)){
@@ -492,7 +504,7 @@ public class GameScreen implements Screen {
                 player1.changeDirection(Direction.DOWN);
             }else{
                 netPlayer1.changeDirection(Direction.DOWN);
-                updatePlayerData(net, netPlayer1);
+
             }
         }
         if (Gdx.input.isKeyPressed(Keys.UP)){
@@ -501,7 +513,7 @@ public class GameScreen implements Screen {
                 player1.changeDirection(Direction.UP);
             }else{
                 netPlayer1.changeDirection(Direction.UP);
-                updatePlayerData(net, netPlayer1);
+
             }
         }
 
@@ -551,6 +563,9 @@ public class GameScreen implements Screen {
         if (Gdx.input.isKeyPressed(Input.Keys.ESCAPE)){
             //TODO: Create logic for quiting gane without closing app
             Gdx.app.exit();
+        }
+        if(multiplayer){
+            updatePlayerData(net, netPlayer1);
         }
 
     }
@@ -640,6 +655,7 @@ public class GameScreen implements Screen {
                     holdingSomething = false;
                     holdingSomethingProcessed = false;
                     isOnPlate = false;
+
                 }
         }
 
@@ -687,10 +703,9 @@ public class GameScreen implements Screen {
 
     public void updatePlayerData(Networking net, NetworkPlayer player){
         if(multiplayer){
-            net.sendPlayerData(player.getDirection(), player.getPositionStringX(), player.getPositionStringY(), player.getUserID());
+            net.sendPlayerData(player.getDirection(), player.getPositionStringX(), player.getPositionStringY(), player.getUserID(), player.getPlate());
         }
     }
-
 
     public void updateIngredientData(Networking net, Ingredient ingredient, String create, String ownerID){
         if(multiplayer){

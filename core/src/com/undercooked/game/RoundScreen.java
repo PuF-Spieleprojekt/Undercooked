@@ -24,6 +24,7 @@ public class RoundScreen extends ControlScreen implements Screen {
 
         //as soon as this screen gets built the game is finished and the highscore is set
         //the highscore is added to highscorelist and updated
+        GlobalUtilities.highscoreList = net.retrieveStorageData("stats", "scores");
         GlobalUtilities.highscoreList.add(String.valueOf(GlobalUtilities.highscore));
         net.updateItemCollectionData("stats", "scores", "Highscores", GlobalUtilities.sortHighscoreList());
 

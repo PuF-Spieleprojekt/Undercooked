@@ -77,7 +77,7 @@ public class Networking {
 
 /*++++++++++++++++++++++++++++++++++
 * ++++++++++++++++++++++++++++++++++
-* PLAYER-MANAGEMENT
+* USER-MANAGEMENT
 * +++++++++++++++++++++++++++++++++
 * +++++++++++++++++++++++++++++++++*/
 
@@ -204,8 +204,6 @@ public class Networking {
             if (!session.getAuthToken().isEmpty()) {
                 //TODO: Add Callbacklistener for Match creation
                 match = socket.createMatch().get();
-                //matchID = "{\"matchID\":\""+ match.getMatchId() +"\"}";
-                //ChannelMessageAck sendAck = socket.writeChatMessage(channel.getId(), matchID).get();
                 System.out.println("Match created with ID: " + match.getMatchId());
                 return true;
             }
@@ -235,45 +233,13 @@ public class Networking {
 
     public MatchList findMatch() throws ExecutionException, InterruptedException {
         MatchList matchlist = client.listMatches(session, 1).get();
-
+        System.out.println("Matchlist created. Authentication via AuthToken: " + session.getAuthToken());
         return matchlist;
         //System.out.println(matchlist.getMatchesCount());
     }
 
-    public Map<String, String> getUserdata(){
-        userData.put("username", session.getUsername());
-        userData.put("userID", session.getUserId());
 
-        return userData;
-    }
 
-    public Map<String, String> getPlayerData() {
-        return playerData;
-    }
-
-    public Map<String, String> getTimerData() {
-        return timerData;
-    }
-
-    public Map<String, String> getIngredientData() {
-        return ingredientData;
-    }
-
-    public Map<String, String> getCreateIngredientCommand() {
-        return createIngredientCommand;
-    }
-
-    public Map<String,String> retrieveNetworkData(String receivedData) {
-        String[] newData = receivedData.split(",");
-        Map<String, String> dataMap = new HashMap<String, String>();
-
-        for (int i = 0; i < newData.length; i++) {
-            String key = newData[i].split(":")[0].replaceAll(",", "").replaceAll("\\{", "").replaceAll("\"", "").replaceAll("}", "");
-            String value = newData[i].split(":")[1].replaceAll(",", "").replaceAll("\\{", "").replaceAll("\"", "").replaceAll("}", "");
-            dataMap.put(key,value);
-        }
-        return dataMap;
-    }
 
     /*++++++++++++++++++++++++++++++++++
      * ++++++++++++++++++++++++++++++++++
@@ -281,16 +247,16 @@ public class Networking {
      * +++++++++++++++++++++++++++++++++
      * +++++++++++++++++++++++++++++++++*/
 
-    public void sendPlayerData(String direction, String hitboxX, String hitboxY, String userID) {
+    public void sendPlayerData(String direction, String hitboxX, String hitboxY, String userID, String hasPlate) {
         if (!match.getMatchId().isEmpty()) {
             long opCode = 1;
-            //String data = "{\"texture\" : \"" + texture + "\", \" hitboxX \" : \"" + hitboxX + "\", \" hitboxY \" : \"" + hitboxY + "\" }";
             Map<String,String> dataString = new HashMap<>();
 
             dataString.put("hitboxY", hitboxY);
             dataString.put("hitboxX", hitboxX);
             dataString.put("direction", direction);
             dataString.put("userID", userID);
+            dataString.put("hasPlate", hasPlate);
 
             String dataJson = new Gson().toJson(dataString);
             byte[] byteData = dataJson.getBytes();
@@ -345,6 +311,29 @@ public class Networking {
         }
     }
 
+    public Map<String, String> getUserdata(){
+        userData.put("username", session.getUsername());
+        userData.put("userID", session.getUserId());
+
+        return userData;
+    }
+
+    public Map<String, String> getPlayerData() {
+        return playerData;
+    }
+
+    public Map<String, String> getTimerData() {
+        return timerData;
+    }
+
+    public Map<String, String> getIngredientData() {
+        return ingredientData;
+    }
+
+    public Map<String, String> getCreateIngredientCommand() {
+        return createIngredientCommand;
+    }
+
 
     final SocketListener listener = new AbstractSocketListener() {
         @Override
@@ -374,6 +363,19 @@ public class Networking {
 
         }
     };
+
+
+    public Map<String,String> retrieveNetworkData(String receivedData) {
+        String[] newData = receivedData.split(",");
+        Map<String, String> dataMap = new HashMap<String, String>();
+
+        for (int i = 0; i < newData.length; i++) {
+            String key = newData[i].split(":")[0].replaceAll(",", "").replaceAll("\\{", "").replaceAll("\"", "").replaceAll("}", "");
+            String value = newData[i].split(":")[1].replaceAll(",", "").replaceAll("\\{", "").replaceAll("\"", "").replaceAll("}", "");
+            dataMap.put(key,value);
+        }
+        return dataMap;
+    }
 
     /*++++++++++++++++++++++++++++++++++
      * ++++++++++++++++++++++++++++++++++
