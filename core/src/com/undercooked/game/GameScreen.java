@@ -76,6 +76,8 @@ public class GameScreen implements Screen {
     RectangleMapObject ingredientArea;
     RectangleMapObject currentLocation;
 
+    Map<String, String> matchData = new HashMap<>();
+
     Sound dropSound, choppingSound, punchSound;
     Music backgroundMusic;
     OrthographicCamera camera;
@@ -214,8 +216,6 @@ public class GameScreen implements Screen {
         // blue and alpha component in the range [0,1]
         // of the color to be used to clear the screen.
         ScreenUtils.clear(0, 0, 0.2f, 1);
-
-        Map<String, String> matchData = new HashMap<>();
 
         // tell the camera to update its matrices.
         camera.update();
@@ -484,6 +484,12 @@ public class GameScreen implements Screen {
             camera.unproject(touchPos);
         }
 
+        boolean matchDataAvailable = net.getPlayerData().isEmpty();
+
+        if(matchDataAvailable){
+            matchData = net.getPlayerData();
+        }
+
         desired_velocity.x = desired_velocity.y = 0.0f;
         if (Gdx.input.isKeyPressed(Keys.LEFT)){
             desired_velocity.x = -300 * Gdx.graphics.getDeltaTime();
@@ -492,7 +498,9 @@ public class GameScreen implements Screen {
             }else{
                 netPlayer1.changeDirection(Direction.LEFT);
                 updatePlayerData(net, netPlayer1);
-                if(net.joinedMatch && !matchData.isEmpty()) netPlayer2.setNetworkDirection(matchData.get("direction"));
+                if(net.joinedMatch && matchData.size() > 1) {
+                    netPlayer2.setNetworkDirection(matchData.get("direction"));
+                }
 
             }
         }
@@ -503,7 +511,9 @@ public class GameScreen implements Screen {
             }else{
                 netPlayer1.changeDirection(Direction.RIGHT);
                 updatePlayerData(net, netPlayer1);
-                if(net.joinedMatch && !matchData.isEmpty()) netPlayer2.setNetworkDirection(matchData.get("direction"));
+                if(net.joinedMatch && matchData.size() > 1) {
+                    netPlayer2.setNetworkDirection(matchData.get("direction"));
+                }
 
             }
         }
@@ -514,7 +524,9 @@ public class GameScreen implements Screen {
             }else{
                 netPlayer1.changeDirection(Direction.DOWN);
                 updatePlayerData(net, netPlayer1);
-                if(net.joinedMatch && !matchData.isEmpty()) netPlayer2.setNetworkDirection(matchData.get("direction"));
+                if(net.joinedMatch && matchData.size() > 1) {
+                    netPlayer2.setNetworkDirection(matchData.get("direction"));
+                }
 
             }
         }
@@ -525,13 +537,15 @@ public class GameScreen implements Screen {
             }else{
                 netPlayer1.changeDirection(Direction.UP);
                 updatePlayerData(net, netPlayer1);
-                if(net.joinedMatch && !matchData.isEmpty()) netPlayer2.setNetworkDirection(matchData.get("direction"));
+                if(net.joinedMatch && matchData.size() > 1) {
+                    netPlayer2.setNetworkDirection(matchData.get("direction"));
+                }
 
             }
         }
 
         if(net.joinedMatch){
-            matchData =  net.getPlayerData();
+            matchData = net.getPlayerData();
             if(matchData.size() > 1){
                 netPlayer2.setNetworkPosition(matchData.get("hitboxX"), matchData.get("hitboxY"));
                 // netPlayer2.checkBoundaries();
