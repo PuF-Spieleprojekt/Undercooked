@@ -375,7 +375,8 @@ public class GameScreen implements Screen {
                         if(ingredient.getOwner().equals(netPlayer1.getUserID())){
                             game.batch.draw(ingredient.getTexture(), netPlayer1.holdingPosition.x, netPlayer1.holdingPosition.y);
                         } else {
-                            game.batch.draw(ingredient.getTexture(), netPlayer2.getHitbox().getX(), netPlayer2.getHitbox().getY());
+                            //game.batch.draw(ingredient.getTexture(), netPlayer2.getHitbox().getX(), netPlayer2.getHitbox().getY());
+                            game.batch.draw(ingredient.getTexture(), netPlayer2.holdingPosition.x, netPlayer2.holdingPosition.y);
                         }
                         updateIngredientData(net, ingredient, "false", ingredient.getOwner());
 
@@ -507,7 +508,8 @@ public class GameScreen implements Screen {
         if(net.joinedMatch){
             Map<String, String> matchData =  net.getPlayerData();
             if(matchData.size() > 1){
-                netPlayer2.setPosition(matchData.get("hitboxX"), matchData.get("hitboxY"));
+                netPlayer2.setNetworkPosition(matchData.get("hitboxX"), matchData.get("hitboxY"));
+                netPlayer2.setNetworkDirection(matchData.get("direction"));
                 // netPlayer2.checkBoundaries();
             }
 
@@ -685,7 +687,7 @@ public class GameScreen implements Screen {
 
     public void updatePlayerData(Networking net, NetworkPlayer player){
         if(multiplayer){
-            net.sendPlayerData(player.getTextureName(), player.getPositionStringX(), player.getPositionStringY(), player.getUserID());
+            net.sendPlayerData(player.getDirection(), player.getPositionStringX(), player.getPositionStringY(), player.getUserID());
         }
     }
 

@@ -154,10 +154,18 @@ public class NetworkPlayer {
         holdingPosition.y = hitbox.getY() + holdingOffset.y;
     }
 
-    public void setPosition(String x, String y){
-        hitbox.x = Float.parseFloat(x);
-        hitbox.y = Float.parseFloat(y);
+    public void setNetworkPosition(String x, String y){
+        hitbox.setX(Float.parseFloat(x));
+        hitbox.setY(Float.parseFloat(y));
     }
+
+    public void setNetworkDirection(String dir){
+        Direction d = Direction.valueOf(dir.toUpperCase());
+        facing = d;
+        changeTexture(d);
+        updateHoldingPosition(d);
+    }
+
 
     public void setUserID(String newID){
         userID = newID;
@@ -189,6 +197,7 @@ public class NetworkPlayer {
 
     public Animation<TextureRegion> getCutAnimation(){ return this.cutAnimation; }
 
+    public String getDirection() { return facing.toString(); }
     public String getUserID () { return userID; }
 
     public String getUserName () { return userName; }

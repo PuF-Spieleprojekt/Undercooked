@@ -281,7 +281,7 @@ public class Networking {
      * +++++++++++++++++++++++++++++++++
      * +++++++++++++++++++++++++++++++++*/
 
-    public void sendPlayerData(String texture, String hitboxX, String hitboxY, String userID) {
+    public void sendPlayerData(String direction, String hitboxX, String hitboxY, String userID) {
         if (!match.getMatchId().isEmpty()) {
             long opCode = 1;
             //String data = "{\"texture\" : \"" + texture + "\", \" hitboxX \" : \"" + hitboxX + "\", \" hitboxY \" : \"" + hitboxY + "\" }";
@@ -289,7 +289,7 @@ public class Networking {
 
             dataString.put("hitboxY", hitboxY);
             dataString.put("hitboxX", hitboxX);
-            dataString.put("texture", texture);
+            dataString.put("direction", direction);
             dataString.put("userID", userID);
 
             String dataJson = new Gson().toJson(dataString);
