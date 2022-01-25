@@ -107,6 +107,9 @@ public class GameScreen implements Screen {
 
 
     // timing
+
+    public float networkTimerClock;
+    public float ingredientTimerCLock;
     public float elapsedTime = 0;
     final float GAMETIME = 120; // one round lasts 120 seconds
     float secondsLeft;
@@ -211,6 +214,7 @@ public class GameScreen implements Screen {
 
     @Override
     public void render(float delta) {
+
         // clear the screen with a dark blue color. The
         // arguments to clear are the red, green
         // blue and alpha component in the range [0,1]
@@ -268,6 +272,7 @@ public class GameScreen implements Screen {
 
         // total game time counter
         elapsedTime += Gdx.graphics.getDeltaTime();
+        networkTimerClock += Gdx.graphics.getDeltaTime();
         // animation timer
 
 
@@ -277,8 +282,9 @@ public class GameScreen implements Screen {
         //if host create Timer else get timerdata from network
         if (isHost) {
             secondsLeft = GAMETIME - elapsedTime;
-            if(multiplayer) {
+            if(multiplayer && networkTimerClock > 4) {
                 net.sendTimerData("globalTimer", String.valueOf(secondsLeft));
+                networkTimerClock = 0;
             }
 
         } else {
@@ -322,7 +328,7 @@ public class GameScreen implements Screen {
 
         if (elapsedTime / 15 > totalOrderCounter) {
             totalOrderCounter++;
-            ordersToBeServed.add(new Order(broccoliSoup, 45, elapsedTime));
+            ordersToBeServed.add(new Order(broccoliSoup, 10, elapsedTime));
         }
 
         // end round / level / game
@@ -390,7 +396,10 @@ public class GameScreen implements Screen {
                         } else {
                             game.batch.draw(ingredient.getTexture(), netPlayer2.holdingPosition.x, netPlayer2.holdingPosition.y);
                         }
-                        updateIngredientData(net, ingredient, "false", ingredient.getOwner());
+                        if(ingredientTimerCLock < 4){
+                            updateIngredientData(net, ingredient, "false", ingredient.getOwner());
+                            ingredientTimerCLock = 0;
+                        }
 
                     } else {
                         game.batch.draw(ingredient.getTexture(), player1.holdingPosition.x, player1.holdingPosition.y);
@@ -712,7 +721,7 @@ public class GameScreen implements Screen {
 
     public void updatePlayerData(Networking net, NetworkPlayer player){
         if(multiplayer){
-            net.sendPlayerData(player.getDirection(), player.getPositionStringX(), player.getPositionStringY(), player.getUserID(), player.getPlate());
+            net.sendPlayerData(player.getDirection(), player.getPositionStringX(), player.getPositionStringY(), player.getUserID());
         }
     }
 

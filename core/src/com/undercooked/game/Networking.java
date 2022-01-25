@@ -248,7 +248,7 @@ public class Networking {
      * +++++++++++++++++++++++++++++++++
      * +++++++++++++++++++++++++++++++++*/
 
-    public void sendPlayerData(String direction, String hitboxX, String hitboxY, String userID, String hasPlate) {
+    public void sendPlayerData(String direction, String hitboxX, String hitboxY, String userID) {
         if (!match.getMatchId().isEmpty()) {
             long opCode = 1;
             Map<String,String> dataString = new HashMap<>();
@@ -257,7 +257,6 @@ public class Networking {
             dataString.put("hitboxX", hitboxX);
             dataString.put("direction", direction);
             dataString.put("userID", userID);
-            dataString.put("hasPlate", hasPlate);
 
             String dataJson = new Gson().toJson(dataString);
             byte[] byteData = dataJson.getBytes();
