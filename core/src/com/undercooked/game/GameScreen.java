@@ -71,6 +71,7 @@ public class GameScreen implements Screen {
     TiledMapRenderer tiledmaprenderer;
     MapObjects objects;
     int[] mapLayerIndices;
+    int i = 0;
 
     RectangleMapObject servingArea;
     RectangleMapObject preparingArea;
@@ -434,7 +435,12 @@ public class GameScreen implements Screen {
                         net.sendIngredientData(ingredient);
                         ingredientTimerCLock = 0;
                     }
-                    if(ingredient.getOwner().equals(netPlayer2.getUserID())){
+                    System.out.println(ingredient.getOwner());
+                    System.out.println();
+                    if(ingredient.getOwner().equals(netPlayer2.getUserID()) && net.joinedMatch == true){
+                        System.out.println(netPlayer2.getUserID());
+                        System.out.println(netPlayer1.getUserID());
+                        System.out.println("Hello I have the wrong owner! :D");
                         Map<String, String> updatedIngredient = net.getIngredientData();
                         if(!updatedIngredient.isEmpty()){
                             if(updatedIngredient.get("isPreparing").equals("true")){
@@ -487,8 +493,7 @@ public class GameScreen implements Screen {
         
         if(multiplayer && net.joinedMatch){
             //TODO: Maybe inject UserID through Constructor...
-            int i = 0;
-            while(i >= 1){
+            while(i <= 1){
                 String newUserID = net.getPlayerData().get("userID");
                 netPlayer2.setUserID(newUserID);
                 i++;
