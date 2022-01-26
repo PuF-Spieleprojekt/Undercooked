@@ -411,6 +411,10 @@ public class Networking {
     public void resetCreateCommand(){
         createIngredientCommand.clear();
     }
+
+    public void resetPLateData(){
+        plateData.clear();
+    }
     /*++++++++++++++++++++++++++++++++++
      * ++++++++++++++++++++++++++++++++++
      * STORAGE-MANAGEMENT

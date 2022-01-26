@@ -269,7 +269,7 @@ public class GameScreen implements Screen {
         } else {
             if(multiplayer){
                 netPlayer1.setHasPlate(false);
-                net.sendPlateData("false");
+                net.resetPLateData();
             }
         }
 
