@@ -112,6 +112,7 @@ public class GameScreen implements Screen {
 
     public float networkTimerClock;
     public float ingredientTimerCLock;
+    public float playerMovementClock;
     public float elapsedTime = 0;
     final float GAMETIME = 120; // one round lasts 120 seconds
     float secondsLeft;
@@ -283,8 +284,11 @@ public class GameScreen implements Screen {
 
         // total game time counter
         elapsedTime += Gdx.graphics.getDeltaTime();
+
+        // counter to restrict amount of network calls
         networkTimerClock += Gdx.graphics.getDeltaTime();
         ingredientTimerCLock += Gdx.graphics.getDeltaTime();
+        playerMovementClock += Gdx.graphics.getDeltaTime();
         // animation timer
 
 
@@ -520,8 +524,7 @@ public class GameScreen implements Screen {
             if(!multiplayer){
                 player1.changeDirection(Direction.LEFT);
             }else{
-                netPlayer1.changeDirection(Direction.LEFT);
-                updatePlayerData(net, netPlayer1);
+                changeAndUpdatePlayerData(Direction.LEFT);
             }
         }
         if (Gdx.input.isKeyPressed(Keys.RIGHT)) {
@@ -529,8 +532,7 @@ public class GameScreen implements Screen {
             if(!multiplayer){
                 player1.changeDirection(Direction.RIGHT);
             }else{
-                netPlayer1.changeDirection(Direction.RIGHT);
-                updatePlayerData(net, netPlayer1);
+                changeAndUpdatePlayerData(Direction.RIGHT);
             }
         }
         if (Gdx.input.isKeyPressed(Keys.DOWN)){
@@ -538,8 +540,7 @@ public class GameScreen implements Screen {
             if(!multiplayer){
                 player1.changeDirection(Direction.DOWN);
             }else{
-                netPlayer1.changeDirection(Direction.DOWN);
-                updatePlayerData(net, netPlayer1);
+                changeAndUpdatePlayerData(Direction.DOWN);
             }
         }
         if (Gdx.input.isKeyPressed(Keys.UP)){
@@ -547,8 +548,7 @@ public class GameScreen implements Screen {
             if(!multiplayer){
                 player1.changeDirection(Direction.UP);
             }else{
-                netPlayer1.changeDirection(Direction.UP);
-                updatePlayerData(net, netPlayer1);
+                changeAndUpdatePlayerData(Direction.UP);
             }
         }
 
@@ -606,7 +606,16 @@ public class GameScreen implements Screen {
         game.batch.draw(ingredient.getTexture(), areaObject.getRectangle().x, areaObject.getRectangle().y);
     }
 
-    public RectangleMapObject getLocation(RectangleMapObject object, Rectangle playerObject){
+    public void changeAndUpdatePlayerData(Direction d){
+        if(playerMovementClock > 0.05){
+            netPlayer1.changeDirection(d);
+            updatePlayerData(net, netPlayer1);
+            playerMovementClock = 0;
+        }
+
+    }
+
+/*    public RectangleMapObject getLocation(RectangleMapObject object, Rectangle playerObject){
         if(object.getProperties().containsKey("blocked")){
             if (object.getRectangle().overlaps(playerObject)){
                 return object;
@@ -623,7 +632,7 @@ public class GameScreen implements Screen {
             }
 
         }return new RectangleMapObject();
-    }
+    }*/
 
     //Create an ingredient according to the area the player is standing in
     public void createIngredient(RectangleMapObject object, Rectangle playerObject){
