@@ -436,12 +436,14 @@ public class GameScreen implements Screen {
                     }
                     if(ingredient.getOwner().equals(netPlayer2.getUserID())){
                         Map<String, String> updatedIngredient = net.getIngredientData();
-                        if(updatedIngredient.get("isPreparing").equals("true")){
-                            ingredient.putDown(preparingArea);
-                        } else if (updatedIngredient.get("isPickedUp").equals("true")){
-                            ingredient.pickUp();
-                        } else if (updatedIngredient.get("isServed").equals(true)){
-                            ingredient.putDown(servingArea);
+                        if(!updatedIngredient.isEmpty()){
+                            if(updatedIngredient.get("isPreparing").equals("true")){
+                                ingredient.putDown(preparingArea);
+                            } else if (updatedIngredient.get("isPickedUp").equals("true")){
+                                ingredient.pickUp();
+                            } else if (updatedIngredient.get("isServed").equals(true)){
+                                ingredient.putDown(servingArea);
+                            }
                         }
                     }
 
