@@ -494,7 +494,7 @@ public class GameScreen implements Screen {
             while(i <= 1){
                 String newUserID = net.getPlayerData().get("userID");
                 netPlayer2.setUserID(newUserID);
-                i++;
+                if(!newUserID.isEmpty()) {i++;}
             }
             System.out.println("PLayer2 ID: " + netPlayer2.getUserID());
             game.batch.draw(netPlayer2.getTexture(), netPlayer2.getHitbox().x, netPlayer2.getHitbox().y);
