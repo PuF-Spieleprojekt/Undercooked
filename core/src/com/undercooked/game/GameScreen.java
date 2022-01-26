@@ -275,6 +275,7 @@ public class GameScreen implements Screen {
         // total game time counter
         elapsedTime += Gdx.graphics.getDeltaTime();
         networkTimerClock += Gdx.graphics.getDeltaTime();
+        ingredientTimerCLock += Gdx.graphics.getDeltaTime();
         // animation timer
 
 
@@ -284,15 +285,17 @@ public class GameScreen implements Screen {
         //if host create Timer else get timerdata from network
         if (isHost) {
             secondsLeft = GAMETIME - elapsedTime;
-            if(multiplayer && networkTimerClock > 4) {
+            if(multiplayer && networkTimerClock > 1) {
                 net.sendTimerData("globalTimer", String.valueOf(secondsLeft));
                 networkTimerClock = 0;
             }
 
         } else {
             Map<String, String> timerData = net.getTimerData();
-            if(timerData.get("timerPurpose").equals("globalTimer")) {
-                secondsLeft = Float.parseFloat(timerData.get("seconds"));
+            if(!timerData.isEmpty()){
+                if(timerData.get("timerPurpose").equals("globalTimer")) {
+                    secondsLeft = Float.parseFloat(timerData.get("seconds"));
+                }
             }
         }
         // for checking if the other client has any created ingredients
@@ -398,7 +401,7 @@ public class GameScreen implements Screen {
                         } else {
                             game.batch.draw(ingredient.getTexture(), netPlayer2.holdingPosition.x, netPlayer2.holdingPosition.y);
                         }
-                        if(ingredientTimerCLock < 4){
+                        if(ingredientTimerCLock > 1){
                             updateIngredientData(net, ingredient, "false", ingredient.getOwner());
                             ingredientTimerCLock = 0;
                         }
@@ -456,7 +459,9 @@ public class GameScreen implements Screen {
             game.batch.draw(netPlayer2.getTexture(), netPlayer2.getHitbox().x, netPlayer2.getHitbox().y);
 
             if(!net.getPlateData().isEmpty()) {
+                System.out.println("Here we are");
                 if (net.getPlateData().get("hasPlate").equals("true")) {
+                    System.out.println("building a plate");
                     game.batch.draw(plateImage, netPlayer2.holdingPosition.x, netPlayer2.holdingPosition.y - 10);
                 }
             }
