@@ -447,10 +447,9 @@ public class GameScreen implements Screen {
                                 ingredient.pickUp();
                             } else if (updatedIngredient.get("isServed").equals("true")) {
                                 ingredient.putDown(servingArea);
-                                netPlayer1.setHasPlate(false);
-                                ingredient.setOwner("");
-                                net.resetIngredientData();
+                                netPlayer2.setHasPlate(false);
                                 net.sendIngredientData(ingredient);
+                                ingredient.setOwner("");
 
                             }
                         }
