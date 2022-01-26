@@ -138,6 +138,8 @@ public class GameScreen implements Screen {
     private float animationStartTime = 0;
     private Boolean animating = false;
 
+    boolean created = false;
+
     public GameScreen(final Undercooked game, Networking net, Boolean multiplayer, Boolean isHost) {
         this.game = game;
         this.multiplayer = multiplayer;
@@ -265,6 +267,13 @@ public class GameScreen implements Screen {
         } else {
             if(multiplayer){
                 netPlayer1.setHasPlate(false);
+
+            }
+        }
+
+        if(!net.getPlateData().isEmpty()) {
+            if (net.getPlateData().get("hasPlate").equals("true")) {
+                game.batch.draw(plateImage, netPlayer2.holdingPosition.x, netPlayer2.holdingPosition.y - 10);
             }
         }
 
@@ -311,11 +320,13 @@ public class GameScreen implements Screen {
                 String ownerID = ingredientData.get("ownerID");
                 ingredients.add(new Ingredient("Broccoli", broccoliImage, new Rectangle(x, y, 32, 32),ownerID));
                 net.createIngredientCommand("false");
+                created = true;
             }
         }
         // IMPORTANT! To let the other Client know to stop producing more new ingredients
-        if(!createCommand.isEmpty() && createCommand.get("create").equals("false") ){
+        if(!createCommand.isEmpty() && createCommand.get("create").equals("false") && created ){
             net.createIngredientCommand("false");
+            created = false;
         }
 
         
@@ -393,6 +404,7 @@ public class GameScreen implements Screen {
 
         //for loop through ingredient array
         for (Ingredient ingredient : ingredients){
+            System.out.println(ingredients.size());
             if(ingredient != null) {
                 if(ingredient.getPickUp()) {
                     if(multiplayer){
@@ -458,13 +470,6 @@ public class GameScreen implements Screen {
             }
             game.batch.draw(netPlayer2.getTexture(), netPlayer2.getHitbox().x, netPlayer2.getHitbox().y);
 
-            if(!net.getPlateData().isEmpty()) {
-                System.out.println("Here we are");
-                if (net.getPlateData().get("hasPlate").equals("true")) {
-                    System.out.println("building a plate");
-                    game.batch.draw(plateImage, netPlayer2.holdingPosition.x, netPlayer2.holdingPosition.y - 10);
-                }
-            }
           }
 
         game.batch.end();
