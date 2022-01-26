@@ -75,5 +75,6 @@ public abstract class ControlScreen implements Screen{
         font.dispose();
         fontGenerator.dispose();
 
+
     }
 }

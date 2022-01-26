@@ -8,6 +8,7 @@ import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.maps.objects.RectangleMapObject;
 import com.badlogic.gdx.math.Rectangle;
 import com.badlogic.gdx.math.Vector2;
+import com.undercooked.game.GlobalUtilities;
 import com.undercooked.game.Networking;
 import com.undercooked.game.utilities.enums.Direction;
 
@@ -23,6 +24,7 @@ public class NetworkPlayer {
     private String textureString = "down1";
     private Byte direction = 3; // clockwise: 1=up 2=right 3=down 4=left
     private Animation<TextureRegion> cutAnimation;
+    private TextureAtlas atlas;
     private String userID;
     private String userName;
     private boolean hasPlate;
@@ -35,12 +37,14 @@ public class NetworkPlayer {
     private EnumMap<Direction, Vector2> holdingOffsetDistances = new EnumMap<Direction, Vector2>(Direction.class);
 
 
-    TextureAtlas textureAtlas = new TextureAtlas(Gdx.files.internal("playermodel/player_apron_yellow.txt"));
-
-
     public NetworkPlayer(Networking net){
         this.net = net;
-        this.sprite = textureAtlas.createSprite("down1");
+        if (GlobalUtilities.skinAsString != null){
+            this.atlas = new TextureAtlas(Gdx.files.internal(GlobalUtilities.skinAsString));
+        } else {
+            this.atlas = new TextureAtlas(Gdx.files.internal("playermodel/player_apron_yellow.txt"));
+        }
+        this.sprite = atlas.createSprite("down1");
         this.hitbox = sprite.getBoundingRectangle();
         this.holdingPosition = new Vector2(hitbox.x, hitbox.y);
         this.userID = net.getUserdata().get("userID");
@@ -70,7 +74,7 @@ public class NetworkPlayer {
             }
 
             case DOWN :
-                this.cutAnimation = new Animation<TextureRegion>(1f/10f, textureAtlas.findRegions("cut-front"));
+                this.cutAnimation = new Animation<TextureRegion>(1f/10f, atlas.findRegions("cut-front"));
                 if (step>=5 &&step<=8){
                     changeAnimationStep("down1");
                     break;
@@ -83,7 +87,7 @@ public class NetworkPlayer {
                 }
 
             case LEFT :
-                this.cutAnimation = new Animation<TextureRegion>(1f/10f, textureAtlas.findRegions("cut-left"));
+                this.cutAnimation = new Animation<TextureRegion>(1f/10f, atlas.findRegions("cut-left"));
                 if (step>=5 &&step<=8){
                     changeAnimationStep("left1");
                     break;
@@ -96,7 +100,7 @@ public class NetworkPlayer {
                 }
 
             case RIGHT :
-                this.cutAnimation = new Animation<TextureRegion>(1f/10f, textureAtlas.findRegions("cut-right"));
+                this.cutAnimation = new Animation<TextureRegion>(1f/10f, atlas.findRegions("cut-right"));
                 if (step>=5 &&step<=8){
                     changeAnimationStep("right1");
                     break;
@@ -139,7 +143,7 @@ public class NetworkPlayer {
 
     private void changeAnimationStep(String name){
         textureString = name;
-        sprite.setRegion(textureAtlas.findRegion(name));
+        sprite.setRegion(atlas.findRegion(name));
 
     }
 

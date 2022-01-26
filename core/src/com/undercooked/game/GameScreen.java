@@ -62,6 +62,7 @@ public class GameScreen implements Screen {
     Texture plateImage;
     Texture counterImage;
     Texture orderImage;
+    Texture boardImage;
 
     //other game object
     Rectangle plate = new Rectangle(200,200,32,32);
@@ -158,6 +159,7 @@ public class GameScreen implements Screen {
         plateImage = new Texture(Gdx.files.internal("textures/plate1.png"));
         counterImage = new Texture(Gdx.files.internal("counter.jpeg"));
         orderImage = new Texture(Gdx.files.internal("textures/order_broc.png"));
+        boardImage = new Texture(Gdx.files.internal("textures/board.png"));
 
         // load Tiled Map and generate Layerindex;
         map = new TmxMapLoader().load("map/map_v.0.1.tmx");
@@ -785,9 +787,17 @@ public class GameScreen implements Screen {
     @Override
     public void dispose() {
         broccoliImage.dispose();
+        counterImage.dispose();
         plateImage.dispose();
+        orderImage.dispose();
+
         dropSound.dispose();
         backgroundMusic.dispose();
+
+        fontGenerator.dispose();
+        font.dispose();
+        map.dispose();
+
 
     }
 

@@ -123,6 +123,11 @@ public class ProfileScreen extends ControlScreen implements Screen {
 
     @Override
     public void dispose() {
+    super.dispose();
+    atlasYellow.dispose();
+    atlasBlue.dispose();
+    atlasGreen.dispose();
+    atlasRed.dispose();
 
     }
 }
