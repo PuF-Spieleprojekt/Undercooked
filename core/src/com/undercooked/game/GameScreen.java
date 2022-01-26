@@ -320,11 +320,13 @@ public class GameScreen implements Screen {
                 String ownerID = ingredientData.get("ownerID");
                 ingredients.add(new Ingredient("Broccoli", broccoliImage, new Rectangle(x, y, 32, 32),ownerID));
                 net.createIngredientCommand("false");
+                System.out.println("Create Command 1");
                 created = true;
             }
         }
         // IMPORTANT! To let the other Client know to stop producing more new ingredients
         if(!createCommand.isEmpty() && createCommand.get("create").equals("false") && created ){
+            System.out.println("Create Command 2");
             net.createIngredientCommand("false");
             created = false;
         }
@@ -404,7 +406,6 @@ public class GameScreen implements Screen {
 
         //for loop through ingredient array
         for (Ingredient ingredient : ingredients){
-            System.out.println(ingredients.size());
             if(ingredient != null) {
                 if(ingredient.getPickUp()) {
                     if(multiplayer){
@@ -414,7 +415,7 @@ public class GameScreen implements Screen {
                             game.batch.draw(ingredient.getTexture(), netPlayer2.holdingPosition.x, netPlayer2.holdingPosition.y);
                         }
                         if(ingredientTimerCLock > 1){
-                            updateIngredientData(net, ingredient, "false", ingredient.getOwner());
+                            updateIngredientData(net, ingredient, ingredient.getOwner());
                             ingredientTimerCLock = 0;
                         }
 
@@ -646,7 +647,7 @@ public class GameScreen implements Screen {
                   ingredients.add(newIngredient);
                   System.out.println("NetworkIngredient gets created");
                   net.createIngredientCommand("true");
-                  updateIngredientData(net,newIngredient, "true", newIngredient.getOwner());
+                  updateIngredientData(net,newIngredient, newIngredient.getOwner());
                   holdingSomething = true;
                 }
             }
@@ -737,9 +738,9 @@ public class GameScreen implements Screen {
         }
     }
 
-    public void updateIngredientData(Networking net, Ingredient ingredient, String create, String ownerID){
+    public void updateIngredientData(Networking net, Ingredient ingredient, String ownerID){
         if(multiplayer){
-            net.sendIngredientData(create,ingredient.getTexture().toString(), ingredient.getPositionStringX(), ingredient.getPositionStringY(), ownerID);
+            net.sendIngredientData(ingredient.getTexture().toString(), ingredient.getPositionStringX(), ingredient.getPositionStringY(), ownerID);
         }
     }
 

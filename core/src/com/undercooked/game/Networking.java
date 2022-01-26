@@ -279,13 +279,13 @@ public class Networking {
         }
     }
 
-    public void sendIngredientData(String create, String texture, String hitboxX, String hitboxY, String ownerID){
+    public void sendIngredientData( String texture, String hitboxX, String hitboxY, String ownerID){
         if (!match.getMatchId().isEmpty()) {
             long opCode = 3;
 
             Map<String,String> dataString = new HashMap<>();
 
-            dataString.put("holding", create);
+
             dataString.put("texture", texture);
             dataString.put("hitboxX", hitboxX);
             dataString.put("hitboxY", hitboxY);
