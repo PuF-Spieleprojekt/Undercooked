@@ -62,6 +62,7 @@ public class Networking {
     private Channel channel;
     private String receivedData = "";
     private Boolean authenticationSuccessful;
+    private String playerDataUserID = "";
     private Map<String, String> userData = new HashMap<>();
     private Map<String, String> playerData = new HashMap<>();
     private Map<String, String> timerData = new HashMap<>();
@@ -342,6 +343,8 @@ public class Networking {
         return playerData;
     }
 
+    public String getPlayerDataUserID() { return playerDataUserID; }
+
     public Map<String, String> getTimerData() {
         return timerData;
     }
@@ -371,6 +374,7 @@ public class Networking {
             switch (String.valueOf(matchData.getOpCode())){
                 case "1" :
                     playerData = retrieveNetworkData(receivedData);
+                    playerDataUserID = retrieveNetworkData(receivedData).get("userID");
                     break;
                 case "2" :
                     timerData = retrieveNetworkData(receivedData);

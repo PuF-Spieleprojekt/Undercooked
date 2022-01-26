@@ -492,7 +492,7 @@ public class GameScreen implements Screen {
         if(multiplayer && net.joinedMatch){
             //TODO: Maybe inject UserID through Constructor...
             while(i <= 1){
-                String newUserID = net.getPlayerData().get("userID");
+                String newUserID = net.getPlayerDataUserID();
                 netPlayer2.setUserID(newUserID);
                 if(!newUserID.isEmpty()) {i++;}
             }
