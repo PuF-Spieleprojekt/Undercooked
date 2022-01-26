@@ -437,10 +437,8 @@ public class GameScreen implements Screen {
                     }
                     System.out.println(ingredient.getOwner());
                     System.out.println();
+
                     if(ingredient.getOwner().equals(netPlayer2.getUserID()) && net.joinedMatch == true){
-                        System.out.println(netPlayer2.getUserID());
-                        System.out.println(netPlayer1.getUserID());
-                        System.out.println("Hello I have the wrong owner! :D");
                         Map<String, String> updatedIngredient = net.getIngredientData();
                         if(!updatedIngredient.isEmpty()){
                             if(updatedIngredient.get("isPreparing").equals("true")){
@@ -498,6 +496,7 @@ public class GameScreen implements Screen {
                 netPlayer2.setUserID(newUserID);
                 i++;
             }
+            System.out.println("PLayer2 ID: " + netPlayer2.getUserID());
             game.batch.draw(netPlayer2.getTexture(), netPlayer2.getHitbox().x, netPlayer2.getHitbox().y);
 
           }
