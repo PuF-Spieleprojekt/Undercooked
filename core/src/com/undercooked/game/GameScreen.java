@@ -260,16 +260,11 @@ public class GameScreen implements Screen {
 
 
         if(isOnPlate) {
-            if(!multiplayer) {
+            if (!multiplayer) {
                 game.batch.draw(plateImage, player1.holdingPosition.x, player1.holdingPosition.y - 10);
             } else {
                 netPlayer1.setHasPlate(true);
                 game.batch.draw(plateImage, netPlayer1.holdingPosition.x, netPlayer1.holdingPosition.y - 10);
-            }
-        } else {
-            if(multiplayer){
-                netPlayer1.setHasPlate(false);
-                net.resetPLateData();
             }
         }
 
@@ -448,6 +443,8 @@ public class GameScreen implements Screen {
                                 ingredient.pickUp();
                             } else if (updatedIngredient.get("isServed").equals("true")){
                                 ingredient.putDown(servingArea);
+                                netPlayer1.setHasPlate(false);
+                                updatePlateData(net, netPlayer1);
                             }
                         }
                     }

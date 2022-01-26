@@ -171,9 +171,6 @@ public class NetworkPlayer {
         hasPlate = carrying;
     }
 
-
-
-
     public void setUserID(String newID){
         userID = newID;
     }
