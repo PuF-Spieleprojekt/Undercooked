@@ -381,6 +381,7 @@ public class Networking {
                     break;
                 case "3" :
                     ingredientData = retrieveNetworkData(receivedData);
+                    System.out.println(new String(matchData.getData()));
                     break;
                 case "4" :
                     createIngredientCommand = retrieveNetworkData(receivedData);
