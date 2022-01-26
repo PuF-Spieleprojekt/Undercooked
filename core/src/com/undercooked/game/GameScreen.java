@@ -412,45 +412,56 @@ public class GameScreen implements Screen {
         //for loop through ingredient array
         for (Ingredient ingredient : ingredients){
             if(ingredient != null) {
-                if(ingredient.getPickUp()) {
-                    if(multiplayer){
+                if(multiplayer){
+                    if(ingredient.getPickUp()){
                         if(ingredient.getOwner().equals(netPlayer1.getUserID())){
                             game.batch.draw(ingredient.getTexture(), netPlayer1.holdingPosition.x, netPlayer1.holdingPosition.y);
                         } else {
                             game.batch.draw(ingredient.getTexture(), netPlayer2.holdingPosition.x, netPlayer2.holdingPosition.y);
                         }
-                        if(ingredientTimerCLock > 1){
-                            updateIngredientData(net, ingredient, ingredient.getOwner());
-                            ingredientTimerCLock = 0;
+                    }else{
+                        if(ingredient.getIsServed()){
+                            drawInArea(servingArea, ingredient);
+                        } else if (ingredient.getIsPreparing()){
+                            drawInArea(preparingArea, ingredient);
                         }
+                    }
+                    servingAreaAction(servingArea, netPlayer1.getHitbox(), ingredient);
+                    preparingAreaAction(preparingArea, netPlayer1.getHitbox(), ingredient);
 
-                    } else {
+                    // update ingredientData every second
+                    if(ingredientTimerCLock > 1){
+                        net.sendIngredientData(ingredient);
+                        ingredientTimerCLock = 0;
+                    }
+                    if(ingredient.getOwner().equals(netPlayer2.getUserID())){
+                        Map<String, String> updatedIngredient = net.getIngredientData();
+                        if(updatedIngredient.get("isPreparing").equals("true")){
+                            ingredient.putDown(preparingArea);
+                        } else if (updatedIngredient.get("isPickedUp").equals("true")){
+                            ingredient.pickUp();
+                        } else if (updatedIngredient.get("isServed").equals(true)){
+                            ingredient.putDown(servingArea);
+                        }
+                    }
+
+                } else {
+                    // singleplayer logic
+                    if(ingredient.getPickUp()) {
                         game.batch.draw(ingredient.getTexture(), player1.holdingPosition.x, player1.holdingPosition.y);
+                    } else {
+                        // if ingredient is put down, draw it there
+                        if(ingredient.getIsServed()){
+                            drawInArea(servingArea, ingredient);
+                        } else if (ingredient.getIsPreparing()){
+                            drawInArea(preparingArea, ingredient);
+                        }
                     }
-
-                } else{
-                    // if ingredient is put down, draw it there
-                    if(ingredient.getIsServed()){
-                        drawInArea(servingArea, ingredient);
-                    }else if (ingredient.getIsPreparing()){
-                        drawInArea(preparingArea, ingredient);
-                    }
-                }
-                if(!multiplayer){
                     servingAreaAction(servingArea, player1.getHitbox(), ingredient);
                     preparingAreaAction(preparingArea, player1.getHitbox(), ingredient);
-                } else {
-                    if(ingredient.getOwner().equals(netPlayer1.getUserID())){
-                        servingAreaAction(servingArea, netPlayer1.getHitbox(), ingredient);
-                        preparingAreaAction(preparingArea, netPlayer1.getHitbox(), ingredient);
-                    } else {
-                        servingAreaAction(servingArea, netPlayer2.getHitbox(), ingredient);
-                        preparingAreaAction(preparingArea, netPlayer2.getHitbox(), ingredient);
-                    }
-
                 }
-
             }
+
 
         }
 
@@ -644,7 +655,7 @@ public class GameScreen implements Screen {
                   ingredients.add(newIngredient);
                   System.out.println("NetworkIngredient gets created");
                   net.createIngredientCommand("true");
-                  updateIngredientData(net,newIngredient, newIngredient.getOwner());
+                  net.sendIngredientData(newIngredient);
                   holdingSomething = true;
                 }
             }
@@ -735,11 +746,11 @@ public class GameScreen implements Screen {
         }
     }
 
-    public void updateIngredientData(Networking net, Ingredient ingredient, String ownerID){
+  /*  public void updateIngredientData(Networking net, Ingredient ingredient, String ownerID){
         if(multiplayer){
             net.sendIngredientData(ingredient.getTexture().toString(), ingredient.getPositionStringX(), ingredient.getPositionStringY(), ownerID);
         }
-    }
+    }*/
 
     public void updatePlateData(Networking net, NetworkPlayer player){
         net.sendPlateData(player.getPlate());

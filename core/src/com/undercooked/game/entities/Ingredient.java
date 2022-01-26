@@ -89,6 +89,8 @@ public class Ingredient {
     public String getOwner(){
         return ownerID;
     }
+
+    public String getTextureString(){ return name; }
     @Override
     public String toString() {
         return name;

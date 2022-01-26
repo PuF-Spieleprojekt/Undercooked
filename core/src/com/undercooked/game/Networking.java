@@ -37,6 +37,7 @@ import com.heroiclabs.nakama.api.MatchList;
 import com.heroiclabs.nakama.api.StorageObject;
 import com.heroiclabs.nakama.api.StorageObjectAcks;
 import com.heroiclabs.nakama.api.StorageObjects;
+import com.undercooked.game.entities.Ingredient;
 
 import org.checkerframework.checker.nullness.compatqual.NullableDecl;
 
@@ -279,17 +280,21 @@ public class Networking {
         }
     }
 
-    public void sendIngredientData( String texture, String hitboxX, String hitboxY, String ownerID){
+    public void sendIngredientData(Ingredient ingredient){
         if (!match.getMatchId().isEmpty()) {
             long opCode = 3;
 
             Map<String,String> dataString = new HashMap<>();
 
 
-            dataString.put("texture", texture);
-            dataString.put("hitboxX", hitboxX);
-            dataString.put("hitboxY", hitboxY);
-            dataString.put("ownerID", ownerID);
+            dataString.put("texture", ingredient.getTextureString());
+            dataString.put("hitboxX", ingredient.getPositionStringX());
+            dataString.put("hitboxY", ingredient.getPositionStringY());
+            dataString.put("ownerID", ingredient.getOwner());
+            dataString.put("isPreparing", String.valueOf(ingredient.getIsPreparing()));
+            dataString.put("isServed", String.valueOf(ingredient.getIsServed()));
+            dataString.put("isPickedUp", String.valueOf(ingredient.getPickUp()));
+
 
             String dataJson = new Gson().toJson(dataString);
             byte[] byteData = dataJson.getBytes();
