@@ -366,7 +366,7 @@ public class Networking {
             //As soon there is match data, a player has joined the Match
             joinedMatch = true;
             //System.out.println("Listener: ");
-            System.out.println(new String(matchData.getData()));
+            //System.out.println(new String(matchData.getData()));
             // received Data
             receivedData = new String(matchData.getData());
 
@@ -384,6 +384,7 @@ public class Networking {
                     break;
                 case "4" :
                     createIngredientCommand = retrieveNetworkData(receivedData);
+                    System.out.println(new String(matchData.getData()));
                     break;
                 case "5" :
                     plateData = retrieveNetworkData(receivedData);
