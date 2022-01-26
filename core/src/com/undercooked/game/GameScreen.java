@@ -265,6 +265,10 @@ public class GameScreen implements Screen {
             } else {
                 netPlayer1.setHasPlate(true);
                 game.batch.draw(plateImage, netPlayer1.holdingPosition.x, netPlayer1.holdingPosition.y - 10);
+                if(ingredientTimerCLock>1){
+                    updatePlateData(net,netPlayer1);
+                }
+
             }
         }
 
@@ -320,7 +324,6 @@ public class GameScreen implements Screen {
                 String ownerID = ingredientData.get("ownerID");
                 ingredients.add(new Ingredient("Broccoli", broccoliImage, new Rectangle(x, y, 32, 32),ownerID));
                 net.createIngredientCommand("false");
-                System.out.println("Create Command 1");
                 net.resetCreateCommand();
 
             }
@@ -427,30 +430,25 @@ public class GameScreen implements Screen {
                     preparingAreaAction(preparingArea, netPlayer1.getHitbox(), ingredient);
 
                     // update ingredientData every second
-                    if(ingredientTimerCLock > 1){
+                    if(ingredientTimerCLock > 1) {
                         net.sendIngredientData(ingredient);
                         ingredientTimerCLock = 0;
-                    }
-                    System.out.println(ingredient.getOwner());
-                    System.out.println();
-
-                    if(ingredient.getOwner().equals(netPlayer2.getUserID()) && net.joinedMatch == true){
-                        Map<String, String> updatedIngredient = net.getIngredientData();
-                        if(!updatedIngredient.isEmpty()){
-                            if(updatedIngredient.get("isPreparing").equals("true")){
-                                ingredient.putDown(preparingArea);
-                            } else if (updatedIngredient.get("isPickedUp").equals("true")){
-                                ingredient.pickUp();
-                            } else if (updatedIngredient.get("isServed").equals("true")){
-                                ingredient.putDown(servingArea);
-                                netPlayer1.setHasPlate(false);
-                                updatePlateData(net,netPlayer1);
-                                ingredient.setOwner("");
-                                net.resetIngredientData();
+                        if (ingredient.getOwner().equals(netPlayer2.getUserID()) && net.joinedMatch == true) {
+                            Map<String, String> updatedIngredient = net.getIngredientData();
+                            if (!updatedIngredient.isEmpty()) {
+                                if (updatedIngredient.get("isPreparing").equals("true")) {
+                                    ingredient.putDown(preparingArea);
+                                } else if (updatedIngredient.get("isPickedUp").equals("true")) {
+                                    ingredient.pickUp();
+                                } else if (updatedIngredient.get("isServed").equals("true")) {
+                                    ingredient.putDown(servingArea);
+                                    netPlayer1.setHasPlate(false);
+                                    ingredient.setOwner("");
+                                    net.resetIngredientData();
+                                }
                             }
                         }
                     }
-
                 } else {
                     // singleplayer logic
                     if(ingredient.getPickUp()) {
@@ -496,7 +494,6 @@ public class GameScreen implements Screen {
                 netPlayer2.setUserID(newUserID);
                 if(!newUserID.isEmpty()) {i++;}
             }
-            System.out.println("PLayer2 ID: " + netPlayer2.getUserID());
             game.batch.draw(netPlayer2.getTexture(), netPlayer2.getHitbox().x, netPlayer2.getHitbox().y);
           }
 
@@ -575,7 +572,6 @@ public class GameScreen implements Screen {
             if(matchData.size() > 1){
                 netPlayer2.setNetworkPosition(matchData.get("hitboxX"), matchData.get("hitboxY"));
                 netPlayer2.setNetworkDirection(matchData.get("direction"));
-                updatePlateData(net, netPlayer1);
             }
 
         }
