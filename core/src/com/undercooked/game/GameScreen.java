@@ -321,11 +321,10 @@ public class GameScreen implements Screen {
                 ingredients.add(new Ingredient("Broccoli", broccoliImage, new Rectangle(x, y, 32, 32),ownerID));
                 net.createIngredientCommand("false");
                 System.out.println("Create Command 1");
-                created = true;
             }
         }
         // IMPORTANT! To let the other Client know to stop producing more new ingredients
-        if(!createCommand.isEmpty() && createCommand.get("create").equals("false") && created ){
+        if(!createCommand.isEmpty() && createCommand.get("create").equals("false")){
             System.out.println("Create Command 2");
             net.createIngredientCommand("false");
             created = false;
