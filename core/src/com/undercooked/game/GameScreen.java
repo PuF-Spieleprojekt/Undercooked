@@ -445,7 +445,7 @@ public class GameScreen implements Screen {
                                 ingredient.putDown(preparingArea);
                             } else if (updatedIngredient.get("isPickedUp").equals("true")){
                                 ingredient.pickUp();
-                            } else if (updatedIngredient.get("isServed").equals(true)){
+                            } else if (updatedIngredient.get("isServed").equals("true")){
                                 ingredient.putDown(servingArea);
                             }
                         }
