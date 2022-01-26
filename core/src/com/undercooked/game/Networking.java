@@ -398,6 +398,10 @@ public class Networking {
     public void resetPlayerData(){
         playerData.clear();
     }
+
+    public void resetCreateCommand(){
+        createIngredientCommand.clear();
+    }
     /*++++++++++++++++++++++++++++++++++
      * ++++++++++++++++++++++++++++++++++
      * STORAGE-MANAGEMENT

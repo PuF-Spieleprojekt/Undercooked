@@ -314,22 +314,23 @@ public class GameScreen implements Screen {
 
         // when the networklistener has data this data gets searched for a create command
         if(!ingredientData.isEmpty()){
-            if(createCommand.get("create").equals("true") && !created){
+            if(!createCommand.isEmpty() && createCommand.get("create").equals("true")){
                 float x = Float.parseFloat(ingredientData.get("hitboxX"));
                 float y = Float.parseFloat(ingredientData.get("hitboxY"));
                 String ownerID = ingredientData.get("ownerID");
                 ingredients.add(new Ingredient("Broccoli", broccoliImage, new Rectangle(x, y, 32, 32),ownerID));
                 net.createIngredientCommand("false");
                 System.out.println("Create Command 1");
-                created = true;
+                net.resetCreateCommand();
+
             }
         }
         // IMPORTANT! To let the other Client know to stop producing more new ingredients
-        if(!createCommand.isEmpty() && createCommand.get("create").equals("false")){
+     /*   if(!createCommand.isEmpty() && createCommand.get("create").equals("false")){
             System.out.println("Create Command 2");
             net.createIngredientCommand("false");
-            created = false;
-        }
+
+        }*/
 
         
 
