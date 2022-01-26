@@ -114,6 +114,7 @@ public class GameScreen implements Screen {
     public float networkTimerClock;
     public float ingredientTimerCLock;
     public float playerMovementClock;
+    public float plateUpdateClock;
     public float elapsedTime = 0;
     final float GAMETIME = 120; // one round lasts 120 seconds
     float secondsLeft;
@@ -258,6 +259,7 @@ public class GameScreen implements Screen {
             }
         }
 
+        plateUpdateClock += Gdx.graphics.getDeltaTime();
 
         if(isOnPlate) {
             if (!multiplayer) {
@@ -265,8 +267,9 @@ public class GameScreen implements Screen {
             } else {
                 netPlayer1.setHasPlate(true);
                 game.batch.draw(plateImage, netPlayer1.holdingPosition.x, netPlayer1.holdingPosition.y - 10);
-                if(ingredientTimerCLock>1){
+                if(plateUpdateClock>1){
                     updatePlateData(net,netPlayer1);
+                    plateUpdateClock = 0;
                 }
 
             }
@@ -289,6 +292,7 @@ public class GameScreen implements Screen {
         networkTimerClock += Gdx.graphics.getDeltaTime();
         ingredientTimerCLock += Gdx.graphics.getDeltaTime();
         playerMovementClock += Gdx.graphics.getDeltaTime();
+
         // animation timer
 
 
