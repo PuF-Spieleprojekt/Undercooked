@@ -434,7 +434,7 @@ public class GameScreen implements Screen {
                     preparingAreaAction(preparingArea, netPlayer1.getHitbox(), ingredient);
 
                     // update ingredientData every second
-                    if(ingredientTimerCLock > 1 && ingredient.getOwner().equals(netPlayer1.getUserID())) {
+                    if(ingredientTimerCLock > 1 && ingredient.getOwner().equals(netPlayer1.getUserID()) && !ingredient.getIsServed()) {
                         net.sendIngredientData(ingredient);
                         ingredientTimerCLock = 0;
                     }
