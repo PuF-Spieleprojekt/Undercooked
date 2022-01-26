@@ -434,22 +434,23 @@ public class GameScreen implements Screen {
                     preparingAreaAction(preparingArea, netPlayer1.getHitbox(), ingredient);
 
                     // update ingredientData every second
-                    if(ingredientTimerCLock > 1) {
+                    if(ingredientTimerCLock > 1 && ingredient.getOwner().equals(netPlayer1.getUserID())) {
                         net.sendIngredientData(ingredient);
                         ingredientTimerCLock = 0;
-                        if (ingredient.getOwner().equals(netPlayer2.getUserID()) && net.joinedMatch == true) {
-                            Map<String, String> updatedIngredient = net.getIngredientData();
-                            if (!updatedIngredient.isEmpty()) {
-                                if (updatedIngredient.get("isPreparing").equals("true")) {
-                                    ingredient.putDown(preparingArea);
-                                } else if (updatedIngredient.get("isPickedUp").equals("true")) {
-                                    ingredient.pickUp();
-                                } else if (updatedIngredient.get("isServed").equals("true")) {
-                                    ingredient.putDown(servingArea);
-                                    netPlayer1.setHasPlate(false);
-                                    ingredient.setOwner("");
-                                    net.resetIngredientData();
-                                }
+                    }
+                    if (ingredient.getOwner().equals(netPlayer2.getUserID()) && net.joinedMatch == true) {
+                        Map<String, String> updatedIngredient = net.getIngredientData();
+                        if (!updatedIngredient.isEmpty()) {
+                            if (updatedIngredient.get("isPreparing").equals("true")) {
+                                ingredient.putDown(preparingArea);
+                            } else if (updatedIngredient.get("isPickedUp").equals("true")) {
+                                ingredient.pickUp();
+                            } else if (updatedIngredient.get("isServed").equals("true")) {
+                                ingredient.putDown(servingArea);
+                                netPlayer1.setHasPlate(false);
+                                ingredient.setOwner("");
+                                net.resetIngredientData();
+
                             }
                         }
                     }
