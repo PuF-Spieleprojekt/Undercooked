@@ -269,7 +269,7 @@ public class GameScreen implements Screen {
         } else {
             if(multiplayer){
                 netPlayer1.setHasPlate(false);
-
+                net.sendPlateData("false");
             }
         }
 
@@ -413,6 +413,7 @@ public class GameScreen implements Screen {
         //for loop through ingredient array
         for (Ingredient ingredient : ingredients){
             if(ingredient != null) {
+                //multiplayer logic
                 if(multiplayer){
                     if(ingredient.getPickUp()){
                         if(ingredient.getOwner().equals(netPlayer1.getUserID())){
@@ -488,7 +489,7 @@ public class GameScreen implements Screen {
             }
         }
 
-        
+        // draw player2
         if(multiplayer && net.joinedMatch){
             //TODO: Maybe inject UserID through Constructor...
             while(i <= 1){
@@ -498,7 +499,6 @@ public class GameScreen implements Screen {
             }
             System.out.println("PLayer2 ID: " + netPlayer2.getUserID());
             game.batch.draw(netPlayer2.getTexture(), netPlayer2.getHitbox().x, netPlayer2.getHitbox().y);
-
           }
 
         game.batch.end();
@@ -534,13 +534,7 @@ public class GameScreen implements Screen {
             touchPos.set(Gdx.input.getX(), Gdx.input.getY(), 0);
             camera.unproject(touchPos);
         }
-
-        boolean matchDataAvailable = net.getPlayerData().isEmpty();
-
-        if(matchDataAvailable){
-            matchData = net.getPlayerData();
-        }
-
+        // player movement
         desired_velocity.x = desired_velocity.y = 0.0f;
         if (Gdx.input.isKeyPressed(Keys.LEFT)){
             desired_velocity.x = -300 * Gdx.graphics.getDeltaTime();
@@ -575,8 +569,10 @@ public class GameScreen implements Screen {
             }
         }
 
+        // get networkdata and change player2 position according to it
         if(net.joinedMatch){
             matchData = net.getPlayerData();
+
             if(matchData.size() > 1){
                 netPlayer2.setNetworkPosition(matchData.get("hitboxX"), matchData.get("hitboxY"));
                 netPlayer2.setNetworkDirection(matchData.get("direction"));
