@@ -450,6 +450,7 @@ public class GameScreen implements Screen {
                                 netPlayer1.setHasPlate(false);
                                 ingredient.setOwner("");
                                 net.resetIngredientData();
+                                net.sendIngredientData(ingredient);
 
                             }
                         }
