@@ -82,8 +82,8 @@ public class Ingredient {
         hitbox.y = Float.parseFloat(y);
     }
 
-    public void setOwner(String ownerID){
-        ownerID = ownerID;
+    public void setOwner(String newOwner){
+        ownerID = newOwner;
     }
 
     public String getOwner(){
