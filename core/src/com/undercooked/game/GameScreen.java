@@ -440,8 +440,14 @@ public class GameScreen implements Screen {
                     servingAreaAction(servingArea, player1.getHitbox(), ingredient);
                     preparingAreaAction(preparingArea, player1.getHitbox(), ingredient);
                 } else {
-                    servingAreaAction(servingArea, netPlayer1.getHitbox(), ingredient);
-                    preparingAreaAction(preparingArea, netPlayer1.getHitbox(), ingredient);
+                    if(ingredient.getOwner().equals(netPlayer1.getUserID())){
+                        servingAreaAction(servingArea, netPlayer1.getHitbox(), ingredient);
+                        preparingAreaAction(preparingArea, netPlayer1.getHitbox(), ingredient);
+                    } else {
+                        servingAreaAction(servingArea, netPlayer2.getHitbox(), ingredient);
+                        preparingAreaAction(preparingArea, netPlayer2.getHitbox(), ingredient);
+                    }
+
                 }
 
             }
@@ -614,25 +620,6 @@ public class GameScreen implements Screen {
         }
 
     }
-
-/*    public RectangleMapObject getLocation(RectangleMapObject object, Rectangle playerObject){
-        if(object.getProperties().containsKey("blocked")){
-            if (object.getRectangle().overlaps(playerObject)){
-                return object;
-            }
-
-        }else if(object.getProperties().containsKey("Preparing Area")){
-            if (object.getRectangle().overlaps(playerObject)){
-                return object;
-            }
-
-        }else if(object.getProperties().containsKey("Serving Area")){
-            if (object.getRectangle().overlaps(playerObject)){
-                return object;
-            }
-
-        }return new RectangleMapObject();
-    }*/
 
     //Create an ingredient according to the area the player is standing in
     public void createIngredient(RectangleMapObject object, Rectangle playerObject){
