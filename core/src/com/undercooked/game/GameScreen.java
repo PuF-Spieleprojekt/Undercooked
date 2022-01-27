@@ -426,7 +426,7 @@ public class GameScreen implements Screen {
                             game.batch.draw(ingredient.getTexture(), netPlayer2.holdingPosition.x, netPlayer2.holdingPosition.y);
                         }
                     }else{
-                        if(ingredient.getIsServed()){
+                        if(ingredient.getIsServed() && !ingredient.getOwner().isEmpty()){
                             drawInArea(servingArea, ingredient);
                         } else if (ingredient.getIsPreparing()){
                             drawInArea(preparingArea, ingredient);
@@ -448,10 +448,10 @@ public class GameScreen implements Screen {
                             } else if (updatedIngredient.get("isPickedUp").equals("true")) {
                                 ingredient.pickUp();
                             } else if (updatedIngredient.get("isServed").equals("true")) {
-                                System.out.println("--------------------------------------");
                                 ingredient.putDown(servingArea);
                                 netPlayer2.setHasPlate(false);
-                                net.sendIngredientData(ingredient);
+                                drawInArea(servingArea, ingredient);
+                                //net.sendIngredientData(ingredient);
                                 ingredient.setOwner("");
 
                             }
