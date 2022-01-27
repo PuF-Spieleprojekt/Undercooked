@@ -13,17 +13,22 @@ import com.badlogic.gdx.scenes.scene2d.ui.TextButton;
 import com.badlogic.gdx.scenes.scene2d.utils.ChangeListener;
 import com.badlogic.gdx.scenes.scene2d.utils.ClickListener;
 
+import java.util.concurrent.ExecutionException;
+
 public class MainMenuScreen extends ControlScreen implements Screen {
 
     final Undercooked game;
     final Networking net;
     OrthographicCamera camera;
 
-    public MainMenuScreen(final Undercooked gam, final Networking net) {
+    public MainMenuScreen(final Undercooked gam, final Networking net) throws ExecutionException, InterruptedException {
 
         super();
         game = gam;
         this.net = net;
+
+        GlobalUtilities.itmeList = net.retrieveStorageData("items", "item");
+        GlobalUtilities.skinAsString = GlobalUtilities.itmeList.get(0);
 
     }
 
@@ -93,7 +98,13 @@ public class MainMenuScreen extends ControlScreen implements Screen {
         profile.addListener(new ChangeListener() {
             @Override
             public void changed(ChangeEvent event, Actor actor) {
-                game.setScreen(new ProfileScreen(game, net));
+                try {
+                    game.setScreen(new ProfileScreen(game, net));
+                } catch (ExecutionException e) {
+                    e.printStackTrace();
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
             }
         });
 

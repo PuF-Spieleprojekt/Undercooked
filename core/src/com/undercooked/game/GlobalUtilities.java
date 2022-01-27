@@ -10,11 +10,19 @@ public class GlobalUtilities {
     //Highscore management:
 
     public static int highscore = 0;
+    public static int highscorePlayer2 = 0;
+    public static int wonGames = 0;
+    public static int playedGames = 0;
+    public static String skinAsString;
+    public static List<String> itmeList = new ArrayList<String>();
+    public static List<String> gamesList = new ArrayList<String>();
     public static List<String> highscoreList = new ArrayList<String>();
     public static List<String> highscoreListUpdated = new ArrayList<String>();
 
     public static void resetHighscore(){
+
         highscore = 0;
+        highscorePlayer2 = 0;
     }
 
     public static List<String> sortHighscoreList(){
@@ -40,6 +48,6 @@ public class GlobalUtilities {
 
     //Skins:
 
-    public static String skinAsString;
+
 
 }

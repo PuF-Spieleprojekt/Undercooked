@@ -15,6 +15,8 @@ import com.badlogic.gdx.scenes.scene2d.ui.Window;
 import com.badlogic.gdx.scenes.scene2d.utils.ChangeListener;
 import com.badlogic.gdx.scenes.scene2d.utils.SpriteDrawable;
 
+import java.util.concurrent.ExecutionException;
+
 import javax.swing.text.Utilities;
 
 public class ProfileScreen extends ControlScreen implements Screen {
@@ -28,10 +30,13 @@ public class ProfileScreen extends ControlScreen implements Screen {
     TextureAtlas atlasRed = new TextureAtlas(Gdx.files.internal("playermodel/player_apron_red.txt"));
 
 
-    public ProfileScreen(Undercooked game, Networking net){
+    public ProfileScreen(Undercooked game, Networking net) throws ExecutionException, InterruptedException {
         super();
         this.game = game;
         this.net = net;
+
+        GlobalUtilities.itmeList = net.retrieveStorageData("items", "item");
+        GlobalUtilities.skinAsString = GlobalUtilities.itmeList.get(0);
     }
 
     @Override
@@ -68,7 +73,17 @@ public class ProfileScreen extends ControlScreen implements Screen {
         super.backButton.addListener(new ChangeListener() {
             @Override
             public void changed(ChangeEvent event, Actor actor) {
-                game.setScreen(new MainMenuScreen(game, net));
+                GlobalUtilities.itmeList.set(0,GlobalUtilities.skinAsString);
+
+                try {
+                    net.updateItemCollectionData("items", "item", "Skins", GlobalUtilities.itmeList);
+                    game.setScreen(new MainMenuScreen(game, net));
+
+                } catch (ExecutionException e) {
+                    e.printStackTrace();
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
             }
         });
         //TODO: Add more Skins.
@@ -78,7 +93,7 @@ public class ProfileScreen extends ControlScreen implements Screen {
                 if(slider.getValue() == 1){
                     System.out.println("Value1");
                     image.setDrawable(new SpriteDrawable(atlasYellow.createSprite("down1")));
-                    GlobalUtilities.skinAsString = "playermodel/yellow.txt";
+                    GlobalUtilities.skinAsString = "playermodel/player_apron_yellow.txt";
                 }else if(slider.getValue() == 2){
                     System.out.println("Value2");
                     image.setDrawable(new SpriteDrawable(atlasGreen.createSprite("down1")));

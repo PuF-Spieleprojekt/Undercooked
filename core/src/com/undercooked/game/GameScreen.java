@@ -95,7 +95,7 @@ public class GameScreen implements Screen {
     double progress = 0;
     int dishesServed = 0;
     int highScore = GlobalUtilities.highscore;
-    int highScorePlayer2 = 0;
+    int highScorePlayer2 = GlobalUtilities.highscorePlayer2;
     boolean holdingSomething = false;
     boolean putDown = false;
     boolean isOnPlate = false;
@@ -127,6 +127,7 @@ public class GameScreen implements Screen {
     Ingredient broccoli = new Ingredient("Broccoli", broccoliImage, new Rectangle(0,0, 32, 32));
     Recipe broccoliSoup = new Recipe("broccoli soup", broccoliSoupIngredients);
     List<Order> ordersToBeServed = new LinkedList<Order>();
+
 
     // stuff to be able to use font in in-game UI
     protected FreeTypeFontGenerator fontGenerator;
@@ -220,6 +221,8 @@ public class GameScreen implements Screen {
         orderCompleteAddScoreLabel.setPosition(690, 300);
         stage.addActor(timeScoreLabel);
         stage.addActor(orderCompleteAddScoreLabel);
+
+
     }
 
 
@@ -310,6 +313,7 @@ public class GameScreen implements Screen {
 
 
         counter = (int)secondsLeft;
+
         if(!multiplayer){
             timeScoreLabel.setText("Score " + highScore + " Time " + counter);
         } else {
@@ -386,11 +390,16 @@ public class GameScreen implements Screen {
         }
 
         // end round / level / game
-        if (elapsedTime > GAMETIME) {
+        if (elapsedTime > GAMETIME || counter < 0) {
             try {
                 GlobalUtilities.highscore = highScore;
                 backgroundMusic.stop();
-                game.setScreen(new RoundScreen(game, net));
+                if(!multiplayer){
+                    game.setScreen(new RoundScreen(game, net, false));
+                } else {
+                    game.setScreen(new RoundScreen(game, net, true));
+                }
+
             } catch (ExecutionException e) {
                 e.printStackTrace();
             } catch (InterruptedException e) {

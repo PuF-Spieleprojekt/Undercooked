@@ -447,17 +447,21 @@ public class Networking {
     public void createItemsCollection() throws ExecutionException, InterruptedException {
         Map<String, List<String>> usableItems = new HashMap<>();
         Map<String, List<String>> highscores = new HashMap<>();
-        //TODO: Fill with content
-        usableItems.put("Skins",  Arrays.asList("green", "blue"));
+        Map<String, List<String>> playedGames = new HashMap<>();
+
+        // creates different collections that can be filled with data at every registartion of a player
+        usableItems.put("Skins",  Arrays.asList("playermodel/yellow.txt"));
         highscores.put("Highscores", Arrays.asList("0000"));
+        playedGames.put("Played Games", Arrays.asList("0", "0"));
 
         String usableItemsJson = new Gson().toJson(usableItems);
         String highscoresJson = new Gson().toJson(highscores);
+        String playedGamesJson = new Gson().toJson(playedGames);
 
         StorageObjectWrite saveGameObject = new StorageObjectWrite("items", "item", usableItemsJson, PermissionRead.OWNER_READ, PermissionWrite.OWNER_WRITE);
         StorageObjectWrite statsObject = new StorageObjectWrite("stats", "scores", highscoresJson, PermissionRead.PUBLIC_READ, PermissionWrite.OWNER_WRITE);
-
-        StorageObjectAcks acks = client.writeStorageObjects(session, saveGameObject, statsObject).get();
+        StorageObjectWrite gamesObject = new StorageObjectWrite("stats", "games", playedGamesJson, PermissionRead.PUBLIC_READ, PermissionWrite.OWNER_WRITE);
+        StorageObjectAcks acks = client.writeStorageObjects(session, saveGameObject, statsObject, gamesObject).get();
         System.out.format("Stored objects %s", acks.getAcksList());
     }
 

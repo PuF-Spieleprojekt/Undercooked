@@ -47,7 +47,13 @@ public class MultiplayerScreen extends ControlScreen implements Screen {
         super.backButton.addListener(new ChangeListener() {
             @Override
             public void changed(ChangeEvent event, Actor actor) {
-                game.setScreen(new MainMenuScreen(game, net));
+                try {
+                    game.setScreen(new MainMenuScreen(game, net));
+                } catch (ExecutionException e) {
+                    e.printStackTrace();
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
             }
         });
 

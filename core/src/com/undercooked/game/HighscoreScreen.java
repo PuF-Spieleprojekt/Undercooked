@@ -22,6 +22,7 @@ public class HighscoreScreen extends ControlScreen implements Screen {
 
         try {
             GlobalUtilities.highscoreList = net.retrieveStorageData("stats", "scores");
+            GlobalUtilities.gamesList = net.retrieveStorageData("stats", "games");
         } catch (ExecutionException e) {
             e.printStackTrace();
         } catch (InterruptedException e) {
@@ -33,27 +34,32 @@ public class HighscoreScreen extends ControlScreen implements Screen {
     public void show(){
         super.show();
 
-
-
         super.backButton.addListener(new ChangeListener() {
             @Override
             public void changed(ChangeEvent event, Actor actor) {
-                game.setScreen(new MainMenuScreen(game, net));
+                try {
+                    game.setScreen(new MainMenuScreen(game, net));
+                } catch (ExecutionException e) {
+                    e.printStackTrace();
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
             }
         });
 
         Skin skin = new Skin(Gdx.files.internal("star-soldier-ui.json"));
-        super.label.setText("Highscores: ");
 
+        super.label.setText("Statistics: ");
         final Table table = new Table();
         table.top();
         table.padTop(80);
         table.setFillParent(true);
         table.setY(-80);
-
 //        table.setDebug(true);
         super.stage.addActor(table);
-
+        table.add(new Label("Played Games: " + GlobalUtilities.gamesList.get(0), skin)).row();
+        table.add(new Label("Won Games: " + GlobalUtilities.gamesList.get(0), skin)).row();
+        table.add(new Label("Higscores: ", skin)).row();
         for(String score : GlobalUtilities.highscoreList){
             table.add(new Label(score,skin)).row();
 
