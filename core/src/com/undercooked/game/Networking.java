@@ -46,29 +46,25 @@ public class Networking {
     private static String serverKey = "defaultkey";
 
 
-    private String id;
-
-
     private final DefaultClient client = new DefaultClient(serverKey, hostUrl, 7349, false);
     private ExecutorService executor;
     private ExecutorService socketExecutor;
     private Session session;
     private SocketClient socket;
     private Match match;
-    private String roomName;
+
     private String matchID = "";
-    private String extractedMatchID = "";
-    private String messageID = "";
-    private Channel channel;
     private String receivedData = "";
     private Boolean authenticationSuccessful;
     private String playerDataUserID = "";
+
     private Map<String, String> userData = new HashMap<>();
     private Map<String, String> playerData = new HashMap<>();
     private Map<String, String> timerData = new HashMap<>();
     private Map<String, String> ingredientData = new HashMap<>();
     private Map<String, String> createIngredientCommand = new HashMap<>();
     private Map<String, String> plateData = new HashMap<>();
+    private Map<String, String> highscoreData = new HashMap<>();
 
     public Boolean joinedMatch = false;
 
@@ -201,11 +197,9 @@ public class Networking {
             System.out.println("Match still ongoing. First leave match..");
             System.out.println("Match " + matchID + "left.");
             matchID = "";
-            extractedMatchID = "";
             return false;
         } else {
             if (!session.getAuthToken().isEmpty()) {
-                //TODO: Add Callbacklistener for Match creation
                 match = socket.createMatch().get();
                 System.out.println("Match created with ID: " + match.getMatchId());
                 return true;
@@ -332,6 +326,20 @@ public class Networking {
         }
     }
 
+    public void updateHighscore(String newHighscore){
+        if (!match.getMatchId().isEmpty()) {
+            long opCode = 6;
+
+            Map<String,String> dataString = new HashMap<>();
+
+            dataString.put("highscore", newHighscore);
+
+            String dataJson = new Gson().toJson(dataString);
+            byte[] byteData = dataJson.getBytes();
+            socket.sendMatchData(match.getMatchId(), opCode, byteData);
+        }
+    }
+
     public Map<String, String> getUserdata(){
         userData.put("username", session.getUsername());
         userData.put("userID", session.getUserId());
@@ -342,6 +350,8 @@ public class Networking {
     public Map<String, String> getPlayerData() {
         return playerData;
     }
+
+    public Map<String, String> getUpdatedHighscore() { return highscoreData; }
 
     public String getPlayerDataUserID() { return playerDataUserID; }
 
@@ -381,14 +391,18 @@ public class Networking {
                     break;
                 case "3" :
                     ingredientData = retrieveNetworkData(receivedData);
-                    System.out.println(new String(matchData.getData()));
+                    //System.out.println(new String(matchData.getData()));
                     break;
                 case "4" :
                     createIngredientCommand = retrieveNetworkData(receivedData);
-                    System.out.println(new String(matchData.getData()));
+                    //System.out.println(new String(matchData.getData()));
                     break;
                 case "5" :
                     plateData = retrieveNetworkData(receivedData);
+                case "6" :
+                    highscoreData = retrieveNetworkData(receivedData);
+                    break;
+
             }
 
         }

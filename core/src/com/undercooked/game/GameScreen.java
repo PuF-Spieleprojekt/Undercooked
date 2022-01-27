@@ -95,6 +95,7 @@ public class GameScreen implements Screen {
     double progress = 0;
     int dishesServed = 0;
     int highScore = GlobalUtilities.highscore;
+    int highScorePlayer2 = 0;
     boolean holdingSomething = false;
     boolean putDown = false;
     boolean isOnPlate = false;
@@ -116,6 +117,7 @@ public class GameScreen implements Screen {
     public float ingredientTimerCLock;
     public float playerMovementClock;
     public float plateUpdateClock;
+    public float updateHighscoreClock;
     public float elapsedTime = 0;
     final float GAMETIME = 120; // one round lasts 120 seconds
     float secondsLeft;
@@ -269,11 +271,19 @@ public class GameScreen implements Screen {
             } else {
                 netPlayer1.setHasPlate(true);
                 game.batch.draw(plateImage, netPlayer1.holdingPosition.x, netPlayer1.holdingPosition.y - 10);
+                // send plate data every one second to the server
                 if(plateUpdateClock>1){
                     updatePlateData(net,netPlayer1);
                     plateUpdateClock = 0;
                 }
-
+            }
+        } else {
+            if (multiplayer){
+                netPlayer1.setHasPlate(false);
+                if(plateUpdateClock>1){
+                    updatePlateData(net,netPlayer1);
+                    plateUpdateClock = 0;
+                }
             }
         }
 
@@ -294,12 +304,27 @@ public class GameScreen implements Screen {
         networkTimerClock += Gdx.graphics.getDeltaTime();
         ingredientTimerCLock += Gdx.graphics.getDeltaTime();
         playerMovementClock += Gdx.graphics.getDeltaTime();
+        updateHighscoreClock += Gdx.graphics.getDeltaTime();
 
         // animation timer
 
 
         counter = (int)secondsLeft;
-        timeScoreLabel.setText("Score " + highScore + " Time " + counter);
+        if(!multiplayer){
+            timeScoreLabel.setText("Score " + highScore + " Time " + counter);
+        } else {
+            timeScoreLabel.setText("Home: " + highScore + "|" + highScorePlayer2 + " : Away" + "\n" + "Time: " + counter);
+            timeScoreLabel.setPosition(200, 420);
+
+
+            if(updateHighscoreClock > 1){
+                net.updateHighscore(String.valueOf(highScore));
+            }
+            if(!net.getUpdatedHighscore().isEmpty()){
+                highScorePlayer2 = Integer.parseInt(net.getUpdatedHighscore().get("highscore"));
+            }
+        }
+
 
         //if host create Timer else get timerdata from network
         if (isHost) {
@@ -420,22 +445,27 @@ public class GameScreen implements Screen {
                 //multiplayer logic
                 if(multiplayer){
                     if(ingredient.getPickUp()){
+                        // compares the ingredients userID's
                         if(ingredient.getOwner().equals(netPlayer1.getUserID())){
                             game.batch.draw(ingredient.getTexture(), netPlayer1.holdingPosition.x, netPlayer1.holdingPosition.y);
                         } else {
                             game.batch.draw(ingredient.getTexture(), netPlayer2.holdingPosition.x, netPlayer2.holdingPosition.y);
                         }
                     }else{
+                        // drwas ingredients in different areas
                         if(ingredient.getIsServed()){
                             drawInArea(servingArea, ingredient);
+                            // after ingredient is served it is not allowed to send network data anymore, so further objects don't get confused by it
                             if(!ingredient.getBlockSending()){
                                 net.sendIngredientData(ingredient);
                             }
                             ingredient.blockSending(true);
+
                         } else if (ingredient.getIsPreparing()){
                             drawInArea(preparingArea, ingredient);
                         }
                     }
+                    // logic for behaviour in different areas
                     servingAreaAction(servingArea, netPlayer1.getHitbox(), ingredient);
                     preparingAreaAction(preparingArea, netPlayer1.getHitbox(), ingredient);
 
@@ -444,6 +474,11 @@ public class GameScreen implements Screen {
                         net.sendIngredientData(ingredient);
                         ingredientTimerCLock = 0;
                     }
+
+                    // checks if ingredients are assigned to the other player and  treats them accordingly
+                    // after an object is served the id is set to "", so this method doesn't get accesed anymore
+                    // and prevents new ingredients that are assigned to the second player to kump directly to
+                    // the serving area
                     if (ingredient.getOwner().equals(netPlayer2.getUserID()) && net.joinedMatch == true) {
                         Map<String, String> updatedIngredient = net.getIngredientData();
                         if (!updatedIngredient.isEmpty()) {
