@@ -426,8 +426,12 @@ public class GameScreen implements Screen {
                             game.batch.draw(ingredient.getTexture(), netPlayer2.holdingPosition.x, netPlayer2.holdingPosition.y);
                         }
                     }else{
-                        if(ingredient.getIsServed() && !ingredient.getOwner().isEmpty()){
+                        if(ingredient.getIsServed()){
                             drawInArea(servingArea, ingredient);
+                            if(!ingredient.getBlockSending()){
+                                net.sendIngredientData(ingredient);
+                            }
+                            ingredient.blockSending(true);
                         } else if (ingredient.getIsPreparing()){
                             drawInArea(preparingArea, ingredient);
                         }
@@ -436,8 +440,7 @@ public class GameScreen implements Screen {
                     preparingAreaAction(preparingArea, netPlayer1.getHitbox(), ingredient);
 
                     // update ingredientData every second
-                    if(ingredientTimerCLock > 1 && ingredient.getOwner().equals(netPlayer1.getUserID())) {
-                        System.out.println("One before wrong call");
+                    if(ingredientTimerCLock > 1 && ingredient.getOwner().equals(netPlayer1.getUserID()) && !ingredient.getBlockSending()) {
                         net.sendIngredientData(ingredient);
                         ingredientTimerCLock = 0;
                     }

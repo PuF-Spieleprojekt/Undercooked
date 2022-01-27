@@ -17,6 +17,7 @@ public class Ingredient {
    private Boolean pickedUp = true;
    private Boolean isServed = false;
    private Boolean isPreparing = false;
+   private Boolean blockSending = false;
 
    // String for identifying which player is currently carrying the ingredient
    private String ownerID;
@@ -53,6 +54,8 @@ public class Ingredient {
         pickedUp = false;
     }
 
+    public void blockSending (boolean block) { blockSending = block; }
+
     public Boolean getPickUp(){
         return pickedUp;
     }
@@ -64,6 +67,8 @@ public class Ingredient {
     public Boolean getIsPreparing(){
         return isPreparing;
     }
+
+    public Boolean getBlockSending() { return blockSending;  }
 
  /*   public String getTextureName(){
         return textureString;
