@@ -399,6 +399,7 @@ public class Networking {
                     break;
                 case "5" :
                     plateData = retrieveNetworkData(receivedData);
+                    break;
                 case "6" :
                     highscoreData = retrieveNetworkData(receivedData);
                     break;

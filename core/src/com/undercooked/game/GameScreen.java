@@ -321,6 +321,7 @@ public class GameScreen implements Screen {
                 net.updateHighscore(String.valueOf(highScore));
             }
             if(!net.getUpdatedHighscore().isEmpty()){
+                System.out.println(net.getUpdatedHighscore().get("highscore"));
                 highScorePlayer2 = Integer.parseInt(net.getUpdatedHighscore().get("highscore"));
             }
         }
