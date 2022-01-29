@@ -731,15 +731,20 @@ public class GameScreen implements Screen {
 
                     ingredient.putDown(areaObject);
                     dishesServed ++;
-                    Order orderProcessed = ordersToBeServed.remove(0); // dummy: remove the first order every time something is served. TODO replace this with sensible logic
-                    int scoreEarned = (int)Math.ceil(orderProcessed.secondsLeft / 20);
-                    highScore += scoreEarned;
 
-                    // animate the little + score text that appears after delivering an order
-                    orderCompleteAddScoreLabel.setText("+" + scoreEarned);
-                    orderCompleteAddScoreLabel.setPosition(690, 280);
-                    animating = true;
-                    animationStartTime = elapsedTime;
+                    // the player only earns points when there is an order
+                    if (!ordersToBeServed.isEmpty()) {
+                        Order orderProcessed = ordersToBeServed.remove(0); // dummy: remove the first order every time something is served. TODO replace this with sensible logic
+                        int scoreEarned = (int)Math.ceil(orderProcessed.secondsLeft / 20);
+                        highScore += scoreEarned;
+
+                        // animate the little + score text that appears after delivering an order
+                        orderCompleteAddScoreLabel.setText("+" + scoreEarned);
+                        orderCompleteAddScoreLabel.setPosition(690, 280);
+                        animating = true;
+                        animationStartTime = elapsedTime;
+                    }
+
 
                     // reset state variables
                     holdingSomething = false;
