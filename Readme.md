@@ -2,7 +2,8 @@
 
 ##Welcome to our kitchen!
 
-**Undercooked** is a LibGDX project build with Gradle. 
+**Undercooked** is a LibGDX project build with Gradle. To use it you need an
+Android SDK.
 You can run the game using **DesktopLauncher** Class in desktop package 
 as Main. 
 
