@@ -28,9 +28,12 @@ public class RoundScreen extends ControlScreen implements Screen {
 
         //as soon as this screen gets built the game is finished and the highscore is set
         //the highscore is added to highscorelist and updated
-        GlobalUtilities.highscoreList = net.retrieveStorageData("stats", "scores");
-        GlobalUtilities.highscoreList.add(String.valueOf(GlobalUtilities.highscore));
-        net.updateItemCollectionData("stats", "scores", "Highscores", GlobalUtilities.sortHighscoreList());
+        if(!net.retrieveStorageData("stats", "scores").isEmpty()){
+            GlobalUtilities.highscoreList = net.retrieveStorageData("stats", "scores");
+            GlobalUtilities.highscoreList.add(String.valueOf(GlobalUtilities.highscore));
+            net.updateItemCollectionData("stats", "scores", "Highscores", GlobalUtilities.sortHighscoreList());
+        }
+
 
         // get data for played games and won games and update them according to the game result.
         GlobalUtilities.gamesList = net.retrieveStorageData("stats", "games");
@@ -38,8 +41,8 @@ public class RoundScreen extends ControlScreen implements Screen {
         GlobalUtilities.playedGames++;
         GlobalUtilities.gamesList.set(0,String.valueOf(GlobalUtilities.playedGames));
 
-        if(GlobalUtilities.highscore > GlobalUtilities.highscorePlayer2){
-            GlobalUtilities.wonGames = Integer.parseInt(GlobalUtilities.gamesList.get(1));
+        if(GlobalUtilities.highscore > GlobalUtilities.highscorePlayer2 && multiplayer){
+            GlobalUtilities.wonGames = Integer.parseInt(GlobalUtilities.gamesList.get(1).replaceAll("[^0-9]", ""));
             GlobalUtilities.wonGames++;
             GlobalUtilities.gamesList.set(1,String.valueOf(GlobalUtilities.wonGames));
         }
