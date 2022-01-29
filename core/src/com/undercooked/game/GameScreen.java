@@ -43,6 +43,7 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.ListIterator;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ExecutionException;
@@ -371,22 +372,24 @@ public class GameScreen implements Screen {
 
         }*/
 
-        
 
-        // TODO do this for all orders: for(Order order : orders) ...
-        // TODO fix bug, if order runs out of time the game crashes and if a dish is served without an order as well
-        for (Order order: ordersToBeServed) {
+        ListIterator<Order> iterator = ordersToBeServed.listIterator();
+        Order order;
+        while(iterator.hasNext())
+        {
+            order = iterator.next();
             order.updateTimeLeft(elapsedTime);
             if (order.secondsLeft <= 0) {
-                ordersToBeServed.remove(order);
+                iterator.remove();
             }
         }
+
 
         // create new orders
 
         if (elapsedTime / 15 > totalOrderCounter) {
             totalOrderCounter++;
-            ordersToBeServed.add(new Order(broccoliSoup, 10, elapsedTime));
+            ordersToBeServed.add(new Order(broccoliSoup, 45, elapsedTime));
         }
 
         // end round / level / game
