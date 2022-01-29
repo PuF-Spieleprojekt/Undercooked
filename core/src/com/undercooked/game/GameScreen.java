@@ -148,6 +148,9 @@ public class GameScreen implements Screen {
 
     boolean created = false;
 
+    // a generic pointer to use in iterators, ...
+    Order order;
+
     public GameScreen(final Undercooked game, Networking net, Boolean multiplayer, Boolean isHost) {
         this.game = game;
         this.multiplayer = multiplayer;
@@ -248,12 +251,6 @@ public class GameScreen implements Screen {
         tiledmaprenderer.render(mapLayerIndices);
 
         game.batch.draw(plateImage, plate.x, plate.y);
-        int orderNumber = 0;
-        for(Order order : ordersToBeServed) {
-            game.batch.draw(orderImage, 30 + (orderNumber * 60), 350 );
-            game.font.draw(game.batch, "" + (int)order.secondsLeft, 62 + (orderNumber * 60), 340);
-            orderNumber++;
-        }
 
         if (animating) {
             float animatedTime = elapsedTime - animationStartTime;
@@ -296,10 +293,6 @@ public class GameScreen implements Screen {
                 game.batch.draw(plateImage, netPlayer2.holdingPosition.x, netPlayer2.holdingPosition.y - 10);
             }
         }
-
-        // bigger / featured / headline font for the round / game timer
-        stage.act(Math.min(Gdx.graphics.getDeltaTime(), 1 / 30f));
-        stage.draw();
 
         // total game time counter
         elapsedTime += Gdx.graphics.getDeltaTime();
@@ -374,7 +367,6 @@ public class GameScreen implements Screen {
 
 
         ListIterator<Order> iterator = ordersToBeServed.listIterator();
-        Order order;
         while(iterator.hasNext())
         {
             order = iterator.next();
@@ -554,13 +546,28 @@ public class GameScreen implements Screen {
             game.batch.draw(netPlayer2.getTexture(), netPlayer2.getHitbox().x, netPlayer2.getHitbox().y);
           }
 
+
+        // All UI elements should be drawn last so as to always overlap the scene / view
+
+        // bigger / featured / headline font for the round / game timer
+        stage.act(Math.min(Gdx.graphics.getDeltaTime(), 1 / 30f));
+        stage.draw();
+
+        int orderNumber = 0;
+        for(Order order : ordersToBeServed) {
+            game.batch.draw(orderImage, 30 + (orderNumber * 70), 390 );
+            game.font.draw(game.batch, "" + (int)order.secondsLeft, 55 + (orderNumber * 70), 380);
+            orderNumber++;
+        }
+
         game.batch.end();
+
 
         // draw progressbar
         game.shape.setProjectionMatrix(camera.combined);
         game.shape.begin(ShapeRenderer.ShapeType.Filled);
         game.shape.setColor(Color.BLUE);
-        game.shape.rect(preparingArea.getRectangle().x + 12, preparingArea.getRectangle().y + 70, (float) (0.7 * progress), 20);
+        game.shape.rect(preparingArea.getRectangle().x + 12, preparingArea.getRectangle().y + 40, (float) (0.7 * progress), 20);
         game.shape.end();
 
 
