@@ -1,6 +1,6 @@
-# Undercooked
+## Undercooked
 
-##Welcome to our kitchen!
+# Welcome to our kitchen!
 
 **Undercooked** is a LibGDX project build with Gradle. To use it you need an
 Android SDK.
@@ -11,7 +11,7 @@ For the run configuration use yourprojectname.desktop.main as main src,
 com.undercooked.game.desktop.DesktopLauncher as main class and
 local project path as Working Directory. 
 
-##How to play
+# How to play
 
 Serve as many orders as you can!
 In the bottom barrel collect an ingredient,
