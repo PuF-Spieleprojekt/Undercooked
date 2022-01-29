@@ -3,14 +3,13 @@ package com.undercooked.game.entities;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.maps.objects.RectangleMapObject;
 import com.badlogic.gdx.math.Rectangle;
+import com.badlogic.gdx.math.Vector2;
 import com.sun.org.apache.xpath.internal.operations.Bool;
 
 import org.w3c.dom.Text;
 
 
-public class Ingredient {
-    String name;
-   public Texture texture;
+public class Ingredient extends Item {
     // TODO seperate ingredient from on-screen implementation. we need ingredients for the recipes,
     //  too but the recipes don't use coordinates
    public Rectangle hitbox;
@@ -25,8 +24,7 @@ public class Ingredient {
 
 
     public Ingredient(String name, Texture texture, Rectangle hitbox, String ownerID){
-        this.name = name;
-        this.texture = texture;
+        super(name, new Vector2(hitbox.x, hitbox.y), texture, true);
         this.hitbox = hitbox;
         this.ownerID = ownerID;
     }
@@ -42,6 +40,8 @@ public class Ingredient {
 
         pickedUp = true;
         isPreparing = false;
+
+
 
     }
 

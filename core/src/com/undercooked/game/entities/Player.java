@@ -26,7 +26,7 @@ public class Player {
     private Animation<TextureRegion> cutAnimation;
     private TextureAtlas atlas;
 
-
+    private Item itemBeingHeld;
 
     // some new ways of dealing with directions and where to draw the items being held
     Direction facing = Direction.DOWN;
