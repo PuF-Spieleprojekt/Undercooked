@@ -251,6 +251,7 @@ public class GameScreen implements Screen {
         tiledmaprenderer.render(mapLayerIndices);
 
         game.batch.draw(plateImage, plate.x, plate.y);
+        game.batch.draw(boardImage, 450, 150);
 
         if (animating) {
             float animatedTime = elapsedTime - animationStartTime;

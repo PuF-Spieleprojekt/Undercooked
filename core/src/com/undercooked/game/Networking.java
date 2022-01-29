@@ -450,7 +450,7 @@ public class Networking {
         Map<String, List<String>> playedGames = new HashMap<>();
 
         // creates different collections that can be filled with data at every registartion of a player
-        usableItems.put("Skins",  Arrays.asList("playermodel/yellow.txt"));
+        usableItems.put("Skins",  Arrays.asList("playermodel/player_apron_yellow.txt"));
         highscores.put("Highscores", Arrays.asList("0000"));
         playedGames.put("Played Games", Arrays.asList("0", "0"));
 
