@@ -19,13 +19,12 @@ public abstract class ControlScreen implements Screen{
 
 //    final Undercooked game;
     OrthographicCamera camera;
-    protected FreeTypeFontGenerator fontGenerator;
-    protected FreeTypeFontGenerator.FreeTypeFontParameter fontParameter;
-    protected BitmapFont font;
+//    CustomFont customFont;
     protected Stage stage;
     protected Label label;
     protected TextButton backButton;
     protected Label.LabelStyle labelStyle;
+
 
     public ControlScreen(){
 
@@ -40,17 +39,11 @@ public abstract class ControlScreen implements Screen{
         stage = new Stage(viewport);
         Gdx.input.setInputProcessor(stage);
 
-        fontGenerator = new FreeTypeFontGenerator(Gdx.files.internal("AgentOrange.ttf"));
-        fontParameter = new FreeTypeFontGenerator.FreeTypeFontParameter();
-        fontParameter.size = 35;
-        fontParameter.borderWidth = 2;
-        fontParameter.borderColor = Color.FIREBRICK;
-        fontParameter.color = Color.WHITE;
-        font = fontGenerator.generateFont(fontParameter);
+        CustomFont customFont = new CustomFont();
         Skin skin = new Skin(Gdx.files.internal("star-soldier-ui.json"));
 
         labelStyle = new Label.LabelStyle();
-        labelStyle.font = font;
+        labelStyle.font = customFont.font;
         label = new Label("Undercooked!", labelStyle);
         label.setPosition(200, 350);
         backButton = new TextButton("Back", skin);
@@ -72,8 +65,7 @@ public abstract class ControlScreen implements Screen{
     @Override
     public void dispose(){
         stage.dispose();
-        font.dispose();
-        fontGenerator.dispose();
+
 
 
     }

@@ -131,9 +131,7 @@ public class GameScreen implements Screen {
 
 
     // stuff to be able to use font in in-game UI
-    protected FreeTypeFontGenerator fontGenerator;
-    protected FreeTypeFontGenerator.FreeTypeFontParameter fontParameter;
-    protected BitmapFont font;
+    protected CustomFont customFont;
     protected Stage stage;
     protected Label timeScoreLabel;
     protected Label orderCompleteAddScoreLabel;
@@ -208,17 +206,10 @@ public class GameScreen implements Screen {
         stage = new Stage(viewport);
         Gdx.input.setInputProcessor(stage);
 
-        fontGenerator = new FreeTypeFontGenerator(Gdx.files.internal("AgentOrange.ttf"));
-        fontParameter = new FreeTypeFontGenerator.FreeTypeFontParameter();
-        fontParameter.size = 35;
-        fontParameter.borderWidth = 2;
-        fontParameter.borderColor = Color.FIREBRICK;
-        fontParameter.color = Color.WHITE;
-        font = fontGenerator.generateFont(fontParameter);
-        Skin skin = new Skin(Gdx.files.internal("star-soldier-ui.json"));
 
+        CustomFont customFont = new CustomFont();
         labelStyle = new Label.LabelStyle();
-        labelStyle.font = font;
+        labelStyle.font = customFont.font;
         timeScoreLabel = new Label("Score " + highScore + " Time " + counter, labelStyle);
         orderCompleteAddScoreLabel = new Label("", labelStyle);
         timeScoreLabel.setPosition(300, 420);
@@ -852,15 +843,19 @@ public class GameScreen implements Screen {
         counterImage.dispose();
         plateImage.dispose();
         orderImage.dispose();
+        boardImage.dispose();
 
         dropSound.dispose();
         backgroundMusic.dispose();
 
-        fontGenerator.dispose();
-        font.dispose();
+        customFont.font.dispose();
         map.dispose();
 
 
     }
 
 }
+
+
+
+
